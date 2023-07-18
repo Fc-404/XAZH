@@ -35,7 +35,7 @@ export class Mongod {
 
     async toConn() {
         if (this.connRetryCount)
-            this.log.info(`第${this.connRetryCount}次尝试连接数据库中...`)
+            this.log.warn(`第${this.connRetryCount}次尝试连接数据库中...`)
         this.conn = await mongoose.connect(connConfig.socket(), connConfig.connOption)
     }
 

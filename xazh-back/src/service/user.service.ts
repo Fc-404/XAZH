@@ -1,15 +1,12 @@
-import { Inject, Provide } from '@midwayjs/core';
+import { Provide } from '@midwayjs/core';
 import { IUserOptions } from '../interface/interface';
-import { Mongod } from '../util/mongod';
+import { ISignUpUserOptions } from '../interface/signup.user.interface';
 import UserBase from '../model/base.user.model';
 
 @Provide()
 export class UserService {
 
-  @Inject()
-  db: Mongod
-
-  async addUser() {
+  async addUser(options: ISignUpUserOptions) {
     UserBase.model.create({
       name: 'xazh'
     })

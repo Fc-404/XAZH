@@ -1,8 +1,8 @@
-import { Inject, Controller, Get, Query } from '@midwayjs/core';
+import { Inject, Controller, Get, Post, Query } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { UserService } from '../service/user.service';
 
-@Controller('/api')
+@Controller('/user')
 export class APIController {
   @Inject()
   ctx: Context;
@@ -16,9 +16,9 @@ export class APIController {
     return { success: true, message: 'OK', data: user };
   }
   
-  @Get('/signup')
+  @Post('/signup')
   async addUser() {
-    const result = await this.userService.addUser()
+    const result = await this.userService.addUser(null)
     return result
   }
 }
