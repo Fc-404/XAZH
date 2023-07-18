@@ -33,10 +33,6 @@ const initSlider = function () {
   console.log(hs);
 }
 
-function () {
-
-}
-
 onMounted(
   () => {
     initSlider()
