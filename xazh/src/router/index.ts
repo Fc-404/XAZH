@@ -1,24 +1,24 @@
 import { RouteRecordRaw, Router, createRouter, createWebHistory } from "vue-router"
 
-import Signup from '../pages/Signup.vue'
+import SignupPage from '../pages/SignupPage.vue'
 import Main from '../pages/Main.vue'
 
 const routes: RouteRecordRaw[] = [
   {
-    name: 'signup',
+    name: 'Signup',
     path: '/signup',
-    component: Signup,
+    component: SignupPage,
   },
   {
-    name: 'main',
+    name: 'Main',
     path: '/',
     component: Main,
     // redirect: 'signin',
     children: [
       {
-        name: 'main2signin',
+        name: 'MainSignin',
         path: 'signin',
-        component: Signup
+        component: SignupPage
       }
     ]
   }

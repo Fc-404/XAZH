@@ -1,18 +1,26 @@
 :root {
-  --logo-primary: #6611cc;
-  --logo-minor: #2255ff;
+  --color-primary: #6611cc;
+  --color-minor: #2255ff;
 }
 
 * {
   margin: 0;
   padding: 0;
 }
+
 *::selection {
-  background-color: #6611cc44;
+  background-color: var(--el-color-primary);
+  color: var(--el-fill-color-light);
 }
 
 html {
+  margin: auto;
   font-size: 16px;
   max-width: 2048px;
-  min-width: 1024px;
+  /*min-width: 1024px;*/
+  background: var(--el-fill-color-light);
+}
+
+a {
+  color: #2255ff;
 }

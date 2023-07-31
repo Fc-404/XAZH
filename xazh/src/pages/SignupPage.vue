@@ -1,17 +1,17 @@
 <template>
   <div>
-    <h1>{{ route.query?.type }}</h1>
+    <Signup></Signup>
   </div>
 </template>
 
 <script setup lang="ts">
 
-import {useRoute, useRouter} from "vue-router";
+import { useRoute } from "vue-router";
 
 const route = useRoute()
 
+document.title = '夏至De主页 ' + route.query?.type
+
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
