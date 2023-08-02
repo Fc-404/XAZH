@@ -1,13 +1,12 @@
 import { Module } from "vuex";
 
-/**
- * Attribute 'platform' is one of
- * Desktop, Mobile, Windows, Linux, Android, IOS.
- * */
-
 const config: Module<any, any> = {
   namespaced: true,
   state: () => ({
+    /**
+     * Attribute 'platform' is one of
+     * Desktop, Mobile, Windows, Linux, Android, IOS.
+     * */
     platform: 'Desktop',
   }),
   getters: {

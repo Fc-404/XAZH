@@ -1,0 +1,25 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+*::selection {}
+
+html {
+  margin: auto;
+  font-size: 16px;
+  max-width: 2048px;
+  /*min-width: 1024px;*/
+}
+
+a {
+  color: var(--colorPrimary);
+
+  &:hover {
+    color: var(--colorPrimary);
+    text-decoration: underline;
+  }
+  &:active, &:focus, &:visited {
+    color: var(--colorPrimary);
+  }
+}

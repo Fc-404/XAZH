@@ -1,33 +1,33 @@
 <template>
   <div id="main">
-    <el-container>
-      <el-header id="main-header">
+    <a-layout>
+      <a-layout-header id="main-header">
         <Header></Header>
-      </el-header>
-      <el-main id="main-">
+      </a-layout-header>
+      <a-layout-content id="main-">
         <div></div>
-      </el-main>
-      <el-footer id="main-footer">
+      </a-layout-content>
+      <a-layout-footer id="main-footer">
         <Footer></Footer>
-      </el-footer>
-    </el-container>
+      </a-layout-footer>
+    </a-layout>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ElContainer, ElHeader } from 'element-plus';
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="less">
 #main {
   #main-header {
     padding: 0;
     height: auto;
+    background-color: transparent;
   }
 
   #main- {
     height: 50rem;
-    /*background-color: red;*/
+    // background-color: red;
   }
 }
 </style>

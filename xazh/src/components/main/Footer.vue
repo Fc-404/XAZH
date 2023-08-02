@@ -2,10 +2,10 @@
   <div id="footer">
     <p>Copyright © 夏至XAZH</p>
     <p><b>GitHub:</b>
-      <el-link
+      <a
         href="http://github.com/Fc-404"
         target="_blank"
-      >Fc-404</el-link>
+      >Fc-404</a>
     </p>
     <p @click="clickCopy($event, null, 'gjl245869@gmail.com')">
       <b>Gmail:</b> gjl245869@gmail.com
@@ -14,13 +14,12 @@
       @click="switchToDesktop"
       v-show="store.getters['config/platform'] != 'Desktop'"
     >
-      <el-link>电脑版</el-link>
+      <a>电脑版</a>
     </p>
   </div>
 </template>
 
 <script setup lang="ts">
-
 import { useStore } from "vuex";
 import { clickCopy } from "../../tools/clickCopy.tool.ts";
 
@@ -29,10 +28,9 @@ const store = useStore()
 const switchToDesktop = function (): void {
   store.commit('config/platform', 'Desktop')
 }
-
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="less">
 #footer {
   padding-top: 1rem;
   padding-bottom: 2rem;
@@ -48,4 +46,5 @@ const switchToDesktop = function (): void {
   .el-link {
     font-size: inherit;
   }
-}</style>
+}
+</style>

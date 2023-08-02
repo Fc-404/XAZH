@@ -1,6 +1,7 @@
 import { Store, createStore } from "vuex"
 
 import Config from './config.m.ts'
+import Ant from './ant.m.ts'
 
 const store: Store<unknown> = createStore({
   state: () => { },
@@ -8,7 +9,8 @@ const store: Store<unknown> = createStore({
   mutations: {},
   actions: {},
   modules: {
-    config: Config
+    config: Config,
+    ant: Ant,
   }
 })
 

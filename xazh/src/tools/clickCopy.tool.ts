@@ -3,8 +3,6 @@
  * this function can only be used based on the vue.
  */
 
-import { ElMessage } from "element-plus";
-
 export function clickCopy(
   el: MouseEvent,
   cb: Function | null,
@@ -22,9 +20,4 @@ export function clickCopy(
 
   if (cb)
     cb()
-  else
-    ElMessage({
-      message: '复制成功！',
-      type: 'success'
-    })
 }
