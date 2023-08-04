@@ -7,16 +7,27 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AAffix: typeof import('ant-design-vue/es')['Affix']
     AButton: typeof import('ant-design-vue/es')['Button']
     AConfigProvider: typeof import('ant-design-vue/es')['ConfigProvider']
+    ADivider: typeof import('ant-design-vue/es')['Divider']
     ALayout: typeof import('ant-design-vue/es')['Layout']
     ALayoutContent: typeof import('ant-design-vue/es')['LayoutContent']
     ALayoutFooter: typeof import('ant-design-vue/es')['LayoutFooter']
     ALayoutHeader: typeof import('ant-design-vue/es')['LayoutHeader']
+    AProgress: typeof import('ant-design-vue/es')['Progress']
+    ARadio: typeof import('ant-design-vue/es')['Radio']
+    ASwitch: typeof import('ant-design-vue/es')['Switch']
+    ATypography: typeof import('ant-design-vue/es')['Typography']
+    ATypographyLink: typeof import('ant-design-vue/es')['TypographyLink']
+    ATypographyParagraph: typeof import('ant-design-vue/es')['TypographyParagraph']
+    ATypographyText: typeof import('ant-design-vue/es')['TypographyText']
+    ATypographyTitle: typeof import('ant-design-vue/es')['TypographyTitle']
     Footer: typeof import('./components/main/Footer.vue')['default']
     Header: typeof import('./components/main/Header.vue')['default']
+    Logo: typeof import('./components/common/Logo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    Signup: typeof import('./components/signup/Signup.vue')['default']
+    Signup: typeof import('./components/common/Signup.vue')['default']
   }
 }

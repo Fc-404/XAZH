@@ -7,7 +7,7 @@ import Components from 'unplugin-vue-components/vite'
 import {AntDesignVueResolver} from 'unplugin-vue-components/resolvers'
 
 import Inspect from 'vite-plugin-inspect'
-import inject from "@rollup/plugin-inject";
+import inject from "@rollup/plugin-inject"
 
 const pathSrc = path.resolve(__dirname, 'src')
 

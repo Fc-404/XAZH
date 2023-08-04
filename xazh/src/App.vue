@@ -63,27 +63,33 @@ class Theme {
    * or else OnUpdated() is not called,
    * that will cause no any change of Antd theme token.
    */
-  static onDark() {
+  static onDark(on: boolean = true) {
     let themeTemp = { ...Theme.appTheme.value }
-    themeTemp.algorithm = theme.darkAlgorithm
+    themeTemp.algorithm = on ? theme.darkAlgorithm : theme.defaultAlgorithm
     Theme.appTheme.value = themeTemp
     Theme.updateStyleTheme()
   }
 }
+provide('onDark', Theme.onDark)
 
 onMounted(() => {
   // Default theme.
   Theme.setTheme({
     token: {
-      "colorPrimary": "#6611ff",
+      "colorPrimary": "#ff85c0",
       "fontSize": 14,
-      "borderRadius": 6
+      "borderRadius": 6,
     },
   })
 
   setTimeout(() => {
-    Theme.onDark()
-  }, 3000)
+    // Theme.onDark(false)
+    store.commit('header/progress', 50)
+  }, 3000);
+
+  // setInterval(() => {
+  //   store.commit('header/progressI')
+  // }, 1000)
 
 })
 

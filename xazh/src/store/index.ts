@@ -1,7 +1,8 @@
 import { Store, createStore } from "vuex"
 
 import Config from './config.m.ts'
-import Ant from './ant.m.ts'
+import AntM from './antM.m.ts'
+import Header from './header.m.ts'
 
 const store: Store<unknown> = createStore({
   state: () => { },
@@ -10,7 +11,8 @@ const store: Store<unknown> = createStore({
   actions: {},
   modules: {
     config: Config,
-    ant: Ant,
+    ant: AntM,
+    header: Header,
   }
 })
 

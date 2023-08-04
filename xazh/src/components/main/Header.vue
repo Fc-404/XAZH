@@ -1,12 +1,22 @@
 <template>
   <div :id="stylePageInfo.style.value">
     <div class="header-box">
+      <a-progress
+        v-show="onProgress"
+        id="header-progress"
+        :percent="progressPercent"
+        :showInfo="false"
+        stroke-color="var(--colorPrimary)"
+        trail-color="transparent"
+        :size="3"
+      ></a-progress>
       <div style="width: 4rem;"></div>
       <div id="header-logo">
-        <img
-          src="../../assets/logo.svg"
-          alt="LOGO"
-        >
+        <Logo
+          id="header-logo-"
+          size="3rem"
+          color="var(--colorPrimary)"
+        ></Logo>
         <label>夏至De主页</label>
       </div>
       <div style="flex-grow: 1;"></div>
@@ -20,6 +30,17 @@
       <div class="header-item">推荐</div>
       <div class="header-item">夏至</div>
       <div id="header-slider"></div>
+      <div>
+        <a-divider type="vertical" />
+      </div>
+      <div>
+        <a-switch
+          id="header-ondark"
+          v-model:checked="onDark"
+          checked-children="日"
+          un-checked-children="夜"
+        ></a-switch>
+      </div>
       <div id="header-self">
         <router-link to="/signup?type=signup">
           <a-button id="header-signup">注册</a-button>
@@ -81,6 +102,31 @@ const initSlider = function () {
   }
 }
 
+/**
+ * On dark
+ */
+const onDark = ref<boolean>(false)
+const onDarkFn = inject('onDark')
+watch(onDark, () => {
+  (onDarkFn as Function)(onDark.value)
+})
+
+/**
+ * Progress Hook
+ */
+const onProgress = ref<boolean>(true)
+const progressPercent = ref<number>(0)
+store.commit('header/onProgress', onProgress)
+store.commit('header/progress', progressPercent)
+
+/**
+ * Title Hook
+ */
+
+
+/**
+ * HOOK
+ */
 onBeforeMount(() => {
   switchStyle(stylePageInfo)
 })
@@ -94,8 +140,9 @@ onMounted(() => {
 
 <style scoped lang="less">
 #header {
-  height: 4rem;
+  height: var(--headerHeight);
   width: 100%;
+  min-width: 1024px;
   position: relative;
 
   .header-box {
@@ -105,32 +152,38 @@ onMounted(() => {
     position: relative;
   }
 
+  &-progress {
+    position: absolute;
+    line-height: 0;
+  }
+
   &-logo {
     height: 100%;
 
-    img {
-      height: 3rem;
+    &- {
       margin-top: 0.5rem;
     }
 
-    label {
+    >label {
       font-size: 1.5rem;
       font-weight: bold;
       line-height: 3rem;
       display: inline-block;
       vertical-align: top;
       margin: 0.5rem 2rem auto 3rem;
-      background-image: linear-gradient(45deg, var(--colorPrimaryTextActive) 30%, var(--colorPrimaryBg));
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      // background-image:
+      //   linear-gradient(45deg, var(--colorPrimary) 30%,
+      //     var(--colorBgLayout));
+      // background-clip: text;
+      // -webkit-background-clip: text;
+      // -webkit-background-clip: text;
+      // -webkit-text-fill-color: transparent;
+      color: var(--colorPrimary);
     }
   }
 
   .header-item {
     color: var(--colorTextBase);
-    line-height: 4rem;
     user-select: none;
     padding-right: 1.1rem;
     padding-left: 1.1rem;
@@ -147,15 +200,15 @@ onMounted(() => {
     transition: all 400ms ease-in-out;
   }
 
-  &-signin,
-  &-signup {
-    height: 2rem;
-    margin-top: 1rem;
-    font-size: 0.8rem;
+  &-ondark {
+    margin-right: 1rem;
+    margin-left: 1rem;
+    margin-bottom: 0.2rem;
   }
 }
 
 #header-m {
+
   background-color: red;
 }
 </style>

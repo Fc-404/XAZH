@@ -1,7 +1,7 @@
 import { Module } from 'vuex'
 import { message } from 'ant-design-vue'
 
-const ant: Module<any, any> = {
+const antM: Module<any, any> = {
   namespaced: false,
   state: () => ({
     antMessage: {
@@ -31,4 +31,4 @@ const ant: Module<any, any> = {
   actions: {}
 }
 
-export default ant
+export default antM
