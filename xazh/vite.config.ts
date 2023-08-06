@@ -1,10 +1,10 @@
 import path from 'path'
-import {defineConfig} from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import {AntDesignVueResolver} from 'unplugin-vue-components/resolvers'
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 
 import Inspect from 'vite-plugin-inspect'
 import inject from "@rollup/plugin-inject"
@@ -16,7 +16,7 @@ export default defineConfig({
   plugins: [
     vue(),
     inject({
-      $: 'jquery',
+      $: 'jquery'
     }),
     AutoImport({
       imports: ['vue'],

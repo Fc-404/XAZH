@@ -8,6 +8,7 @@ const config: Module<any, any> = {
      * Desktop, Mobile, Windows, Linux, Android, IOS.
      * */
     platform: 'Desktop',
+    ondark: false,
   }),
   getters: {
     platform(state): string {
@@ -22,6 +23,9 @@ const config: Module<any, any> = {
           || [5, '5', 'a', 'A', 'android', 'Android'].find(i => i == str) && 'Android' == state.platform
           || [6, '6', 'i', 'I', 'ios', 'IOS'].find(i => i == str) && 'IOS' == state.platform
         )
+    },
+    ondark(state): boolean {
+      return state.ondark
     }
   },
   mutations: {
@@ -76,6 +80,9 @@ const config: Module<any, any> = {
           state.platform = 'IOS'
       }
       return state.platform
+    },
+    ondark(state, v: boolean = true) {
+      state.ondark = v
     }
   },
   actions: {}

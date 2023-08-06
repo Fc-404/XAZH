@@ -100,20 +100,46 @@
 </template>
 
 <script setup lang="ts">
+import { useStore } from 'vuex';
+
 const blockContent = `AntV 是蚂蚁金服全新一代数据可视化解决方案，致力于提供一套简单方便、专业可靠、不限可能的数据可视化最佳实践。得益于丰富的业务场景和用户需求挑战，AntV 经历多年积累与不断打磨，已支撑整个阿里集团内外 20000+ 业务系统，通过了日均千万级 UV 产品的严苛考验。
 我们正在基础图表，图分析，图编辑，地理空间可视化，智能可视化等各个可视化的领域耕耘，欢迎同路人一起前行。`;
+
+const store = useStore()
+
+/**
+ * TODO: Progress
+ */
+window.addEventListener('scroll', () => {
+  // console.log(document.documentElement.scrollHeight,
+  //   document.documentElement.scrollTop,
+  //   Math.round((document.documentElement.scrollTop * 100) / (document.documentElement.scrollHeight - window.innerHeight)));
+  let progressOld = -1
+  let progress = Math.round(
+    (document.documentElement.scrollTop * 100) /
+    (document.documentElement.scrollHeight - window.innerHeight))
+
+  if (progressOld != progress) {
+    store.commit('header/progress', progress)
+    progressOld = progress
+  }
+})
+
+onMounted(() => {
+  store.commit('header/title', 'Introduction 介绍')
+})
 </script>
 
 <style scoped lang="less">
 #main {
   #main-header {
     padding: 0;
-    height: auto;
-    background-color:  var(--colorBgLayout);
+    background-color: var(--colorBgLayout);
   }
 
   #main- {
-    // height: 80rem;
+    height: 10 0rem;
+
     // background-color: red;
     &>div {
       margin: auto 12rem;

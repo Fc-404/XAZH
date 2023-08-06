@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { theme } from 'ant-design-vue'
 import { ThemeConfig } from 'ant-design-vue/es/config-provider/context';
-import { GlobalToken } from 'ant-design-vue/es/theme';
+import { GlobalToken } from 'ant-design-vue/es/theme'
 
 const store = useStore()
 
@@ -68,6 +68,7 @@ class Theme {
     themeTemp.algorithm = on ? theme.darkAlgorithm : theme.defaultAlgorithm
     Theme.appTheme.value = themeTemp
     Theme.updateStyleTheme()
+    store.commit('config/ondark', on)
   }
 }
 provide('onDark', Theme.onDark)
@@ -82,14 +83,9 @@ onMounted(() => {
     },
   })
 
-  setTimeout(() => {
-    // Theme.onDark(false)
-    store.commit('header/progress', 50)
-  }, 3000);
-
-  // setInterval(() => {
-  //   store.commit('header/progressI')
-  // }, 1000)
+  // setTimeout(() => {
+  //   Theme.onDark(true)
+  // }, 3000);
 
 })
 

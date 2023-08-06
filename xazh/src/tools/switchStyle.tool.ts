@@ -5,7 +5,7 @@
 import { StylePageI } from "../interface/page.i.ts";
 import { useStore } from "vuex";
 
-const components: Array<string> = []
+var isSubscribe = false
 
 export default function (m: StylePageI) {
   const store = useStore()
@@ -22,11 +22,10 @@ export default function (m: StylePageI) {
   }
   alterIdName()
 
-  if (components.find(value => value == m.name) === undefined) {
+  if (!isSubscribe) {
     store.subscribe((m) => {
       if (m.type == 'config/platform')
         alterIdName()
     })
-    components.push(m.name)
   }
 }
