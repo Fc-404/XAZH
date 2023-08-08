@@ -138,7 +138,7 @@ onMounted(() => {
   }
 
   #main- {
-    height: 10 0rem;
+    margin: 4rem;
 
     // background-color: red;
     &>div {

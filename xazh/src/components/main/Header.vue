@@ -35,12 +35,17 @@
           <a-divider type="vertical" />
         </div>
         <div>
-          <a-button
-            ghost
-            type="primary"
-          >
-            <search-outlined />
-          </a-button>
+          <a-popover placement="bottomRight">
+            <template #content>
+              <FnNotice :size="2"></FnNotice>
+            </template>
+            <a-button
+              ghost
+              type="primary"
+            >
+              <search-outlined />
+            </a-button>
+          </a-popover>
         </div>
         <div>
           <a-switch
@@ -63,14 +68,17 @@
             </a-button>
           </router-link>
         </div>
-        <div style="margin-left: 1rem;">
+        <!-- <div style="margin-left: 1rem;">
           <a-popover
-            content="Meajifejaiojsfioajefiasjifjeiofjaisoefjsioe"
             placement="bottomRight"
+            trigger="click"
           >
-            <!-- <a-button>个人</a-button> -->
+            <template #content>
+              <FnNotice :size="2"></FnNotice>
+            </template>
+            <a-button>个人</a-button>
           </a-popover>
-        </div>
+        </div> -->
         <div style="width: 2rem;"></div>
       </div>
       <div id="title-box">
@@ -171,7 +179,6 @@ const titleDeal = function () {
   const preBarTitle = document.title
 
   store.commit('header/changeTitleHandle', (v: string) => {
-    console.log(document.title);
     document.title = v
   })
 

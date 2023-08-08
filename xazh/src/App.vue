@@ -28,7 +28,6 @@ if (window.outerWidth <= 1024) {
 class Theme {
   static updateThemeToStyle: Function = () => { }
   static appTheme = ref<ThemeConfig>({})
-  static styleTheme = ref({})
 
   private static themeToken: GlobalToken
   private static themeTokenStyleVar: any = {}
@@ -52,7 +51,8 @@ class Theme {
       for (let key in Theme.themeToken)
         Theme.themeTokenStyleVar['--' + key] = Theme.themeToken[key as keyof typeof Theme.themeToken]
 
-      Theme.styleTheme.value = Theme.themeTokenStyleVar
+      $('body').css(Theme.themeTokenStyleVar)
+
       Theme.updateThemeToStyle = () => { }
     }
   }
@@ -95,11 +95,19 @@ onUpdated(() => {
 </script>
 
 <template>
-  <div :style="Theme.styleTheme.value">
+  <div id="app">
     <a-config-provider :theme="Theme.appTheme.value">
       <router-view></router-view>
+      <!-- <FnNotice :size="5.6"></FnNotice> -->
     </a-config-provider>
   </div>
 </template>
 
 <style lang="less" src="./style.less"></style>
+
+<style>
+#app {
+  width: 100%;
+  height: 100%;
+}
+</style>

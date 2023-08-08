@@ -44,7 +44,6 @@ const header: Module<any, any> = {
         return
       }
       state.changeTitleHandle(v)
-      console.log(state.changeTitleHandle);
     },
     titleMode(state, v: ModeTitlePageI) {
       state.titleMode = v
