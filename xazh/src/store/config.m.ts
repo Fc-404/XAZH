@@ -9,6 +9,7 @@ const config: Module<any, any> = {
      * */
     platform: 'Desktop',
     ondark: false,
+    themeToken: null
   }),
   getters: {
     platform(state): string {
@@ -26,6 +27,9 @@ const config: Module<any, any> = {
     },
     ondark(state): boolean {
       return state.ondark
+    },
+    themeToken(state) {
+      return state.themeToken
     }
   },
   mutations: {
@@ -83,6 +87,9 @@ const config: Module<any, any> = {
     },
     ondark(state, v: boolean = true) {
       state.ondark = v
+    },
+    themeToken(state, value) {
+      state.themeToken = value
     }
   },
   actions: {}

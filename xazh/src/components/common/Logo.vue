@@ -73,9 +73,11 @@
 </template>
 
 <script setup lang="ts">
+import { uid } from 'uid/single'
+
 const props = defineProps({
   size: { type: String, default: '2rem' },
-  color: {type: String},
+  color: { type: String },
   h: { type: String },
   w: { type: String },
   qsc: { type: String, default: '#2277FF' },
@@ -92,7 +94,7 @@ const _qec = ref<string>()
 const _hsc = ref<string>()
 const _hec = ref<string>()
 
-const ID = ref<string>()
+const ID = ref<string>(uid())
 
 onMounted(() => {
   if (!props.h || !props.w)
@@ -100,8 +102,6 @@ onMounted(() => {
 
   if (props.color)
     _qsc.value = _qec.value = _hsc.value = _hec.value = props.color
-
-  ID.value = new Date().getTime() + Math.random().toString()
 })
 </script>
 

@@ -111,9 +111,6 @@ const store = useStore()
  * TODO: Progress
  */
 window.addEventListener('scroll', () => {
-  // console.log(document.documentElement.scrollHeight,
-  //   document.documentElement.scrollTop,
-  //   Math.round((document.documentElement.scrollTop * 100) / (document.documentElement.scrollHeight - window.innerHeight)));
   let progressOld = -1
   let progress = Math.round(
     (document.documentElement.scrollTop * 100) /

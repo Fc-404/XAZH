@@ -1,21 +1,56 @@
 <template>
   <div id="footer">
-    <p>Copyright © 夏至XAZH</p>
-    <p><b>GitHub:</b>
-      <a
-        href="http://github.com/Fc-404"
-        target="_blank"
-      >Fc-404</a>
-    </p>
-    <p @click="clickCopy($event, null, 'gjl245869@gmail.com')">
-      <b>Gmail:</b> gjl245869@gmail.com
-    </p>
-    <p
-      @click="switchToDesktop"
-      v-show="store.getters['config/platform'] != 'Desktop'"
+    <a-row
+      id="footer-fn"
+      justify="center"
     >
-      <a>电脑版</a>
-    </p>
+      <span>
+        <a-tooltip
+          :title="githubAdr"
+          color="var(--colorPrimary)"
+        >
+          <a
+            :href="githubAdr"
+            target="_blank"
+          >
+            <github-outlined />
+          </a>
+        </a-tooltip>
+      </span>
+      <span>
+        <a-divider type="vertical"></a-divider>
+      </span>
+      <span @click="clickCopy($event, '邮箱复制成功！', gmailAdr)">
+        <a-tooltip
+          :title="gmailAdr"
+          color="var(--colorPrimary)"
+        >
+          <mail-outlined />
+        </a-tooltip>
+      </span>
+      <span
+        @click="switchToDesktop"
+        v-show="store.getters['config/platform'] != 'Desktop'"
+      >
+        <a-divider type="vertical"></a-divider>
+        <a-tooltip
+          title="访问电脑端"
+          color="var(--colorPrimary)"
+        >
+          <desktop-outlined />
+        </a-tooltip>
+      </span>
+    </a-row>
+    <a-row
+      id="footer-copyright"
+      justify="center"
+    >
+      <span>
+        Copyright&nbsp;
+        <copyright-outlined />
+        &nbsp;夏至XAZH
+      </span>
+    </a-row>
   </div>
 </template>
 
@@ -23,7 +58,12 @@
 import { useStore } from "vuex";
 import { clickCopy } from "../../tools/clickCopy.tool.ts";
 
+import { CopyrightOutlined, GithubOutlined, MailOutlined, DesktopOutlined } from "@ant-design/icons-vue";
+
 const store = useStore()
+
+const githubAdr = 'https://github.com/Fc-404'
+const gmailAdr = 'gjl245869@gmail.com'
 
 const switchToDesktop = function (): void {
   store.commit('config/platform', 'Desktop')
@@ -35,16 +75,18 @@ const switchToDesktop = function (): void {
   padding-top: 1rem;
   padding-bottom: 2rem;
 
-  p {
-    color: var(--el-text-color-regular);
-    font-size: 0.6rem;
-    padding-top: 12px;
-    text-align: center;
-    line-height: 1.2rem;
+  &-fn {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+
+    span {
+      cursor: pointer;
+      color: var(--colorPrimary);
+    }
   }
 
-  .el-link {
-    font-size: inherit;
+  &-copyright {
+    font-size: 0.8rem;
+    color: var(--colorTextSecondary);
   }
-}
-</style>
+}</style>

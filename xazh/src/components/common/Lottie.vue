@@ -5,6 +5,7 @@
 
 <script setup lang="ts">
 import lottie from 'lottie-web'
+import { uid } from 'uid/single'
 
 const props = defineProps({
   render: { type: String, default: 'svg' },
@@ -15,11 +16,12 @@ const props = defineProps({
 
 var lottieDom: Element
 var animItem: any
+const uuid = ref<string>(uid())
 
 onMounted(() => {
   lottieDom = document.getElementById('lottie') as Element
   animItem = lottie.loadAnimation({
-    name: 'lottie',
+    name: uuid.value,
     container: lottieDom,
     // @ts-ignore
     renderer: props.render,
@@ -28,12 +30,11 @@ onMounted(() => {
     path: props.path
   })
 
-  console.log(animItem);
   animItem.play('lottie')
 })
 
 onUnmounted(() => {
-  lottie.destroy('lottie')
+  lottie.destroy(uuid.value)
 })
 </script>
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { theme } from 'ant-design-vue'
-import { ThemeConfig } from 'ant-design-vue/es/config-provider/context';
+import { Modal, theme } from 'ant-design-vue'
+import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
 import { GlobalToken } from 'ant-design-vue/es/theme'
 
 const store = useStore()
@@ -18,8 +18,35 @@ useRouter().replace({
  * Switch what style of display in the light of
  * change of window width and user's selection.
  */
-if (window.outerWidth <= 1024) {
-  store.commit('config/platform', 'Mobile')
+const toMobile = function () {
+  if (window.outerWidth <= 1024) {
+    // store.commit('config/platform', 'Mobile')
+    $('#app').css('min-width', '1024px')
+
+    let countDown = 3
+    const tip = Modal.warning({
+      title: '已跳转到桌面端',
+      content: h('div', [
+        h('p', '移动端界面正在开发中...'),
+        h('p', '暂请使用桌面端')
+      ]),
+      okText: '3s, 关闭',
+      style: {
+        marginLeft: '12px'
+      }
+    })
+
+    const tipTimer = setInterval(() => {
+      tip.update({
+        okText: `${--countDown}s, 关闭`
+      })
+    }, 1000)
+
+    setTimeout(() => {
+      clearInterval(tipTimer)
+      tip.destroy()
+    }, 3000)
+  }
 }
 
 /**
@@ -51,6 +78,7 @@ class Theme {
       for (let key in Theme.themeToken)
         Theme.themeTokenStyleVar['--' + key] = Theme.themeToken[key as keyof typeof Theme.themeToken]
 
+      store.commit('config/themeToken', Theme.themeToken)
       $('body').css(Theme.themeTokenStyleVar)
 
       Theme.updateThemeToStyle = () => { }
@@ -82,6 +110,9 @@ onMounted(() => {
       "borderRadius": 6,
     },
   })
+
+  // Jump to mobile if the screen less than 1024px
+  toMobile()
 
   // setTimeout(() => {
   //   Theme.onDark(true)

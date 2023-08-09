@@ -3,21 +3,25 @@
  * this function can only be used based on the vue.
  */
 
-export function clickCopy(
+import { message } from 'ant-design-vue'
+
+export async function clickCopy(
   el: MouseEvent,
-  cb: Function | null,
+  done: Function | string | null,
   str?: string
-): void {
+) {
   if (!str)
     str = (el.currentTarget as any).innerText
 
-  const textarea: any = document.createElement('textarea')
-    ; (el.currentTarget as any).appendChild(textarea)
-  textarea.value = str
-  textarea.select()
-  document.execCommand('copy')
-  textarea.remove()
+  try {
+    await navigator.clipboard.writeText(str as string)
 
-  if (cb)
-    cb()
+    if (typeof done == 'function')
+      (done as Function)()
+    else
+      message.success(done || '复制成功！')
+  } catch {
+    message.error('复制失败！')
+  }
+
 }
