@@ -12,11 +12,18 @@ export default function (m: StylePageI) {
 
   const alterIdName = () => {
     switch (store.getters["config/platform"]) {
+      case 'Windows':
+      case 'Linux':
+      case 'Mac':
       case 'Desktop':
-        m.style.value = m.name
+        m.mobile ? m.mobile.value = false : null
+        m.onDesktop ? m.onDesktop() : null
         break
+      case 'Android':
+      case 'IOS':
       case 'Mobile':
-        m.style.value = m.name + '-m'
+        m.mobile ? m.mobile.value = true : null
+        m.onMobile ? m.onMobile() : null
         break
     }
   }

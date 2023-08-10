@@ -20,34 +20,46 @@ useRouter().replace({
  */
 const toMobile = function () {
   if (window.outerWidth <= 1024) {
-    // store.commit('config/platform', 'Mobile')
-    $('#app').css('min-width', '1024px')
+    store.commit('config/platform', 'Mobile')
 
-    let countDown = 3
-    const tip = Modal.warning({
-      title: '已跳转到桌面端',
-      content: h('div', [
-        h('p', '移动端界面正在开发中...'),
-        h('p', '暂请使用桌面端')
-      ]),
-      okText: '3s, 关闭',
-      style: {
-        marginLeft: '12px'
-      }
-    })
+    // let countDown = 3
+    // const tip = Modal.warning({
+    //   title: '已跳转到桌面端',
+    //   content: h('div', [
+    //     h('p', '移动端界面正在开发中...'),
+    //     h('p', '暂请使用桌面端')
+    //   ]),
+    //   okText: '3s, 关闭',
+    //   style: {
+    //     marginLeft: '12px'
+    //   }
+    // })
 
-    const tipTimer = setInterval(() => {
-      tip.update({
-        okText: `${--countDown}s, 关闭`
-      })
-    }, 1000)
+    // const tipTimer = setInterval(() => {
+    //   tip.update({
+    //     okText: `${--countDown}s, 关闭`
+    //   })
+    // }, 1000)
 
-    setTimeout(() => {
-      clearInterval(tipTimer)
-      tip.destroy()
-    }, 3000)
+    // setTimeout(() => {
+    //   clearInterval(tipTimer)
+    //   tip.destroy()
+    // }, 3000)
   }
 }
+
+/**
+ * Listen change of window size
+ */
+const listenWindowSize = function () {
+  if (store.getters['config/adaptPlatform']('Desktop')) {
+    $('#app').css('min-width', '1024px')
+  } else {
+    $('#app').css('min-width', 'none')
+  }
+}
+store.commit('addResizeEvent',
+  { name: 'listenWindowSize', fn: listenWindowSize })
 
 /**
  * Set the theme of App
@@ -114,6 +126,9 @@ onMounted(() => {
   // Jump to mobile if the screen less than 1024px
   toMobile()
 
+  // Listen change of window size
+  listenWindowSize()
+
   // setTimeout(() => {
   //   Theme.onDark(true)
   // }, 3000);
@@ -126,7 +141,7 @@ onUpdated(() => {
 </script>
 
 <template>
-  <div id="app">
+  <div id="app-">
     <a-config-provider :theme="Theme.appTheme.value">
       <router-view></router-view>
       <!-- <FnNotice :size="5.6"></FnNotice> -->
@@ -137,7 +152,7 @@ onUpdated(() => {
 <style lang="less" src="./style.less"></style>
 
 <style>
-#app {
+#app- {
   width: 100%;
   height: 100%;
 }

@@ -7,10 +7,12 @@ import { Ref } from 'vue'
 export interface StylePageI {
   // root name in component
   name: string,
-  // id name of component style
-  style: Ref<string>,
+  // Whether mobile
+  mobile?: Ref<boolean>,
+  // Change callback
+  onMobile?: Function,
+  onDesktop?: Function
 }
-
 
 /**
  * Page Header. For display the correlative information in the header component.

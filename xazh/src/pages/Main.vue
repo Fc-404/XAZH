@@ -135,11 +135,10 @@ onMounted(() => {
   }
 
   #main- {
-    margin: 4rem;
 
     // background-color: red;
-    &>div {
-      margin: auto 12rem;
+    >div {
+      margin: auto 10vw;
     }
   }
 }

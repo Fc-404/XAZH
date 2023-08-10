@@ -5,11 +5,13 @@ const config: Module<any, any> = {
   state: () => ({
     /**
      * Attribute 'platform' is one of
-     * Desktop, Mobile, Windows, Linux, Android, IOS.
+     * Desktop, Mobile, Windows, Linux, Mac, Android, IOS.
      * */
     platform: 'Desktop',
+    // Whether dark of theme
     ondark: false,
-    themeToken: null
+    // Antdv's theme token
+    themeToken: null,
   }),
   getters: {
     platform(state): string {
@@ -21,8 +23,15 @@ const config: Module<any, any> = {
           || [2, '2', 'm', 'M', 'mobile', 'Mobile'].find(i => i == str) && 'Mobile' == state.platform
           || [3, '3', 'w', 'W', 'windows', 'Windows'].find(i => i == str) && 'Windows' == state.platform
           || [4, '4', 'l', 'L', 'linux', 'Linux'].find(i => i == str) && 'Linux' == state.platform
-          || [5, '5', 'a', 'A', 'android', 'Android'].find(i => i == str) && 'Android' == state.platform
-          || [6, '6', 'i', 'I', 'ios', 'IOS'].find(i => i == str) && 'IOS' == state.platform
+          || [5, '5', 'mac', 'Mac'].find(i => i == str) && 'Mac' == state.platform
+          || [6, '6', 'a', 'A', 'android', 'Android'].find(i => i == str) && 'Android' == state.platform
+          || [7, '7', 'i', 'I', 'ios', 'IOS'].find(i => i == str) && 'IOS' == state.platform
+        )
+    },
+    adaptPlatform(state) {
+      return (str: 'Desktop' | 'Mobile'): boolean =>
+        !!((str == 'Desktop' && ['Desktop', 'Windows', 'Linux', 'Mac'].find(i => i == state.platform))
+          || (str == 'Mobile' && ['Mobile', 'Android', 'IOS'].find(i => i == state.platform))
         )
     },
     ondark(state): boolean {
@@ -30,7 +39,7 @@ const config: Module<any, any> = {
     },
     themeToken(state) {
       return state.themeToken
-    }
+    },
   },
   mutations: {
     platform(state, platform): string {
@@ -69,14 +78,20 @@ const config: Module<any, any> = {
           break
         case 5:
         case '5':
+        case 'mac':
+        case 'Mac':
+          state.platform = 'Mac'
+          break
+        case 6:
+        case '6':
         case 'a':
         case 'A':
         case 'android':
         case 'Android':
           state.platform = 'Android'
           break
-        case 6:
-        case '6':
+        case 7:
+        case '7':
         case 'i':
         case 'I':
         case 'ios':

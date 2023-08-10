@@ -1,5 +1,5 @@
 <template>
-  <div :id="stylePageInfo.style.value">
+  <div id="header">
     <a-progress
       v-show="store.getters['header/onProgress']"
       id="header-progress"
@@ -10,7 +10,10 @@
       :size="3"
     ></a-progress>
     <div id="header-container">
-      <div id="header-box">
+      <div
+        id="header-box"
+        v-if="!stylePageInfo.mobile?.value"
+      >
         <div style="width: 4rem;"></div>
         <div id="header-logo">
           <Logo
@@ -81,6 +84,21 @@
         </div> -->
         <div style="width: 2rem;"></div>
       </div>
+      <div
+        id="header-box-m"
+        v-if="stylePageInfo.mobile?.value"
+      >
+        <div style="width: 1rem;"></div>
+        <div id="header-logo">
+          <Logo
+            id="header-logo-"
+            size="3rem"
+            color="var(--colorPrimary)"
+          ></Logo>
+          <label>夏至De主页</label>
+        </div>
+        <div style="flex-grow: 1;"></div>
+      </div>
       <div id="title-box">
         <p id="title-box-">{{ store.getters['header/title'] }}</p>
       </div>
@@ -98,7 +116,7 @@ import { SearchOutlined } from '@ant-design/icons-vue';
 const store = useStore()
 const stylePageInfo: StylePageI = {
   name: 'header',
-  style: ref<string>('Desktop')
+  mobile: ref<boolean>(false)
 }
 
 /**
@@ -128,9 +146,12 @@ const initSlider = function () {
     index.css('color', 'var(--colorPrimary)')
   })
 
-  document.body.onresize = function () {
-    hs.css('left', index.offset()?.left ?? 0)
-  }
+  store.commit('addResizeEvent', {
+    name: 'headerSlider',
+    fn: () => {
+      hs.css('left', index.offset()?.left ?? 0)
+    }
+  })
 }
 
 /**
@@ -200,7 +221,7 @@ onBeforeMount(() => {
 })
 
 onMounted(() => {
-  if (store.getters["config/isPlatform"]('Desktop'))
+  if (!stylePageInfo.mobile?.value)
     initSlider()
   titleDeal()
 })
@@ -215,6 +236,10 @@ onMounted(() => {
   position: relative;
   overflow: hidden;
 
+  @media (max-width: 1024px) {
+    min-width: 300px;
+  }
+
   &-progress {
     position: absolute;
     top: 0;
@@ -227,7 +252,8 @@ onMounted(() => {
     position: absolute;
     transition: all .2s ease-in-out;
 
-    #header-box {
+    #header-box,
+    #header-box-m {
       width: 100%;
       height: var(--headerHeight);
       display: flex;
@@ -247,13 +273,6 @@ onMounted(() => {
           display: inline-block;
           vertical-align: top;
           margin: 0.5rem 2rem auto 3rem;
-          // background-image:
-          //   linear-gradient(45deg, var(--colorPrimary) 30%,
-          //     var(--colorBgLayout));
-          // background-clip: text;
-          // -webkit-background-clip: text;
-          // -webkit-background-clip: text;
-          // -webkit-text-fill-color: transparent;
           color: var(--colorPrimary);
         }
       }
@@ -283,6 +302,14 @@ onMounted(() => {
       }
     }
 
+    #header-box-m {
+      #header-logo {
+        >label {
+          margin: 0.5rem 1rem;
+        }
+      }
+    }
+
     #title-box {
       width: 100%;
       height: var(--headerHeight);
@@ -298,10 +325,5 @@ onMounted(() => {
       }
     }
   }
-}
-
-#header-m {
-
-  background-color: red;
 }
 </style>
