@@ -98,6 +98,40 @@
           <label>夏至De主页</label>
         </div>
         <div style="flex-grow: 1;"></div>
+        <div>
+          <menu-outlined
+            @click="showMenu = !showMenu"
+            style="color: var(--colorPrimary); font-size: 1.5rem;"
+          />
+          <a-drawer
+            v-model:open="showMenu"
+            :closable="false"
+            width="auto"
+            style="text-align: center; line-height: 4rem; color: var(--colorPrimary); font-size: 1.2rem;"
+            :headerStyle="{ color: 'var(--colorPrimary)', fontSize: '3rem' }"
+          >
+            <p>夏至De主页</p>
+            <a-menu
+              v-model:selected-keys="selectedMenu"
+              style="border-inline-end: none"
+            >
+              <a-menu-item key="1">博客</a-menu-item>
+              <a-menu-item key="2">项目</a-menu-item>
+              <a-menu-item key="3">工具</a-menu-item>
+              <a-menu-item key="4">推荐</a-menu-item>
+              <a-menu-item key="5">夏至</a-menu-item>
+            </a-menu>
+            <div style="position: fixed; bottom: 0; margin: 2rem;">
+              <a-switch
+                id="header-ondark"
+                v-model:checked="onDark"
+                checked-children="日"
+                un-checked-children="夜"
+              ></a-switch>
+            </div>
+          </a-drawer>
+        </div>
+        <div style="width: 1rem;"></div>
       </div>
       <div id="title-box">
         <p id="title-box-">{{ store.getters['header/title'] }}</p>
@@ -111,13 +145,16 @@ import { useStore } from 'vuex'
 import switchStyle from '../../tools/switchStyle.tool.ts'
 import { ModeTitlePageI, StylePageI } from '../../interface/page.i.ts'
 
-import { SearchOutlined } from '@ant-design/icons-vue';
+import { SearchOutlined, MenuOutlined } from '@ant-design/icons-vue';
 
 const store = useStore()
 const stylePageInfo: StylePageI = {
   name: 'header',
   mobile: ref<boolean>(false)
 }
+
+const selectedMenu = ref<number[]>([1])
+const showMenu = ref<boolean>(false)
 
 /**
  * Set the slider.

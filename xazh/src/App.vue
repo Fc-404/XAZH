@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { Modal, theme } from 'ant-design-vue'
+import { theme } from 'ant-design-vue'
 import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
 import { GlobalToken } from 'ant-design-vue/es/theme'
 
@@ -51,7 +51,7 @@ const toMobile = function () {
 /**
  * Listen change of window size
  */
-const listenWindowSize = function () {
+const modifyMinWidth = function () {
   if (store.getters['config/adaptPlatform']('Desktop')) {
     $('#app').css('min-width', '1024px')
   } else {
@@ -59,7 +59,15 @@ const listenWindowSize = function () {
   }
 }
 store.commit('addResizeEvent',
-  { name: 'listenWindowSize', fn: listenWindowSize })
+  {
+    name: 'listenWindowSize',
+    fn: modifyMinWidth,
+    debounce: 444
+  })
+store.subscribe((m) => {
+  if (m.type == 'config/platform')
+    modifyMinWidth()
+})
 
 /**
  * Set the theme of App
@@ -126,8 +134,8 @@ onMounted(() => {
   // Jump to mobile if the screen less than 1024px
   toMobile()
 
-  // Listen change of window size
-  listenWindowSize()
+  // Modify min-width of body
+  modifyMinWidth()
 
   // setTimeout(() => {
   //   Theme.onDark(true)
@@ -143,8 +151,8 @@ onUpdated(() => {
 <template>
   <div id="app-">
     <a-config-provider :theme="Theme.appTheme.value">
-      <router-view></router-view>
-      <!-- <FnNotice :size="5.6"></FnNotice> -->
+      <!-- <router-view></router-view> -->
+      <Signup></Signup>
     </a-config-provider>
   </div>
 </template>
