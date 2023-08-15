@@ -51,11 +51,12 @@ const toMobile = function () {
 /**
  * Listen change of window size
  */
+const appDom = document.getElementById('app')
 const modifyMinWidth = function () {
   if (store.getters['config/adaptPlatform']('Desktop')) {
-    $('#app').css('min-width', '1024px')
+    appDom!.style.minWidth = '1024px'
   } else {
-    $('#app').css('min-width', 'none')
+    appDom!.style.minWidth = 'none'
   }
 }
 store.commit('addResizeEvent',
@@ -77,7 +78,7 @@ class Theme {
   static appTheme = ref<ThemeConfig>({})
 
   private static themeToken: GlobalToken
-  private static themeTokenStyleVar: any = {}
+  private static themeTokenStyleVar: string
 
   static setTheme(value: ThemeConfig): void {
     Theme.appTheme.value = value
@@ -93,13 +94,15 @@ class Theme {
    */
   private static updateStyleTheme() {
     Theme.updateThemeToStyle = () => {
-      Theme.themeTokenStyleVar = {}
+      Theme.themeTokenStyleVar = ''
       Theme.themeToken = theme.useToken().token.value
       for (let key in Theme.themeToken)
-        Theme.themeTokenStyleVar['--' + key] = Theme.themeToken[key as keyof typeof Theme.themeToken]
+        Theme.themeTokenStyleVar +=
+          '--' + key + ':' + Theme.themeToken[key as keyof typeof Theme.themeToken] + ';'
 
       store.commit('config/themeToken', Theme.themeToken)
-      $('body').css(Theme.themeTokenStyleVar)
+      console.log(Theme.themeTokenStyleVar);
+      document.body.style.cssText = Theme.themeTokenStyleVar
 
       Theme.updateThemeToStyle = () => { }
     }
@@ -151,8 +154,8 @@ onUpdated(() => {
 <template>
   <div id="app-">
     <a-config-provider :theme="Theme.appTheme.value">
-      <!-- <router-view></router-view> -->
-      <Signup></Signup>
+      <router-view></router-view>
+      <!-- <Signup></Signup> -->
     </a-config-provider>
   </div>
 </template>

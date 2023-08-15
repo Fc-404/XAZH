@@ -160,36 +160,34 @@ const showMenu = ref<boolean>(false)
  * Set the slider.
  */
 const initSlider = function () {
-  // init
-  const hs: JQuery<HTMLElement> = $('#header-box > #header-slider')
-  const blog: JQuery<HTMLElement> = $('#header-box > #header-blog')
-  const items: JQuery<HTMLElement> = $('#header-box > .header-item')
-  let index: JQuery<HTMLElement> = blog
+  const hs = document.querySelector('#header-box > #header-slider') as HTMLElement
+  const blog = document.querySelector('#header-box > #header-blog') as HTMLElement
+  const items = document.querySelectorAll('#header-box > .header-item') as NodeListOf<HTMLElement>
+  let index: HTMLElement = blog
 
-  hs.css('left', blog.offset()?.left ?? 0)
-    .css('width', blog.outerWidth() ?? 0)
-  index.css('color', 'var(--colorPrimary')
+  hs.style.left = blog.offsetLeft + 'px'
+  hs.style.width = blog.offsetWidth + 'px'
+  index.style.color = 'var(--colorPrimary)'
 
   // event
-  items.on('mouseenter', function () {
-    hs.css('left', $(this).offset()?.left ?? 0)
-      .css('width', $(this).outerWidth() ?? 0)
-  }).on('mouseleave', function () {
-    hs.css('left', index.offset()?.left ?? 0)
-      .css('width', index.outerWidth() ?? 0)
-  }).on('click', function () {
-    index.css('color', 'var(--colorTextBase)')
-    index = $(this)
-    index.css('color', 'var(--colorPrimary)')
-  })
-
-  store.commit('addResizeEvent', {
-    name: 'headerSlider',
-    fn: () => {
-      hs.css('left', index.offset()?.left ?? 0)
+  items.forEach((v) => {
+    v.onmouseenter = () => {
+      hs.style.left = v.offsetLeft + 'px'
+      hs.style.width = v.offsetWidth + 'px'
+    }
+    v.onmouseleave = () => {
+      hs.style.left = index.offsetLeft + 'px'
+      hs.style.width = index.offsetWidth + 'px'
+    }
+    v.onclick = () => {
+      index.style.color = 'var(--colorTextBase)'
+      index = v
+      index.style.color = 'var(--colorPrimary)'
     }
   })
 }
+
+
 
 /**
  * On dark
@@ -209,7 +207,7 @@ watch(computed(() => {
  * Title Hook
  */
 const titleDeal = function () {
-  const headerContainer: JQuery<HTMLElement> = $('#header-container')
+  const headerContainer: HTMLElement = document.getElementById('header-container') as HTMLElement
   var scrollTopForTitle: number = 0
   var changeTitleDebounceHandle: any
 
@@ -222,13 +220,13 @@ const titleDeal = function () {
       if (store.getters['header/titleMode'] == ModeTitlePageI.SCROLL) {
         var scrollTopForTitleT = document.documentElement.scrollTop
         if (scrollTopForTitleT > scrollTopForTitle) {
-          headerContainer.css('top', 'calc(var(--headerHeight) * -1)')
+          headerContainer.style.top = 'calc(var(--headerHeight) * -1)'
         } else {
-          headerContainer.css('top', '0')
+          headerContainer.style.top = '0'
         }
         scrollTopForTitle = scrollTopForTitleT
       } else if (store.getters['header/titleMode'] == ModeTitlePageI.CONSTANT) {
-        headerContainer.css('top', 'calc(var(--headerHeight) * -1)')
+        headerContainer.style.top = 'calc(var(--headerHeight) * -1)'
       }
     }, 44)
   }
@@ -241,7 +239,7 @@ const titleDeal = function () {
   })
 
   store.commit('header/closeTitleHandle', () => {
-    headerContainer.css('top', '0')
+    headerContainer.style.top = '0'
     document.title = preBarTitle
   })
 
