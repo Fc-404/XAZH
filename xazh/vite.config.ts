@@ -15,9 +15,7 @@ const pathSrc = path.resolve(__dirname, 'src')
 export default defineConfig({
   plugins: [
     vue(),
-    inject({
-      $: 'jquery'
-    }),
+    // inject(),
     AutoImport({
       imports: ['vue'],
 
