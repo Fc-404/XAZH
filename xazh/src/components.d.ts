@@ -33,6 +33,7 @@ declare module 'vue' {
     FnNotice: typeof import('./components/common/FnNotice.vue')['default']
     Footer: typeof import('./components/main/Footer.vue')['default']
     Header: typeof import('./components/main/Header.vue')['default']
+    HeaderM: typeof import('./components/main/HeaderM.vue')['default']
     Logo: typeof import('./components/common/Logo.vue')['default']
     Lottie: typeof import('./components/common/Lottie.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

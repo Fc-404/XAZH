@@ -7,14 +7,16 @@ type OnResizeEvent = {
   debounce?: number,
 }
 
+const resizeDebounce: any = {}
 var onResizeEventCount: number = 0
+var v: boolean = true
 
 const resizeEvent: Module<any, any> = {
   namespaced: false,
   state: () => ({
     // List of functions executed when changing the window size.
     onResize: {},
-    resizeDebounce: {}
+
   }),
   mutations: {
     addResizeEvent(state, value: OnResizeEvent | Function) {
@@ -31,13 +33,16 @@ const resizeEvent: Module<any, any> = {
       }
 
       state.onResize[name] = fn
-      state.resizeDebounce[name] = debouncems
+      resizeDebounce[name] = debouncems
 
-      document.body.onresize = () => {
-        for (let f in state.onResize)
-          state.resizeDebounce[f]
-            ? debounce(state.onResize[f] as Function, state.resizeDebounce[f])
-            : (state.onResize[f] as Function)()
+      if (v) {
+        document.body.onresize = () => {
+          for (let f in state.onResize)
+            resizeDebounce[f]
+              ? debounce(state.onResize[f] as Function, resizeDebounce[f])
+              : (state.onResize[f] as Function)()
+        }
+        v = false
       }
     },
     removeResizeEvent(state, value: string) {

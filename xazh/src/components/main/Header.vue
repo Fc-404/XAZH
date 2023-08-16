@@ -10,10 +10,7 @@
       :size="3"
     ></a-progress>
     <div id="header-container">
-      <div
-        id="header-box"
-        v-if="!stylePageInfo.mobile?.value"
-      >
+      <div id="header-box">
         <div style="width: 4rem;"></div>
         <div id="header-logo">
           <Logo
@@ -27,12 +24,25 @@
         <div
           id="header-blog"
           class="header-item"
+          @click="toMenu('MainBlogs')"
         >博客
         </div>
-        <div class="header-item">项目</div>
-        <div class="header-item">工具</div>
-        <div class="header-item">推荐</div>
-        <div class="header-item">夏至</div>
+        <div
+          class="header-item"
+          @click="toMenu('MainProjects')"
+        >项目</div>
+        <div
+          class="header-item"
+          @click="toMenu('MainTools')"
+        >工具</div>
+        <div
+          class="header-item"
+          @click="toMenu('MainFavors')"
+        >推荐</div>
+        <div
+          class="header-item"
+          @click="toMenu('MainXAZH')"
+        >夏至</div>
         <div id="header-slider"></div>
         <div>
           <a-divider type="vertical" />
@@ -84,55 +94,6 @@
         </div> -->
         <div style="width: 2rem;"></div>
       </div>
-      <div
-        id="header-box-m"
-        v-if="stylePageInfo.mobile?.value"
-      >
-        <div style="width: 1rem;"></div>
-        <div id="header-logo">
-          <Logo
-            id="header-logo-"
-            size="3rem"
-            color="var(--colorPrimary)"
-          ></Logo>
-          <label>夏至De主页</label>
-        </div>
-        <div style="flex-grow: 1;"></div>
-        <div>
-          <menu-outlined
-            @click="showMenu = !showMenu"
-            style="color: var(--colorPrimary); font-size: 1.5rem;"
-          />
-          <a-drawer
-            v-model:open="showMenu"
-            :closable="false"
-            width="auto"
-            style="text-align: center; line-height: 4rem; color: var(--colorPrimary); font-size: 1.2rem;"
-            :headerStyle="{ color: 'var(--colorPrimary)', fontSize: '3rem' }"
-          >
-            <p>夏至De主页</p>
-            <a-menu
-              v-model:selected-keys="selectedMenu"
-              style="border-inline-end: none"
-            >
-              <a-menu-item key="1">博客</a-menu-item>
-              <a-menu-item key="2">项目</a-menu-item>
-              <a-menu-item key="3">工具</a-menu-item>
-              <a-menu-item key="4">推荐</a-menu-item>
-              <a-menu-item key="5">夏至</a-menu-item>
-            </a-menu>
-            <div style="position: fixed; bottom: 0; margin: 2rem;">
-              <a-switch
-                id="header-ondark"
-                v-model:checked="onDark"
-                checked-children="日"
-                un-checked-children="夜"
-              ></a-switch>
-            </div>
-          </a-drawer>
-        </div>
-        <div style="width: 1rem;"></div>
-      </div>
       <div id="title-box">
         <p id="title-box-">{{ store.getters['header/title'] }}</p>
       </div>
@@ -142,19 +103,12 @@
 
 <script setup lang="ts">
 import { useStore } from 'vuex'
-import switchStyle from '../../tools/switchStyle.tool.ts'
-import { ModeTitlePageI, StylePageI } from '../../interface/page.i.ts'
+import { ModeTitlePageI } from '../../interface/page.i.ts'
 
-import { SearchOutlined, MenuOutlined } from '@ant-design/icons-vue';
+import { SearchOutlined } from '@ant-design/icons-vue';
+import { useRouter } from 'vue-router';
 
 const store = useStore()
-const stylePageInfo: StylePageI = {
-  name: 'header',
-  mobile: ref<boolean>(false)
-}
-
-const selectedMenu = ref<number[]>([1])
-const showMenu = ref<boolean>(false)
 
 /**
  * Set the slider.
@@ -185,9 +139,32 @@ const initSlider = function () {
       index.style.color = 'var(--colorPrimary)'
     }
   })
+
+  store.commit('addResizeEvent', {
+    name: 'headerSliderAdjust',
+    fn: () => {
+      hs.style.left = index.offsetLeft + 'px'
+      hs.style.width = index.offsetWidth + 'px'
+    }
+  })
 }
 
+/**
+ * TODO: Progress
+ */
+window.addEventListener('scroll', () => {
+  if (!store.getters['header/onProgress'])
+    return
+  let progressOld = -1
+  let progress = Math.round(
+    (document.documentElement.scrollTop * 100) /
+    (document.documentElement.scrollHeight - window.innerHeight))
 
+  if (progressOld != progress) {
+    store.commit('header/progress', progress)
+    progressOld = progress
+  }
+})
 
 /**
  * On dark
@@ -249,15 +226,20 @@ const titleDeal = function () {
 }
 
 /**
+ * To Menu
+ */
+const router = useRouter()
+const toMenu = function (name: string) {
+  router.push({
+    name: name
+  })
+}
+
+/**
  * HOOK
  */
-onBeforeMount(() => {
-  switchStyle(stylePageInfo)
-})
-
 onMounted(() => {
-  if (!stylePageInfo.mobile?.value)
-    initSlider()
+  initSlider()
   titleDeal()
 })
 
@@ -271,10 +253,6 @@ onMounted(() => {
   position: relative;
   overflow: hidden;
 
-  @media (max-width: 1024px) {
-    min-width: 300px;
-  }
-
   &-progress {
     position: absolute;
     top: 0;
@@ -287,8 +265,7 @@ onMounted(() => {
     position: absolute;
     transition: all .2s ease-in-out;
 
-    #header-box,
-    #header-box-m {
+    #header-box {
       width: 100%;
       height: var(--headerHeight);
       display: flex;
@@ -334,14 +311,6 @@ onMounted(() => {
         margin-right: 1rem;
         margin-left: 1rem;
         margin-bottom: 0.2rem;
-      }
-    }
-
-    #header-box-m {
-      #header-logo {
-        >label {
-          margin: 0.5rem 1rem;
-        }
       }
     }
 

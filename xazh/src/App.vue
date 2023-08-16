@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { theme } from 'ant-design-vue'
 import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
 import { GlobalToken } from 'ant-design-vue/es/theme'
+
+import Modal from 'ant-design-vue/es/modal/Modal'
 
 const store = useStore()
 
@@ -20,31 +22,31 @@ useRouter().replace({
  */
 const toMobile = function () {
   if (window.outerWidth <= 1024) {
-    store.commit('config/platform', 'Mobile')
+    // store.commit('config/platform', 'Mobile')
 
-    // let countDown = 3
-    // const tip = Modal.warning({
-    //   title: '已跳转到桌面端',
-    //   content: h('div', [
-    //     h('p', '移动端界面正在开发中...'),
-    //     h('p', '暂请使用桌面端')
-    //   ]),
-    //   okText: '3s, 关闭',
-    //   style: {
-    //     marginLeft: '12px'
-    //   }
-    // })
+    let countDown = 3
+    const tip = Modal.warning({
+      title: '已跳转到桌面端',
+      content: h('div', [
+        h('p', '移动端界面正在开发中...'),
+        h('p', '暂请使用桌面端')
+      ]),
+      okText: '3s, 关闭',
+      style: {
+        marginLeft: '12px'
+      }
+    })
 
-    // const tipTimer = setInterval(() => {
-    //   tip.update({
-    //     okText: `${--countDown}s, 关闭`
-    //   })
-    // }, 1000)
+    const tipTimer = setInterval(() => {
+      tip.update({
+        okText: `${--countDown}s, 关闭`
+      })
+    }, 1000)
 
-    // setTimeout(() => {
-    //   clearInterval(tipTimer)
-    //   tip.destroy()
-    // }, 3000)
+    setTimeout(() => {
+      clearInterval(tipTimer)
+      tip.destroy()
+    }, 3000)
   }
 }
 
@@ -101,7 +103,6 @@ class Theme {
           '--' + key + ':' + Theme.themeToken[key as keyof typeof Theme.themeToken] + ';'
 
       store.commit('config/themeToken', Theme.themeToken)
-      console.log(Theme.themeTokenStyleVar);
       document.body.style.cssText = Theme.themeTokenStyleVar
 
       Theme.updateThemeToStyle = () => { }
@@ -154,7 +155,7 @@ onUpdated(() => {
 <template>
   <div id="app-">
     <a-config-provider :theme="Theme.appTheme.value">
-      <router-view></router-view>
+      <RouterView></RouterView>
       <!-- <Signup></Signup> -->
     </a-config-provider>
   </div>
