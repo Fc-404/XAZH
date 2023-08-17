@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { RouterView, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { theme } from 'ant-design-vue'
 import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
 import { GlobalToken } from 'ant-design-vue/es/theme'
 
-import Modal from 'ant-design-vue/es/modal/Modal'
+// import Modal from 'ant-design-vue/es/modal/Modal'
 
 const store = useStore()
 
@@ -22,33 +22,35 @@ useRouter().replace({
  */
 const toMobile = function () {
   if (window.outerWidth <= 1024) {
-    // store.commit('config/platform', 'Mobile')
+    store.commit('config/platform', 'Mobile')
 
-    let countDown = 3
-    const tip = Modal.warning({
-      title: '已跳转到桌面端',
-      content: h('div', [
-        h('p', '移动端界面正在开发中...'),
-        h('p', '暂请使用桌面端')
-      ]),
-      okText: '3s, 关闭',
-      style: {
-        marginLeft: '12px'
-      }
-    })
+    // let countDown = 3
+    // const tip = Modal.warning({
+    //   title: '已跳转到桌面端',
+    //   content: h('div', [
+    //     h('p', '移动端界面正在开发中...'),
+    //     h('p', '暂请使用桌面端')
+    //   ]),
+    //   okText: '3s, 关闭',
+    //   style: {
+    //     marginLeft: '12px'
+    //   }
+    // })
 
-    const tipTimer = setInterval(() => {
-      tip.update({
-        okText: `${--countDown}s, 关闭`
-      })
-    }, 1000)
+    // const tipTimer = setInterval(() => {
+    //   tip.update({
+    //     okText: `${--countDown}s, 关闭`
+    //   })
+    // }, 1000)
 
-    setTimeout(() => {
-      clearInterval(tipTimer)
-      tip.destroy()
-    }, 3000)
+    // setTimeout(() => {
+    //   clearInterval(tipTimer)
+    //   tip.destroy()
+    // }, 3000)
   }
 }
+// Jump to mobile if the screen less than 1024px
+toMobile()
 
 /**
  * Listen change of window size
@@ -71,6 +73,8 @@ store.subscribe((m) => {
   if (m.type == 'config/platform')
     modifyMinWidth()
 })
+// Modify min-width of body
+modifyMinWidth()
 
 /**
  * Set the theme of App
@@ -85,7 +89,7 @@ class Theme {
   static setTheme(value: ThemeConfig): void {
     Theme.appTheme.value = value
 
-    Theme.updateStyleTheme()
+    Theme.updateThemeStyle()
   }
 
   /**
@@ -94,7 +98,7 @@ class Theme {
    * The purpose is to get theme token after set theme.
    * Because function nextTick() is not work with module 'theme.useToken()'.
    */
-  private static updateStyleTheme() {
+  private static updateThemeStyle() {
     Theme.updateThemeToStyle = () => {
       Theme.themeTokenStyleVar = ''
       Theme.themeToken = theme.useToken().token.value
@@ -119,12 +123,15 @@ class Theme {
     let themeTemp = { ...Theme.appTheme.value }
     themeTemp.algorithm = on ? theme.darkAlgorithm : theme.defaultAlgorithm
     Theme.appTheme.value = themeTemp
-    Theme.updateStyleTheme()
+    Theme.updateThemeStyle()
     store.commit('config/ondark', on)
   }
 }
 provide('onDark', Theme.onDark)
 
+/**
+ * Hook
+ */
 onMounted(() => {
   // Default theme.
   Theme.setTheme({
@@ -134,19 +141,7 @@ onMounted(() => {
       "borderRadius": 6,
     },
   })
-
-  // Jump to mobile if the screen less than 1024px
-  toMobile()
-
-  // Modify min-width of body
-  modifyMinWidth()
-
-  // setTimeout(() => {
-  //   Theme.onDark(true)
-  // }, 3000);
-
 })
-
 onUpdated(() => {
   Theme.updateThemeToStyle()
 })
@@ -155,8 +150,8 @@ onUpdated(() => {
 <template>
   <div id="app-">
     <a-config-provider :theme="Theme.appTheme.value">
-      <RouterView></RouterView>
-      <!-- <Signup></Signup> -->
+      <!-- <RouterView></RouterView> -->
+      <Signup></Signup>
     </a-config-provider>
   </div>
 </template>
