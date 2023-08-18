@@ -151,7 +151,10 @@ onUpdated(() => {
   <div id="app-">
     <a-config-provider :theme="Theme.appTheme.value">
       <!-- <RouterView></RouterView> -->
-      <Signup></Signup>
+      <div style="height: 10rem;"></div>
+      <Signup :panel-style="{
+        background: '#ffffffdd',
+      }"></Signup>
     </a-config-provider>
   </div>
 </template>
