@@ -12,6 +12,8 @@
     <div id="header-container">
       <div id="header-box">
         <div style="width: 4rem;"></div>
+
+        <!-- LOGO -->
         <div id="header-logo">
           <Logo
             id="header-logo-"
@@ -21,6 +23,8 @@
           <label>夏至De主页</label>
         </div>
         <div style="flex-grow: 1;"></div>
+
+        <!-- Menu -->
         <div
           id="header-blog"
           class="header-item"
@@ -47,6 +51,8 @@
         <div>
           <a-divider type="vertical" />
         </div>
+
+        <!-- Search -->
         <div>
           <a-popover placement="bottomRight">
             <template #content>
@@ -60,6 +66,8 @@
             </a-button>
           </a-popover>
         </div>
+
+        <!-- onDark -->
         <div>
           <a-switch
             id="header-ondark"
@@ -68,6 +76,8 @@
             un-checked-children="夜"
           ></a-switch>
         </div>
+
+        <!-- Signup -->
         <div id="header-self">
           <router-link to="/signup?type=signup">
             <a-button id="header-signup">注册</a-button>
@@ -81,6 +91,8 @@
             </a-button>
           </router-link>
         </div>
+
+        <!-- Self -->
         <!-- <div style="margin-left: 1rem;">
           <a-popover
             placement="bottomRight"
@@ -95,6 +107,7 @@
         <div style="width: 2rem;"></div>
       </div>
       <div id="title-box">
+        <!-- Title -->
         <p id="title-box-">{{ store.getters['header/title'] }}</p>
       </div>
     </div>

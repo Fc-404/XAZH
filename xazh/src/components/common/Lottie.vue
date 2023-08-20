@@ -1,5 +1,8 @@
 <template>
-  <div id="lottie">
+  <div
+    ref="dom"
+    class="lottie"
+  >
   </div>
 </template>
 
@@ -14,15 +17,14 @@ const props = defineProps({
   path: { type: String, default: 'lottie/default.json' }
 })
 
-var lottieDom: Element
 var animItem: any
 const uuid = ref<string>(uid())
+const dom = ref<HTMLElement>()
 
 onMounted(() => {
-  lottieDom = document.getElementById('lottie') as Element
   animItem = lottie.loadAnimation({
     name: uuid.value,
-    container: lottieDom,
+    container: dom.value as Element,
     // @ts-ignore
     renderer: props.render,
     loop: props.loop,
@@ -30,7 +32,7 @@ onMounted(() => {
     path: props.path
   })
 
-  animItem.play('lottie')
+  animItem.play(uuid.value)
 })
 
 onUnmounted(() => {
@@ -39,8 +41,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="less">
-#lottie {
+.lottie {
   width: 100%;
   height: 100%;
-}
-</style>
+}</style>

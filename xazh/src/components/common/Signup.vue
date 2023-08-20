@@ -43,10 +43,12 @@
           <p>注册账号</p>
           <p>已有账号？去<span @click="signUpOrIn($event, false)">登录</span></p>
         </div>
-        <a-avatar
-          :size="64"
-          style="font-size: 32px;"
-        >{{ username }}</a-avatar>
+        <a-tooltip title="成为用户可修改头像">
+          <a-avatar
+            :size="64"
+            style="font-size: 32px;"
+          >{{ usernameF }}</a-avatar>
+        </a-tooltip>
       </div>
 
       <!-- User Input -->
@@ -79,32 +81,28 @@
 
       <!-- User Password -->
       <div id="signup-panel-pswd">
-        <a-tooltip
-          title="6-16位字符 A-Z a-z 0-9 $ @ * _ & | !"
-          :open="isSignup ? undefined : false"
+        <a-input
+          v-model:value="userpswd"
+          :status="validPswd === false ? 'error' : undefined"
+          type="password"
+          placeholder="密码"
+          @blur="checkUserPswdLen"
         >
-          <a-input
-            v-model:value="userpswd"
-            :status="validPswd === false ? 'error' : undefined"
-            type="password"
-            placeholder="密码"
-          >
-            <template #prefix>
-              <lock-outlined />
-              <a-divider type="vertical" />
-            </template>
-            <template #suffix>
-              <check-outlined
-                style="color: var(--colorSuccess); margin-inline-end: auto;"
-                v-show="validPswd === true"
-              />
-              <close-outlined
-                style="color: var(--colorError)"
-                v-show="validPswd === false"
-              />
-            </template>
-          </a-input>
-        </a-tooltip>
+          <template #prefix>
+            <lock-outlined />
+            <a-divider type="vertical" />
+          </template>
+          <template #suffix>
+            <check-outlined
+              style="color: var(--colorSuccess); margin-inline-end: auto;"
+              v-show="validPswd === true"
+            />
+            <close-outlined
+              style="color: var(--colorError)"
+              v-show="validPswd === false"
+            />
+          </template>
+        </a-input>
       </div>
 
       <!-- Password Repeat -->
@@ -117,6 +115,7 @@
           :status="validPswdR === false ? 'error' : undefined"
           type="password"
           placeholder="重复密码"
+          @blur="checkUserPswdRLen"
         >
           <template #prefix>
             <lock-outlined />
@@ -142,6 +141,7 @@
       >
         <a-input
           :status="validMail === false ? 'error' : undefined"
+          v-model:value="usermail"
           placeholder="邮箱"
         >
           <template #prefix>
@@ -163,7 +163,11 @@
           id="signup-panel-mail-verify"
           v-show="isSignup"
         >
-          <a-input placeholder="验证码">
+          <a-input
+            v-model:value="usermailC"
+            placeholder="验证码"
+            :maxlength="6"
+          >
             <template #addonBefore>
               <span>M -</span>
             </template>
@@ -192,9 +196,19 @@
       >
         <qq-outlined class="signup-other" />
         <a-divider type="vertical" />
-        <wechat-outlined class="signup-other" />
+        <a-popover trigger="click">
+          <template #content>
+            <FnNotice :size="2"></FnNotice>
+          </template>
+          <wechat-outlined class="signup-other" />
+        </a-popover>
         <a-divider type="vertical" />
-        <github-outlined class="signup-other" />
+        <a-popover trigger="click">
+          <template #content>
+            <FnNotice :size="2"></FnNotice>
+          </template>
+          <github-outlined class="signup-other" />
+        </a-popover>
       </div>
 
       <!-- Protocal -->
@@ -231,6 +245,9 @@ import {
   QqOutlined, WechatOutlined, GithubOutlined
 } from "@ant-design/icons-vue";
 
+import { checkMail, checkPswdLen, formatPswd, formatUser } from "../../tools/formCheck.tool";
+import { message } from "ant-design-vue";
+
 const props = defineProps({
   type: { type: String, default: 'signin' },
   tip: { type: Boolean, default: true },
@@ -243,11 +260,12 @@ const store = useStore()
 
 const isSignup = ref<boolean>(!!(props.type == 'signup'))
 const platform = ref<string>()
-const himg = ref<string>()
 const username = ref<string>()
 const usernameF = ref<string>()
 const userpswd = ref<string>()
 const userpswdR = ref<string>()
+const usermail = ref<string>()
+const usermailC = ref<string>()
 
 const validUser = ref<boolean | undefined | null>(undefined)
 const validPswd = ref<boolean | undefined>(undefined)
@@ -290,6 +308,47 @@ const sendVerificationCode = function () {
  */
 const signUpOrIn = function (e: MouseEvent, type: boolean = true): void {
   e; type ? isSignup.value = true : isSignup.value = false
+}
+
+/**
+ * Check user input
+ */
+watch(username, (v) => {
+  username.value = formatUser(v || '')
+  usernameF.value = /[\u4e00-\u9fa5]/.test(username.value[0]) ?
+    username.value[0] : username.value.substring(0, 2)
+})
+watch(userpswd, (v) => {
+  userpswd.value = formatPswd(v || '')
+})
+watch(userpswdR, (v) => {
+  userpswdR.value = formatPswd(v || '')
+})
+watch(usermail, (v) => {
+  !v ? (
+    validMail.value = undefined
+  ) : (
+    checkMail(v) ? validMail.value = true : validMail.value = false
+  )
+})
+const checkUserPswdLen = function () {
+  let code = checkPswdLen(userpswd.value || '')
+  if (code == -1) {
+    message.error('密码必须大于等于6位！')
+    validPswd.value = false
+  } else if (code == 0) {
+    validPswd.value = true
+  } else if (code == 1) {
+    message.error('密码必须小于等于16位！')
+    validPswd.value = false
+  }
+}
+const checkUserPswdRLen = function () {
+  if (userpswd.value == userpswdR.value) {
+    validPswdR.value = true
+  } else {
+    validPswdR.value = false
+  }
 }
 
 /**
@@ -448,4 +507,5 @@ onMounted(() => {
       }
     }
   }
-}</style>
+}
+</style>
