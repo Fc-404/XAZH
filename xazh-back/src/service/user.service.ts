@@ -2,6 +2,7 @@ import { Provide } from '@midwayjs/core';
 import { IUserOptions } from '../interface/interface';
 import { ISignUpUserOptions } from '../interface/signup.user.interface';
 import UserBase from '../model/base.user.model';
+import DataFile from '../model/data.file.model';
 
 @Provide()
 export class UserService {
@@ -9,6 +10,11 @@ export class UserService {
   async addUser(options: ISignUpUserOptions) {
     UserBase.model.create({
       name: 'xazh'
+    })
+
+    DataFile.model.create({
+      _id: '1234',
+      data: '1234'
     })
   }
   

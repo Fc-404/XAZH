@@ -1,12 +1,19 @@
-import { Configuration, App, Inject } from '@midwayjs/core';
+import { Configuration, App, Inject, MidwayDecoratorService } from '@midwayjs/core';
 import * as koa from '@midwayjs/koa';
 import * as validate from '@midwayjs/validate';
 import * as info from '@midwayjs/info';
 import { join } from 'path';
-// import { DefaultErrorFilter } from './filter/default.filter';
-// import { NotFoundFilter } from './filter/notfound.filter';
+
+import { Mongod } from './util/mongod.util';
+
 import { ReportMiddleware } from './middleware/report.middleware';
-import { Mongod } from './util/mongod';
+import { NormalizeResponse } from './middleware/response.middleware';
+
+import { GetBoundaryM } from './decorator/param/formdata.decorator';
+
+import { NotFoundFilter } from './filter/notfound.filter';
+import { DefaultErrorFilter } from './filter/default.filter';
+import { ValidateErrorFilter } from './filter/validate.filter';
 
 @Configuration({
   imports: [
@@ -27,10 +34,24 @@ export class ContainerLifeCycle {
   @Inject()
   db: Mongod
 
+  @Inject()
+  decoratorService: MidwayDecoratorService
+
   async onReady() {
     // add middleware
-    this.app.useMiddleware([ReportMiddleware]);
+    this.app.useMiddleware([
+      ReportMiddleware,
+      NormalizeResponse
+    ]);
+
     // add filter
-    // this.app.useFilter([NotFoundFilter, DefaultErrorFilter]);
+    this.app.useFilter([
+      DefaultErrorFilter,
+      NotFoundFilter,
+      ValidateErrorFilter
+    ]);
+
+    // add decorator
+    GetBoundaryM(this.decoratorService)
   }
 }

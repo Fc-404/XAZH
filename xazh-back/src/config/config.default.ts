@@ -5,5 +5,5 @@ export default {
   keys: '1684327937564_4290',
   koa: {
     port: 7001,
-  }
+  },
 } as MidwayConfig;
