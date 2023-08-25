@@ -1,3 +1,7 @@
+/**
+ * To connect Database within MongoDB.
+ */
+
 import {
   Provide, Scope,
   ScopeEnum

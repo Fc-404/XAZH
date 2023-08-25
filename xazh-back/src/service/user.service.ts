@@ -1,13 +1,11 @@
 import { Provide } from '@midwayjs/core';
-import { IUserOptions } from '../interface/interface';
-import { ISignUpUserOptions } from '../interface/signup.user.interface';
 import UserBase from '../model/base.user.model';
 import DataFile from '../model/data.file.model';
 
 @Provide()
 export class UserService {
 
-  async addUser(options: ISignUpUserOptions) {
+  async addUser(options) {
     UserBase.model.create({
       name: 'xazh'
     })
@@ -17,8 +15,8 @@ export class UserService {
       data: '1234'
     })
   }
-  
-  async getUser(options: IUserOptions) {
+
+  async getUser(options) {
     return {
       uid: options.uid,
       username: 'mockedName',
