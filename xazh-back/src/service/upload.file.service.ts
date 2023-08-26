@@ -1,5 +1,5 @@
 import { Provide } from "@midwayjs/core";
-import { IUploadFileOptions } from "../interface/upload.file.interface";
+import { IUploadFile } from "../interface/file.interface";
 
 import FileData from '../model/data.file.model'
 import FileInfo from '../model/info.file.model'
@@ -15,7 +15,7 @@ export class UploadFileService {
    * TODO: Due to handle the req necessarily, so cann't return status.
    * @param options 
    */
-  async upload(options: IUploadFileOptions) {
+  async upload(options: IUploadFile) {
     // TODO: Not auther. And Not size judge. And Not routine.
     const filemd5 = new Md5().appendByteArray(options.data).end()
 

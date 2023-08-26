@@ -23,7 +23,7 @@ export class MailService {
     }
 
     setTimeout(() => {
-      ValidMail.model.deleteOne({ _id: mail }).exec()
+      ValidMail.model.findByIdAndDelete(mail).exec()
     }, 300000)
 
     return true

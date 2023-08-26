@@ -1,13 +1,10 @@
 import { Rule, RuleType } from '@midwayjs/validate'
+import { ValidMailDTO } from './mail.dto'
 
-export class SignupUserDTO {
-  @Rule(RuleType.string().required())
+export class SignupUserDTO extends ValidMailDTO {
+  @Rule(RuleType.string().required().max(16).min(1))
   user: string
 
-  @Rule(RuleType.string().required())
+  @Rule(RuleType.string().required().max(16).min(6))
   pswd: string
-
-  @Rule(RuleType.string().required()
-    .pattern(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/))
-  mail: string
 }

@@ -1,8 +1,8 @@
 /**
- * Upload File
+ * About File Services.
  */
 
-export interface IUploadFileOptions {
+export interface IUploadFile {
   // Post form
   name?: String,      // File name
   author?: String,    // User's _id

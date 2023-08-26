@@ -3,10 +3,8 @@
  */
 
 import {
-  Provide, Scope,
-  ScopeEnum
+  Provide, Scope, ScopeEnum
 } from "@midwayjs/core";
-
 import { ILogger, loggers } from "@midwayjs/logger"
 import mongoose from "mongoose";
 import mongodConfig from "../config/mongod.config";

@@ -25,9 +25,14 @@ const schema = new mongoose.Schema({
         },
         about_me: String,               // User signature
     },
+
     himg: ObjectId,                     // User headimg, point to Id of file
-    user: String,                       // User account
+    user: {                             // User account
+        type: String,
+        unique: true,
+    },
     pswd: String,                       // User password, pswd + time then md5 operate
+    
     recent_ip: [String],                // IP list for recent signin
     belong_place: String,               // Belong place, be got by last ip of signin
     exp: Number,                        // Experience
@@ -37,22 +42,12 @@ const schema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    bind_qq: {                          // Bind QQ
-        verify: Boolean,
-        value: String,
-    },
-    bind_we: {                          // Bind Wechat
-        verify: Boolean,
-        value: String,
-    },
-    bind_phone: {                       // Bind phone number
-        verify: Boolean,
-        value: String,
-    },
-    bind_mail: {                        // Bind EMail
-        verify: Boolean,
-        value: String,
-    },
+
+    bind_qq: String,                          // Bind QQ
+    bind_we: String,                          // Bind Wechat
+    bind_phone: String,                       // Bind phone number
+    bind_mail: String,                        // Bind EMail
+
     blogs_link: ObjectId,               // Foreign key for the Blogs
     config_link: ObjectId,              // Foreign key for the Config
     message_link: ObjectId,             // Foreign key for the Message

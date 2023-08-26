@@ -4,7 +4,7 @@
 
 import { Context } from "@midwayjs/koa";
 import { Body, Controller, Inject, Post } from "@midwayjs/core";
-import { MailDTO, ValidMailDTO } from "../dto/validMail.dto";
+import { MailDTO, ValidMailDTO } from "../dto/mail.dto";
 import { sendMailByOutlook } from "../util/sendMail.util";
 import { MailService } from "../service/mail.service";
 import SignupCodeTemplete from "../templete/SignupCode.templete";
@@ -16,7 +16,7 @@ export class ValidMailController {
   ctx: Context
 
   @Inject()
-  mailser: MailService
+  mailService: MailService
 
   /**
    * Send mail valid code.
@@ -32,7 +32,7 @@ export class ValidMailController {
       SignupCodeTemplete(code))
 
     if (result) {
-      await this.mailser.saveValidCode(vmdto.mail, code)
+      await this.mailService.saveValidCode(vmdto.mail, code)
       return true
     } else {
       this.ctx.status = 500
@@ -48,7 +48,7 @@ export class ValidMailController {
    */
   @Post('/VerifyMailCode')
   async verifyMailCode(@Body() vmdto: ValidMailDTO) {
-    return await this.mailser.verifyCode(vmdto.mail, vmdto.code)
+    return await this.mailService.verifyCode(vmdto.mail, vmdto.code)
   }
 
 }
