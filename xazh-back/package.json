@@ -4,6 +4,7 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "@koa/cors": "^4.0.0",
     "@midwayjs/bootstrap": "^3.0.0",
     "@midwayjs/core": "^3.0.0",
     "@midwayjs/decorator": "^3.0.0",

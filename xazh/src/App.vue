@@ -4,10 +4,16 @@ import { useStore } from 'vuex'
 import { theme } from 'ant-design-vue'
 import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
 import { GlobalToken } from 'ant-design-vue/es/theme'
+import axios from 'axios'
 
 // import Modal from 'ant-design-vue/es/modal/Modal'
 
 const store = useStore()
+
+/**
+ * Set backend's base api for axios.
+ */
+axios.defaults.baseURL = store.getters['config/baseApi']
 
 /**
  * Jump to the main page by default.

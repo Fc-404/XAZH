@@ -43,12 +43,10 @@
           <p>注册账号</p>
           <p>已有账号？去<span @click="signUpOrIn($event, false)">登录</span></p>
         </div>
-        <a-tooltip title="成为用户可修改头像">
-          <a-avatar
-            :size="64"
-            style="font-size: 32px;"
-          >{{ usernameF }}</a-avatar>
-        </a-tooltip>
+        <a-avatar
+          :size="64"
+          style="font-size: 32px;"
+        >{{ usernameF }}</a-avatar>
       </div>
 
       <!-- User Input -->
@@ -57,6 +55,7 @@
           v-model:value="username"
           :status="validUser === false ? 'error' : undefined"
           :placeholder="'用户名' + (!isSignup ? '/邮箱' : '')"
+          @change="checkUserValid"
         >
           <template #prefix>
             <user-outlined />
@@ -86,7 +85,7 @@
           :status="validPswd === false ? 'error' : undefined"
           type="password"
           placeholder="密码"
-          @blur="checkUserPswdLen"
+          @blur="checkUserPswd"
         >
           <template #prefix>
             <lock-outlined />
@@ -115,7 +114,7 @@
           :status="validPswdR === false ? 'error' : undefined"
           type="password"
           placeholder="重复密码"
-          @blur="checkUserPswdRLen"
+          @blur="checkUserPswdR"
         >
           <template #prefix>
             <lock-outlined />
@@ -194,20 +193,19 @@
         id="signup-panel-other"
         v-show="!isSignup"
       >
-        <qq-outlined class="signup-other" />
-        <a-divider type="vertical" />
         <a-popover trigger="click">
           <template #content>
             <FnNotice :size="2"></FnNotice>
           </template>
+
+          <qq-outlined class="signup-other" />
+          <a-divider type="vertical" />
+
           <wechat-outlined class="signup-other" />
-        </a-popover>
-        <a-divider type="vertical" />
-        <a-popover trigger="click">
-          <template #content>
-            <FnNotice :size="2"></FnNotice>
-          </template>
+          <a-divider type="vertical" />
+
           <github-outlined class="signup-other" />
+
         </a-popover>
       </div>
 
@@ -229,6 +227,7 @@
           type="primary"
           :disabled="invalidSubmit"
           :loading="invalidSubmit === undefined"
+          @click="submitEvent"
         >
           {{ isSignup ? '注册' : '登录' }}
         </a-button>
@@ -247,6 +246,8 @@ import {
 
 import { checkMail, checkPswdLen, formatPswd, formatUser } from "../../tools/formCheck.tool";
 import { message } from "ant-design-vue";
+import axios from 'axios'
+import { debounceByName } from "../../tools/debounce.tool";
 
 const props = defineProps({
   type: { type: String, default: 'signin' },
@@ -272,12 +273,13 @@ const validPswd = ref<boolean | undefined>(undefined)
 const validPswdR = ref<boolean | undefined>(undefined)
 const validMail = ref<boolean | undefined>(undefined)
 const agreeProtlcal = ref<boolean>(false)
+const submitEvent = ref()
 const invalidSubmit = ref<boolean | undefined>(false)
 
 platform.value = store.getters["config/platform"]
 
 /**
- * TODO: 
+ * Send verifition code of mail
  */
 const verifyMailBtnData = reactive({
   loading: false,
@@ -287,7 +289,19 @@ const verifyMailBtnData = reactive({
   timer: ref<NodeJS.Timer>()
 })
 const sendVerificationCode = function () {
+  if (!validMail.value) {
+    message.error('请正确输入邮箱！')
+    return
+  }
+
   verifyMailBtnData.loading = true
+
+  axios.post('SendMailValidCode', { mail: usermail.value })
+    .then((r) => {
+      if (!r.data.body) {
+        message.error('验证码发送失败！')
+      }
+    })
 
   verifyMailBtnData.timer = setInterval(() => {
     if (verifyMailBtnData.timeCount < 0) {
@@ -306,20 +320,37 @@ const sendVerificationCode = function () {
 /**
  * To signup
  */
-const signUpOrIn = function (e: MouseEvent, type: boolean = true): void {
-  e; type ? isSignup.value = true : isSignup.value = false
+const signUpOrIn = function (
+  e: MouseEvent | undefined | null,
+  type: boolean = true
+): void {
+  e;
+  if (type) {
+    isSignup.value = true
+    submitEvent.value = signupSubmit
+  } else {
+    isSignup.value = false
+    submitEvent.value = signinSubmit
+  }
+
+
+  username.value = ''
+  userpswd.value = ''
+  validPswd.value = undefined
+  validUser.value = undefined
 }
 
 /**
  * Check user input
  */
-watch(username, (v) => {
+watch(username, async (v) => {
   username.value = formatUser(v || '')
   usernameF.value = /[\u4e00-\u9fa5]/.test(username.value[0]) ?
     username.value[0] : username.value.substring(0, 2)
 })
 watch(userpswd, (v) => {
   userpswd.value = formatPswd(v || '')
+  userpswdR.value = ''
 })
 watch(userpswdR, (v) => {
   userpswdR.value = formatPswd(v || '')
@@ -331,24 +362,102 @@ watch(usermail, (v) => {
     checkMail(v) ? validMail.value = true : validMail.value = false
   )
 })
-const checkUserPswdLen = function () {
-  let code = checkPswdLen(userpswd.value || '')
-  if (code == -1) {
-    message.error('密码必须大于等于6位！')
-    validPswd.value = false
-  } else if (code == 0) {
-    validPswd.value = true
-  } else if (code == 1) {
-    message.error('密码必须小于等于16位！')
-    validPswd.value = false
-  }
+const checkUserPswd = function () {
+  if (isSignup.value) {
+    let code = checkPswdLen(userpswd.value || '')
+    if (code == -1) {
+      message.error('密码必须大于等于6位！')
+      validPswd.value = false
+    } else if (code == 0) {
+      validPswd.value = true
+    } else if (code == 1) {
+      message.error('密码必须小于等于16位！')
+      validPswd.value = false
+    }
+  } else
+    validPswdR.value = undefined
 }
-const checkUserPswdRLen = function () {
+const checkUserPswdR = function () {
+  if (validPswd.value != true)
+    return
   if (userpswd.value == userpswdR.value) {
     validPswdR.value = true
   } else {
     validPswdR.value = false
   }
+}
+
+/**
+ * Check valid for username.
+ */
+const checkUserValid = function () {
+  if (isSignup.value) {
+    validUser.value = null
+    debounceByName('CheckUserValid', () => {
+      axios.get('User/isExist/' + (username.value || '夏至'))
+        .then((r) => {
+          if (r.data.code) {
+            validUser.value = true
+          } else {
+            validUser.value = false
+          }
+        })
+    }, 1000)
+  } else
+    validUser.value = undefined
+}
+
+/**
+ * Signup and Signin
+ */
+const signupSubmit = function () {
+  if (!agreeProtlcal.value) {
+    message.warn('请先阅读并同意用户协议！')
+    return
+  }
+
+  if (!!!(validUser.value && validPswd.value && validPswdR.value
+    && validMail.value && usermailC.value)) {
+    message.error('请正确填写信息！')
+    return
+  }
+
+  const info = {
+    user: username.value,
+    pswd: userpswd.value,
+    mail: usermail.value,
+    code: usermailC.value
+  }
+
+  axios.post('User/Signup', info)
+    .then((r) => {
+      switch (r.data.code) {
+        case -1:
+          message.error('注册失败！')
+          break
+        case 0:
+          message.success('注册成功！')
+          signUpOrIn(null, false)
+          break
+        case 1:
+          message.error('邮箱验证码错误！')
+          break
+        case 2:
+          message.error('邮箱已被注册！')
+      }
+    })
+    .catch(() => {
+      message.error('无法连接到服务器！')
+    })
+
+}
+const signinSubmit = function () {
+  if (!agreeProtlcal.value) {
+    message.warn('请先阅读并同意用户协议！')
+    return
+  }
+  
+  console.log('signin');
 }
 
 /**
@@ -437,7 +546,7 @@ onMounted(() => {
         >p:nth-child(2) {
           font-size: .5rem;
           line-height: 1.8rem;
-          color: var(--colorTextSecondary);
+          color: var(--);
 
           >span {
             color: var(--colorPrimary);

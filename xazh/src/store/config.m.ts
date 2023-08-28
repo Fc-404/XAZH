@@ -12,6 +12,8 @@ const config: Module<any, any> = {
     ondark: false,
     // Antdv's theme token
     themeToken: null,
+    // Backend API base address.
+    baseApi: 'http://localhost:7001/'
   }),
   getters: {
     platform(state): string {
@@ -40,6 +42,9 @@ const config: Module<any, any> = {
     themeToken(state) {
       return state.themeToken
     },
+    baseApi(state) {
+      return state.baseApi
+    }
   },
   mutations: {
     platform(state, platform): string {

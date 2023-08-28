@@ -5,7 +5,7 @@ import { UploadFileService } from "../service/upload.file.service";
 import { GetBoundary } from "../decorator/param/formdata.decorator";
 import parseFormData from "../util/parseFormData.util";
 
-@Controller('/upload')
+@Controller('/Upload')
 export class FileUploadController {
 
   @Inject()

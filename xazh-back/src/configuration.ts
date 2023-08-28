@@ -38,10 +38,12 @@ export class ContainerLifeCycle {
   decoratorService: MidwayDecoratorService
 
   async onReady() {
+
     // add middleware
     this.app.useMiddleware([
+      require('@koa/cors')(),
       ReportMiddleware,
-      NormalizeResponse
+      NormalizeResponse,
     ]);
 
     // add filter

@@ -1,6 +1,5 @@
 import { Provide } from '@midwayjs/core';
 import UserBase from '../model/base.user.model';
-import FileInfo from '../model/info.file.model'
 import { IAddUser } from '../interface/user.interface';
 @Provide()
 export class UserService {
@@ -35,10 +34,6 @@ export class UserService {
         bind_mail: options.mail
       }], { session })
 
-      await FileInfo.model.create([{
-        fileMd5: options.user
-      }], { session })
-
       // TODO: Other Documents haven't create.
 
       await session.commitTransaction()
@@ -50,6 +45,16 @@ export class UserService {
     }
 
     return result
+  }
+
+  /**
+   * Whether the mail is registered.
+   * @param mail 
+   * @returns 
+   */
+  async existMail(mail: string) {
+    return (await UserBase.model.findOne({ bind_mail: mail }))
+      ? true : false
   }
 
   async getUser(options) {
