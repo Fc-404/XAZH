@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 
-const name: string = 'ValidCode.Mail'
+const name: string = 'Mail.ValidCode'
 
 const schema = new mongoose.Schema({
   _id: String,    // User EMail to be verified.

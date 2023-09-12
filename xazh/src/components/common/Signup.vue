@@ -1,7 +1,7 @@
 <template>
   <div
     id="signup"
-    :style="{ width: props.tip ? '44rem' : '20rem', ...props.mStyle }"
+    :style="{ width: props.tip ? '46rem' : '22rem', ...props.mStyle }"
   >
     <div
       id="signup-tip"
@@ -9,11 +9,11 @@
       :style="props.tipStyle"
     >
       <div id="signup-tip-text">
-        <p>枯藤老树昏鸦，小桥流水人家，古道西风瘦马。<br>夕阳西下，断肠人在天涯。</p>
+        <p v-html="tipData.content"></p>
         <a-divider
           orientation="right"
           style="border-color: #dcdcdc; color: #dcdcdc;"
-        >2023年08月18日</a-divider>
+        ><span v-html="tipData.footer"></span></a-divider>
       </div>
     </div>
     <div
@@ -248,6 +248,7 @@ import { checkMail, checkPswdLen, formatPswd, formatUser } from "../../tools/for
 import { message } from "ant-design-vue";
 import axios from 'axios'
 import { debounceByName } from "../../tools/debounce.tool";
+import { Md5 } from "ts-md5";
 
 const props = defineProps({
   type: { type: String, default: 'signin' },
@@ -257,6 +258,7 @@ const props = defineProps({
   mStyle: { type: Object }
 })
 
+const emit = defineEmits(['signinSuccess'])
 const store = useStore()
 
 const isSignup = ref<boolean>(!!(props.type == 'signup'))
@@ -273,8 +275,14 @@ const validPswd = ref<boolean | undefined>(undefined)
 const validPswdR = ref<boolean | undefined>(undefined)
 const validMail = ref<boolean | undefined>(undefined)
 const agreeProtlcal = ref<boolean>(false)
-const submitEvent = ref()
+const submitEvent = ref(signinSubmit)
 const invalidSubmit = ref<boolean | undefined>(false)
+
+const tipData = reactive({
+  content: '枯藤老树昏鸦，小桥流水人家，古道西风瘦马。<br>夕阳西下，断肠人在天涯。',
+  footer: '天净沙·秋思'
+})
+
 
 platform.value = store.getters["config/platform"]
 
@@ -296,11 +304,14 @@ const sendVerificationCode = function () {
 
   verifyMailBtnData.loading = true
 
-  axios.post('SendMailValidCode', { mail: usermail.value })
+  axios.post('/SendMailValidCode', { mail: usermail.value })
     .then((r) => {
       if (!r.data.body) {
         message.error('验证码发送失败！')
       }
+    })
+    .catch(() => {
+      message.error('服务器错误！')
     })
 
   verifyMailBtnData.timer = setInterval(() => {
@@ -337,13 +348,17 @@ const signUpOrIn = function (
   username.value = ''
   userpswd.value = ''
   validPswd.value = undefined
+  validPswdR.value = undefined
   validUser.value = undefined
 }
 
 /**
  * Check user input
  */
-watch(username, async (v) => {
+watch(username, (v) => {
+  if (!isSignup.value)
+    return
+
   username.value = formatUser(v || '')
   usernameF.value = /[\u4e00-\u9fa5]/.test(username.value[0]) ?
     username.value[0] : username.value.substring(0, 2)
@@ -351,9 +366,6 @@ watch(username, async (v) => {
 watch(userpswd, (v) => {
   userpswd.value = formatPswd(v || '')
   userpswdR.value = ''
-})
-watch(userpswdR, (v) => {
-  userpswdR.value = formatPswd(v || '')
 })
 watch(usermail, (v) => {
   !v ? (
@@ -388,12 +400,12 @@ const checkUserPswdR = function () {
 }
 
 /**
- * Check valid for username.
+ * Check valid for username at signup.
  */
 const checkUserValid = function () {
   if (isSignup.value) {
     validUser.value = null
-    debounceByName('CheckUserValid', () => {
+    debounceByName('/CheckUserValid', () => {
       axios.get('User/isExist/' + (username.value || '夏至'))
         .then((r) => {
           if (r.data.code) {
@@ -410,7 +422,7 @@ const checkUserValid = function () {
 /**
  * Signup and Signin
  */
-const signupSubmit = function () {
+function signupSubmit() {
   if (!agreeProtlcal.value) {
     message.warn('请先阅读并同意用户协议！')
     return
@@ -422,14 +434,15 @@ const signupSubmit = function () {
     return
   }
 
-  const info = {
+  const userInfo = {
     user: username.value,
     pswd: userpswd.value,
     mail: usermail.value,
     code: usermailC.value
   }
 
-  axios.post('User/Signup', info)
+  invalidSubmit.value = true
+  axios.post('/User/Signup', userInfo)
     .then((r) => {
       switch (r.data.code) {
         case -1:
@@ -447,17 +460,55 @@ const signupSubmit = function () {
       }
     })
     .catch(() => {
-      message.error('无法连接到服务器！')
+      message.error('服务器错误！')
+    })
+    .finally(() => {
+      invalidSubmit.value = true
     })
 
 }
-const signinSubmit = function () {
+function signinSubmit() {
   if (!agreeProtlcal.value) {
     message.warn('请先阅读并同意用户协议！')
     return
   }
-  
-  console.log('signin');
+
+  if (!username.value) {
+    message.warn('请输入用户名！')
+    return
+  } else if (!userpswd.value) {
+    message.warn('请输入用户密码！')
+    return
+  }
+
+  const userInfo = {
+    account: username.value,
+    pswd: Md5.hashStr(username.value! + userpswd.value! + new Date().getDate())
+  }
+
+  invalidSubmit.value = true
+  axios.post('/User/Signin', userInfo)
+    .then((r) => {
+      switch (r.data.code) {
+        case 0:
+          message.success('登录成功！')
+          store.commit('signinToken', r.data.message)
+          store.commit('isSignin', true)
+          emit('signinSuccess')
+          break
+        case 1:
+          message.error('账号不存在！')
+          break
+        case 2:
+          message.error('密码错误！')
+      }
+    })
+    .catch(() => {
+      message.error('服务器错误！')
+    })
+    .finally(() => {
+      invalidSubmit.value = false
+    })
 }
 
 /**
@@ -467,18 +518,19 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="scss">
+<style scoped lang="less">
 #signup {
   border-radius: 1.2rem;
   margin: 0 auto;
-  height: 26rem;
+  height: 28rem;
   overflow: hidden;
   background-image: url(/img/bg.jpg);
   background-size: cover;
+  background-position: center;
 
   &-tip,
   &-panel {
-    height: 26rem;
+    height: 28rem;
     display: inline-block;
     vertical-align: top;
   }
@@ -498,10 +550,12 @@ onMounted(() => {
 
   &-panel {
     position: relative;
-    width: 20rem;
-    backdrop-filter: blur(1rem) saturate(180%);
+    width: 22rem;
+    backdrop-filter: blur(2rem) saturate(180%);
 
     &-head {
+      margin-top: 1rem;
+
       &-logo {
         margin-left: 3rem;
         margin-right: 1.5rem;
@@ -530,12 +584,12 @@ onMounted(() => {
 
     &-himg {
       padding: 0 3rem;
-      margin-top: 1.2rem;
+      margin-top: 2.2rem;
 
       >div {
         display: inline-block;
         vertical-align: middle;
-        margin-right: 3.4rem;
+        margin-right: 5.4rem;
 
         >p:nth-child(1) {
           font-size: 1.6rem;
@@ -546,7 +600,7 @@ onMounted(() => {
         >p:nth-child(2) {
           font-size: .5rem;
           line-height: 1.8rem;
-          color: var(--);
+          color: var(--colorTextSecondary);
 
           >span {
             color: var(--colorPrimary);
@@ -587,7 +641,7 @@ onMounted(() => {
 
     &-mail-verify {
       width: 7.2rem !important;
-      margin-left: 6.8rem;
+      margin-left: 8.8rem;
       margin-top: .2rem;
     }
 

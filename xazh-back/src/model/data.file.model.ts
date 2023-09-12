@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 
-const name: string = 'Data.File'
+const name: string = 'File.Data'
 
 const schema = new mongoose.Schema({
   _id: String,    // Md5

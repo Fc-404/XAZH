@@ -78,7 +78,10 @@
         </div>
 
         <!-- Signup -->
-        <div id="header-self">
+        <div
+          id="header-self"
+          v-if="!store.getters['isSignin']"
+        >
           <router-link to="/signup?type=signup">
             <a-button id="header-signup">注册</a-button>
           </router-link>
@@ -93,17 +96,7 @@
         </div>
 
         <!-- Self -->
-        <!-- <div style="margin-left: 1rem;">
-          <a-popover
-            placement="bottomRight"
-            trigger="click"
-          >
-            <template #content>
-              <FnNotice :size="2"></FnNotice>
-            </template>
-            <a-button>个人</a-button>
-          </a-popover>
-        </div> -->
+        <SelfPanel v-if="store.getters['isSignin']"></SelfPanel>
         <div style="width: 2rem;"></div>
       </div>
       <div id="title-box">
@@ -182,7 +175,7 @@ window.addEventListener('scroll', () => {
 /**
  * On dark
  */
-const onDark = ref<boolean>(false)
+const onDark = ref<boolean>(store.getters['config/ondark'])
 const onDarkFn = inject('onDark')
 watch(onDark, () => {
   (onDarkFn as Function)(onDark.value)
@@ -342,5 +335,4 @@ onMounted(() => {
       }
     }
   }
-}
-</style>
+}</style>

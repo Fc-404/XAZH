@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const name: string = 'Info.File'
+const name: string = 'File.Info'
 
 const schema = new mongoose.Schema({
   fileMd5: {

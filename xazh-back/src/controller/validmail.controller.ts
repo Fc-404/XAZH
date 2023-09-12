@@ -24,7 +24,7 @@ export class ValidMailController {
    * @returns true | false
    */
   @Post('/SendMailValidCode')
-  async validEMail(@Body() vmdto: MailDTO) {
+  async sendMailValidCode(@Body() vmdto: MailDTO) {
 
     const code = Math.random().toString().slice(2, 8)
     let result: any = await sendMailByOutlook(vmdto.mail,
@@ -35,7 +35,7 @@ export class ValidMailController {
       await this.mailService.saveValidCode(vmdto.mail, code)
       return true
     } else {
-      this.ctx.status = 500
+      this.ctx.code = 1
       return false
     }
 

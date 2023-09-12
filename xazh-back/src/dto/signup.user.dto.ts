@@ -8,3 +8,15 @@ export class SignupUserDTO extends ValidMailDTO {
   @Rule(RuleType.string().required().max(16).min(6))
   pswd: string
 }
+
+export class SigninUserDTO {
+  @Rule(RuleType.string().required())
+  account: string
+  @Rule(RuleType.string().required())
+  pswd: string
+}
+
+export class TokenDTO {
+  @Rule(RuleType.string().required())
+  token: string
+}

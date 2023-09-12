@@ -3,6 +3,7 @@ import { Store, createStore } from "vuex"
 import Config from './config.m.ts'
 import Header from './header.m.ts'
 import ResizeEvent from './resizeEvent.m.ts'
+import SigninStore from './signin.m.ts'
 
 const store: Store<unknown> = createStore({
   state: () => { },
@@ -12,7 +13,8 @@ const store: Store<unknown> = createStore({
   modules: {
     config: Config,
     header: Header,
-    resizeEvent: ResizeEvent
+    resizeEvent: ResizeEvent,
+    globeStore: SigninStore
   }
 })
 

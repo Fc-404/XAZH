@@ -43,6 +43,7 @@ declare module 'vue' {
     Lottie: typeof import('./components/common/Lottie.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SelfPanel: typeof import('./components/common/SelfPanel.vue')['default']
     Signup: typeof import('./components/common/Signup.vue')['default']
   }
 }

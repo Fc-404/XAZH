@@ -1,0 +1,18 @@
+/**
+ * Identify the level
+ */
+
+import { Guard, IGuard, getPropertyMetadata } from "@midwayjs/core";
+import { USER_KEY } from "../decorator/auth/level.decorator";
+import { Context } from "@midwayjs/koa";
+
+@Guard()
+export class LevelGuard implements IGuard {
+  async canActivate(ctx: Context, supplierClz, methodName: string): Promise<boolean> {
+    const level = getPropertyMetadata<string>(USER_KEY, supplierClz, methodName) ?? 0
+    const userLevel = ctx.user.level ?? 0
+    if (userLevel >= level)
+      return true
+    return false
+  }
+}

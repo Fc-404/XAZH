@@ -5,6 +5,10 @@ import { theme } from 'ant-design-vue'
 import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
 import { GlobalToken } from 'ant-design-vue/es/theme'
 import axios from 'axios'
+import cookie from 'js-cookie'
+
+import SigninEventRegister from './handle/signinEventRegister.vue'
+import CookieHandle from './handle/cookieHandle.vue'
 
 // import Modal from 'ant-design-vue/es/modal/Modal'
 
@@ -131,9 +135,20 @@ class Theme {
     Theme.appTheme.value = themeTemp
     Theme.updateThemeStyle()
     store.commit('config/ondark', on)
+    cookie.set('ondark', on ? 'true' : 'false')
   }
 }
 provide('onDark', Theme.onDark)
+
+/**
+ * Get configure from cookie
+ */
+const getCookie = function () {
+  // Get onDark
+  const ondarkC = cookie.get('ondark') == 'true' ? true : false
+  if (ondarkC)
+    Theme.onDark()
+}
 
 /**
  * Hook
@@ -147,6 +162,9 @@ onMounted(() => {
       "borderRadius": 6,
     },
   })
+
+  // Get cookie
+  getCookie()
 })
 onUpdated(() => {
   Theme.updateThemeToStyle()
@@ -156,11 +174,15 @@ onUpdated(() => {
 <template>
   <div id="app-">
     <a-config-provider :theme="Theme.appTheme.value">
-      <!-- <RouterView></RouterView> -->
-      <div style="height: 10rem;"></div>
-      <Signup :panel-style="{
-        background: '#ffffffdd',
-      }"></Signup>
+      <CookieHandle></CookieHandle>
+      <SigninEventRegister></SigninEventRegister>
+      <RouterView></RouterView>
+      <!-- <div style="height: 10rem;"></div> -->
+      <!-- <Signup
+        :panel-style="{
+          background: '#ffffffdd',
+        }"
+      ></Signup> -->
     </a-config-provider>
   </div>
 </template>
