@@ -11,6 +11,7 @@ import { Context } from '@midwayjs/koa';
 import { UserService } from '../service/base.user.service';
 import { UserToken } from '../service/token.user.service';
 import { MailService } from '../service/mail.service';
+import { base64WithDate, debase64WithDate } from '../util/encodeMsg.util';
 
 @Controller('/User')
 export class UserController {
@@ -74,12 +75,15 @@ export class UserController {
         // Token generate algorithm.
         // ! Don't modify it easily.
         const token = Base64.encode(useri.user + userinfo.pswd + useri.user.length.toString(36))
-        this.ctx.body = {
+        const tokenN = base64WithDate(token)
+
+        const result = {
           user: useri.user,
-          token: token
+          token: tokenN.data,
+          date: tokenN.date,
         }
         await this.userTokenService.setToken(useri.user, token)
-        return '登录成功！'
+        return result
       case 1:
         this.ctx.code = 1
         return '账号不存在！'
@@ -90,7 +94,27 @@ export class UserController {
   }
 
   @Post('/VerifyToken')
-  async verifyToken(@Body() token: TokenDTO) {
+  async verifyToken(@Body() body: TokenDTO) {
+    const dateC = new Date(body.date).getTime()
+    const dateS = new Date().getTime()
+    if (dateS - dateC > 30000) {
+      this.ctx.code = 999
+      return '请求超时！'
+    }
 
+    const token = debase64WithDate({
+      date: body.date,
+      data: body.token
+    }) || 'invalid'
+
+    const result =
+      await this.userTokenService.verifyToken(body.user, token as string)
+
+    if (result) {
+      return '验证成功！'
+    } else {
+      this.ctx.code = 1
+      return '验证失败！'
+    }
   }
 }

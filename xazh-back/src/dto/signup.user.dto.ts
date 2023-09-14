@@ -17,6 +17,10 @@ export class SigninUserDTO {
 }
 
 export class TokenDTO {
+  @Rule(RuleType.string().required().max(16).min(1))
+  user: string
   @Rule(RuleType.string().required())
   token: string
+  @Rule(RuleType.date().required())
+  date: string
 }

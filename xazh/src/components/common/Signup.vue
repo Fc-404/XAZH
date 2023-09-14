@@ -249,6 +249,7 @@ import { message } from "ant-design-vue";
 import axios from 'axios'
 import { debounceByName } from "../../tools/debounce.tool";
 import { Md5 } from "ts-md5";
+import { debase64WithDate } from "../../tools/encodeMsg.tool";
 
 const props = defineProps({
   type: { type: String, default: 'signin' },
@@ -492,8 +493,14 @@ function signinSubmit() {
       switch (r.data.code) {
         case 0:
           message.success('登录成功！')
-          store.commit('signinToken', r.data.message)
-          store.commit('isSignin', true)
+          // Decode the Token
+          const token = debase64WithDate({
+            date: r.data.body.date, data: r.data.body.token
+          }) || 'aW52YWxpZDE='
+
+          store.commit('signin/signinToken', token)
+          store.commit('signin/isSignin', true)
+
           emit('signinSuccess')
           break
         case 1:

@@ -63,7 +63,7 @@ import { CopyrightOutlined, GithubOutlined, MailOutlined, DesktopOutlined } from
 const store = useStore()
 
 const githubAdr = 'https://github.com/Fc-404'
-const gmailAdr = 'xazhteam@gmail.com'
+const gmailAdr = 'xazhteam@outlook.com'
 
 const switchToDesktop = function (): void {
   store.commit('config/platform', 'Desktop')

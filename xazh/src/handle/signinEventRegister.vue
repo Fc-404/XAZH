@@ -13,7 +13,7 @@ const test = function () {
   console.log('signin success');
 }
 
-store.commit('signined', () => {
+store.commit('signin/signined', () => {
   test()
 })
 // store.commit('logout', () => {})

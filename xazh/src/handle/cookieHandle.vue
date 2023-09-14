@@ -6,7 +6,8 @@ import cookie from 'js-cookie'
 import axios from 'axios'
 import { message } from 'ant-design-vue'
 import { onBeforeMount } from 'vue';
-import { Md5 } from 'ts-md5';
+
+import { base64WithDate } from '../tools/encodeMsg.tool'
 
 const store = useStore()
 
@@ -14,25 +15,33 @@ const store = useStore()
  * Signin test with token
  */
 const testTokenValidity = function () {
+  const user = cookie.get('user') || null
   const token = cookie.get('token') || null
-  if (!token) {
+  if (!token || !user) {
     message.info('Not signin token.')
     // TODO
     return
   }
 
+  const param = base64WithDate(token)
+
   // test token
-  axios.post('/VerifyToken', {
-    token: Md5.hashStr(token)
+  axios.post('/User/VerifyToken', {
+    date: param.date,
+    user: user,
+    token: param.data
   })
-    .then(() => {
-      store.commit('signin/isSignin', true)
+    .then((r) => {
+      if (r.data.code == 0) {
+        store.commit('signin/isSignin', true)
+        store.commit('signin/signinToken', token)
+      } else {
+        message.warn('登录失效！')
+        store.commit('signin/isSignin', false)
+      }
     })
     .catch(() => {
-
-    })
-    .finally(() => {
-
+      message.error('服务器错误！')
     })
 }
 

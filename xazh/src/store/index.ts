@@ -14,7 +14,7 @@ const store: Store<unknown> = createStore({
     config: Config,
     header: Header,
     resizeEvent: ResizeEvent,
-    globeStore: SigninStore
+    signin: SigninStore
   }
 })
 
