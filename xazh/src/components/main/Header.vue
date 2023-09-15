@@ -80,7 +80,7 @@
         <!-- Signup -->
         <div
           id="header-self"
-          v-if="!store.getters['isSignin']"
+          v-if="!isSignin"
         >
           <router-link to="/signup?type=signup">
             <a-button id="header-signup">注册</a-button>
@@ -96,7 +96,7 @@
         </div>
 
         <!-- Self -->
-        <SelfPanel v-if="store.getters['isSignin']"></SelfPanel>
+        <SelfPanel v-if="isSignin"></SelfPanel>
         <div style="width: 2rem;"></div>
       </div>
       <div id="title-box">
@@ -242,6 +242,17 @@ const toMenu = function (name: string) {
 }
 
 /**
+ * Self Panel
+ */
+const isSignin = ref<boolean>(store.getters['signin/isSignin'])
+watch(computed(() => {
+  return store.getters['signin/isSignin']
+}), (v) => {
+  isSignin.value = v
+})
+
+
+/**
  * HOOK
  */
 onMounted(() => {
@@ -335,4 +346,5 @@ onMounted(() => {
       }
     }
   }
-}</style>
+}
+</style>

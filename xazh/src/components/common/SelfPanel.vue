@@ -1,6 +1,6 @@
 <template>
   <div id="selfp">
-    <a-avatar></a-avatar>
+    <a-avatar id="selfp-head"></a-avatar>
   </div>
 </template>
 
