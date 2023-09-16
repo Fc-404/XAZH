@@ -49,9 +49,20 @@ export class UserController {
       return '验证码错误！'
     }
 
+    const pswd = debase64WithDate({
+      date: userinfo.date,
+      data: userinfo.pswd
+    })
+
+    if (!pswd) {
+      this.ctx.status = 500
+      this.ctx.code = -1
+      return '服务器错误！'
+    }
+
     const result = await this.userBaseService.addUser({
       user: userinfo.user,
-      pswd: userinfo.pswd,
+      pswd: pswd as string,
       mail: userinfo.mail,
       code: userinfo.code
     })

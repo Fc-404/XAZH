@@ -5,7 +5,6 @@ import { useStore } from 'vuex'
 import cookie from 'js-cookie'
 import axios from 'axios'
 import { message } from 'ant-design-vue'
-import { onBeforeMount } from 'vue';
 
 import { base64WithDate } from '../tools/encodeMsg.tool'
 
@@ -19,6 +18,7 @@ const testTokenValidity = function () {
   const token = cookie.get('token') || null
   if (!token || !user) {
     message.info('Not signin token.')
+    store.commit('signin/isSignin', false)
     // TODO
     return
   }
@@ -48,7 +48,7 @@ const testTokenValidity = function () {
 /**
  * HOOK
  */
-onBeforeMount(() => {
+onMounted(() => {
   testTokenValidity()
 })
 </script>

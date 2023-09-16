@@ -249,7 +249,7 @@ import { message } from "ant-design-vue";
 import axios from 'axios'
 import { debounceByName } from "../../tools/debounce.tool";
 import { Md5 } from "ts-md5";
-import { debase64WithDate } from "../../tools/encodeMsg.tool";
+import { base64WithDate, debase64WithDate } from "../../tools/encodeMsg.tool";
 
 const props = defineProps({
   type: { type: String, default: 'signin' },
@@ -435,9 +435,11 @@ function signupSubmit() {
     return
   }
 
+  const pswdToken = base64WithDate(userpswd.value!)
   const userInfo = {
+    date: pswdToken.date,
     user: username.value,
-    pswd: userpswd.value,
+    pswd: pswdToken.data,
     mail: usermail.value,
     code: usermailC.value
   }
@@ -458,13 +460,14 @@ function signupSubmit() {
           break
         case 2:
           message.error('邮箱已被注册！')
+          break
       }
     })
     .catch(() => {
       message.error('服务器错误！')
     })
     .finally(() => {
-      invalidSubmit.value = true
+      invalidSubmit.value = false
     })
 
 }
@@ -618,7 +621,6 @@ onMounted(() => {
 
       >.ant-avatar {
         display: inline-block;
-        background-color: var(--colorPrimary);
       }
     }
 

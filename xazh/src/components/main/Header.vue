@@ -48,10 +48,10 @@
           @click="toMenu('MainXAZH')"
         >夏至</div>
         <div id="header-slider"></div>
+
         <div>
           <a-divider type="vertical" />
         </div>
-
         <!-- Search -->
         <div>
           <a-popover placement="bottomRight">
@@ -96,7 +96,9 @@
         </div>
 
         <!-- Self -->
-        <SelfPanel v-if="isSignin"></SelfPanel>
+        <div v-if="isSignin">
+          <SelfPanel></SelfPanel>
+        </div>
         <div style="width: 2rem;"></div>
       </div>
       <div id="title-box">
