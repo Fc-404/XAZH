@@ -91,20 +91,18 @@ const openSelfpc = function () {
     display: grid;
     grid-template-columns: repeat(6, 50px);
     grid-template-rows: repeat(auto-fill, 50px);
-    // background-color: #e5e5e5;
 
     &-info {
-      grid-column: 1 / 5;
+      grid-column: 4 / 7;
       grid-row: 1 / 3;
       padding-top: .5rem;
       padding-right: 3rem;
-      text-align: right;
       font-size: 1.1rem;
       color: var(--colorTextBase);
     }
 
     &-img {
-      grid-column: 5 / 7;
+      grid-column: 1 / 3;
       grid-row: 1 / 3;
 
       width: 100%;
