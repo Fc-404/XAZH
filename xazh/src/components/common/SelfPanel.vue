@@ -55,6 +55,7 @@
           type="primary"
           class="selfp-ctl-fun"
           style="grid-row: -2 / -1;"
+          @click="logout"
         >logout</a-button>
       </div>
     </a-drawer>
@@ -62,6 +63,11 @@
 </template>
 
 <script setup lang="ts">
+import { useStore } from 'vuex';
+import { message } from 'ant-design-vue'
+
+const store = useStore()
+
 // head-img size
 const headImgSize: number =
   parseInt(
@@ -69,10 +75,15 @@ const headImgSize: number =
   ) * 0.66
 
 const selfpcOpen = ref<boolean>(true)
-
 // open self-panel
 const openSelfpc = function () {
   selfpcOpen.value = !selfpcOpen.value
+}
+
+// Logout
+const logout = function () {
+  store.commit('signin/isSignin', false)
+  message.success('账号已退出！')
 }
 </script>
 

@@ -303,7 +303,7 @@ onMounted(() => {
           line-height: 3rem;
           display: inline-block;
           vertical-align: top;
-          margin: 0.5rem 2rem auto 3rem;
+          margin: 0.5rem 2rem auto 2rem;
           color: var(--colorPrimary);
         }
       }
