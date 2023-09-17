@@ -487,7 +487,7 @@ function signinSubmit() {
 
   const userInfo = {
     account: username.value,
-    pswd: Md5.hashStr(username.value! + userpswd.value! + new Date().getDate())
+    pswd: Md5.hashStr(username.value! + userpswd.value! + username.value!)
   }
 
   invalidSubmit.value = true

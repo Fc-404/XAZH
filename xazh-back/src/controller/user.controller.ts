@@ -9,7 +9,7 @@ import {
 import { Base64 } from 'js-base64';
 import { Context } from '@midwayjs/koa';
 import { UserService } from '../service/base.user.service';
-import { UserToken } from '../service/token.user.service';
+import { UserTokenService } from '../service/token.user.service';
 import { MailService } from '../service/mail.service';
 import { base64WithDate, debase64WithDate } from '../util/encodeMsg.util';
 
@@ -21,7 +21,7 @@ export class UserController {
   @Inject()
   userBaseService: UserService;
   @Inject()
-  userTokenService: UserToken
+  userTokenService: UserTokenService
 
   @Inject()
   mailService: MailService
@@ -102,6 +102,11 @@ export class UserController {
         this.ctx.code = 2
         return '密码错误！'
     }
+  }
+
+  @Post('/GetUserInfo')
+  async getUserInfo() {
+
   }
 
   @Post('/VerifyToken')

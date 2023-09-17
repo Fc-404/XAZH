@@ -6,6 +6,7 @@ import { join } from 'path';
 
 import { Mongod } from './util/mongod.util';
 
+import { GetUserIdentity } from './middleware/getUserIdentity.middleware';
 import { ReportMiddleware } from './middleware/report.middleware';
 import { NormalizeResponse } from './middleware/response.middleware';
 
@@ -42,6 +43,7 @@ export class ContainerLifeCycle {
     // add middleware
     this.app.useMiddleware([
       require('@koa/cors')(),
+      GetUserIdentity,
       ReportMiddleware,
       NormalizeResponse,
     ]);

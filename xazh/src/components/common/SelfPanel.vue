@@ -18,7 +18,10 @@
           <p>User</p>
           <p>Exp | Level</p>
           <p>Rank</p>
-          <p>local</p>
+          <p>
+            <EnvironmentOutlined />
+            local
+          </p>
         </div>
         <a-avatar id="selfp-ctl-img"></a-avatar>
 
@@ -27,23 +30,45 @@
         <a-button
           type="text"
           class="selfp-ctl-fun"
-        >messages</a-button>
+        >
+          <MessageTwoTone two-tone-color="#73d13d" />
+          消息
+        </a-button>
         <a-button
           type="text"
           class="selfp-ctl-fun"
-        >blogs</a-button>
+        >
+          <FileTwoTone two-tone-color="#4096ff" />
+          文章管理
+        </a-button>
         <a-button
           type="text"
           class="selfp-ctl-fun"
-        >stars</a-button>
+        >
+          <StarTwoTone two-tone-color="#f759ab" />
+          我的收藏
+        </a-button>
         <a-button
           type="text"
           class="selfp-ctl-fun"
-        >personal</a-button>
+        >
+          <ContactsTwoTone two-tone-color="#36cfc9" />
+          个人中心
+        </a-button>
         <a-button
           type="text"
           class="selfp-ctl-fun"
-        >setting</a-button>
+        >
+          <SettingTwoTone two-tone-color="#ffc53d" />
+          设置
+        </a-button>
+        <a-button
+          type="text"
+          class="selfp-ctl-fun"
+        >
+          <BulbTwoTone two-tone-color="#9254de" />
+          反馈 & 建议
+        </a-button>
 
         <a-divider
           class="selfp-ctl-fun"
@@ -56,7 +81,10 @@
           class="selfp-ctl-fun"
           style="grid-row: -2 / -1;"
           @click="logout"
-        >logout</a-button>
+        >
+          <ImportOutlined />
+          退出登录
+        </a-button>
       </div>
     </a-drawer>
   </div>
@@ -65,6 +93,12 @@
 <script setup lang="ts">
 import { useStore } from 'vuex';
 import { message } from 'ant-design-vue'
+import {
+  MessageTwoTone, FileTwoTone,
+  StarTwoTone, ContactsTwoTone,
+  SettingTwoTone, ImportOutlined,
+  BulbTwoTone, EnvironmentOutlined,
+} from '@ant-design/icons-vue';
 
 const store = useStore()
 
@@ -122,8 +156,8 @@ const logout = function () {
 
     .selfp-ctl-fun {
       grid-column: 1 / fill;
-      font-size: 1.2rem;
-      line-height: 1.2rem;
+      font-size: 1.1rem;
+      line-height: 1.1rem;
       padding-left: 1rem;
       height: 100%;
       text-align: left;
@@ -131,8 +165,16 @@ const logout = function () {
       user-select: none;
       cursor: pointer;
 
+      >.anticon {
+        margin-right: 1.1rem;
+      }
+
       &:last-child {
         text-align: center;
+
+        >.anticon {
+          margin-right: 0 !important;
+        }
       }
     }
   }

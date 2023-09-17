@@ -2,7 +2,7 @@ import { Provide } from "@midwayjs/core";
 import UToken from '../model/token.user.model'
 
 @Provide()
-export class UserToken {
+export class UserTokenService {
 
   /**
    * Set User's Token.
@@ -10,7 +10,7 @@ export class UserToken {
    * @param token 
    * @returns true | false
    */
-  async setToken(user: string, token: string) {
+  async setToken(user: string, token: string): Promise<boolean> {
     const result = await UToken.model.findOneAndUpdate({
       _id: user
     }, {
@@ -22,7 +22,13 @@ export class UserToken {
     return result ? true : false
   }
 
-  async verifyToken(user: string, token: string) {
+  /**
+   * Verify user's token.
+   * @param user 
+   * @param token 
+   * @returns true | false
+   */
+  async verifyToken(user: string, token: string): Promise<boolean> {
     const result = await UToken.model.findOne({
       _id: user,
       token: token,

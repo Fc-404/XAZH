@@ -11,7 +11,7 @@ export class MailService {
    * @param code code
    * @returns true always.
    */
-  async saveValidCode(mail: string, code: string) {
+  async saveValidCode(mail: string, code: string): Promise<boolean> {
     const findOneR = await ValidMail.model.findById(mail).exec()
 
     if (!findOneR) {
@@ -35,7 +35,7 @@ export class MailService {
    * @param code the code we sent.
    * @returns return true if code correct else return false.
    */
-  async verifyCode(mail: string, code) {
+  async verifyCode(mail: string, code): Promise<boolean> {
     return (
       await ValidMail.model.findOne({ _id: mail, code: code }).exec()
     ) ? true : false
