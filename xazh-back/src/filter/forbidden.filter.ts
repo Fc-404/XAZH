@@ -1,14 +1,14 @@
 import { Catch, httpError, MidwayHttpError } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 
-@Catch(httpError.NotFoundError)
-export class NotFoundErrorFilter {
+@Catch(httpError.ForbiddenError)
+export class ForbiddenErrorFilter {
   async catch(err: MidwayHttpError, ctx: Context) {
-    ctx.status = 404
+    ctx.status = 403
 
     return {
-      status: 404,
-      message: 'Not found.',
-    }
+      status: 403,
+      message: 'Forbidden.',
+    };
   }
 }

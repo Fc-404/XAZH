@@ -8,6 +8,7 @@ export class DefaultErrorFilter {
     return {
       status: 500,
       message: 'Unknown error.',
+      body: err
     };
   }
 }

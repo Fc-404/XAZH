@@ -11,9 +11,10 @@ type resultType = {
 
 export function base64WithDate(
   msg: string,
+  date?: Date
 ): resultType {
-  const date = new Date()
-  const dateSeed = date.getTime().toString().slice(0, -4)
+  const date_ = date ? new Date(date) : new Date()
+  const dateSeed = date_.getTime().toString().slice(0, -3)
   const base64Count: number =
     parseInt(dateSeed.slice(-1))
     || 9
@@ -27,7 +28,7 @@ export function base64WithDate(
   }
 
   return {
-    date: date,
+    date: date_,
     data: msgN
   }
 }
@@ -40,7 +41,7 @@ export function debase64WithDate(
 ): string | boolean {
   try {
     const date = new Date(obj.date)
-    const dateSeed = date.getTime().toString().slice(0, -4)
+    const dateSeed = date.getTime().toString().slice(0, -3)
     if (dateSeed == 'NaN')
       return false
 

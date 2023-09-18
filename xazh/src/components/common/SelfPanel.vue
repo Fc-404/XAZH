@@ -17,7 +17,9 @@
         <div id="selfp-ctl-info">
           <p>User</p>
           <p>Exp | Level</p>
-          <p>Rank</p>
+          <p>
+            <a-tag style="border: none;">无头衔</a-tag>
+          </p>
           <p>
             <EnvironmentOutlined />
             local
@@ -140,10 +142,14 @@ const logout = function () {
     &-info {
       grid-column: 4 / 7;
       grid-row: 1 / 3;
-      padding-top: .5rem;
-      padding-right: 3rem;
-      font-size: 1.1rem;
+      margin-top: -1rem;
+      margin-left: -20px;
+      font-size: 1rem;
       color: var(--colorTextBase);
+
+      >p {
+        margin-top: .5rem;
+      }
     }
 
     &-img {

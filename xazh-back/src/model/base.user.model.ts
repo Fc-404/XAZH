@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import { USER_LEVEL } from "../types/userLevel.types"
 
 
 const ObjectId = mongoose.Types.ObjectId
@@ -32,11 +33,16 @@ const schema = new mongoose.Schema({
         unique: true,
     },
     pswd: String,                       // User password, pswd + time then md5 operate
-    
-    recent_ip: [String],                // IP list for recent signin
+
+    recent_ip: [                        // IP list for recent signin
+        { ip: String, place: String }
+    ],
     belong_place: String,               // Belong place, be got by last ip of signin
     exp: Number,                        // Experience
-    level: String,                      // 'visitor', 'user', 'admin', 'master'
+    level: {                            // 'visitor', 'user', 'admin', 'master'
+        type: Number,
+        default: USER_LEVEL.visitor
+    },
     ranks: [String],                    // Rank is to limit the use of specific functions
     signup_time: {                      // Signup time
         type: Date,

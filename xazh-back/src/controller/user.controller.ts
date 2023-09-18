@@ -1,6 +1,6 @@
 import {
   Inject, Controller, Post,
-  Body, Param, Get
+  Body, Param, Get, UseGuard,
 } from '@midwayjs/core';
 import {
   SigninUserDTO, SignupUserDTO,
@@ -12,6 +12,9 @@ import { UserService } from '../service/base.user.service';
 import { UserTokenService } from '../service/token.user.service';
 import { MailService } from '../service/mail.service';
 import { base64WithDate, debase64WithDate } from '../util/encodeMsg.util';
+import { LevelGuard } from '../guard/level.guard';
+import { USER_LEVEL } from '../types/userLevel.types';
+import { Level } from '../decorator/auth/level.decorator';
 
 @Controller('/User')
 export class UserController {
@@ -94,6 +97,10 @@ export class UserController {
           date: tokenN.date,
         }
         await this.userTokenService.setToken(useri.user, token)
+        this.userBaseService.pushIp(
+          '夏至',
+          this.ctx.user.ipv4
+        )
         return result
       case 1:
         this.ctx.code = 1
@@ -104,9 +111,12 @@ export class UserController {
     }
   }
 
+  @Level(USER_LEVEL.user)
+  @UseGuard(LevelGuard)
   @Post('/GetUserInfo')
   async getUserInfo() {
-
+    console.log('ok');
+    return 'ok'
   }
 
   @Post('/VerifyToken')

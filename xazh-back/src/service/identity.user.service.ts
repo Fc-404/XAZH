@@ -4,34 +4,35 @@ import UserBase from '../model/base.user.model'
 
 @Provide()
 export class UserIdentityService {
-  async getUserLevel(user: string): Promise<string> {
+  async getUserLevel(user: string): Promise<number> {
     const result = await UserBase.model.findOne(
       { user: user },
       ['level']
     )
-    return result.level ?? undefined
+    return result.level ?? 0
   }
 
-  async getUserRanks(user: string): Promise<[string]> {
+  async getUserRanks(user: string): Promise<Array<string>> {
     const result = await UserBase.model.findOne(
       { user: user },
       ['ranks']
     )
-    console.log(result);
-    return ['']
+    return result.ranks
   }
 
   async get(user: string): Promise<
     {
-      level: string,
-      ranks: [string]
+      level: number,
+      ranks: Array<string>
     }
   > {
     const result = await UserBase.model.findOne(
       { user: user },
       ['level', 'ranks']
     )
-    console.log(result);
-    return { level: '', ranks: [''] }
+    return {
+      level: result.level ?? 0,
+      ranks: result.ranks ?? []
+    }
   }
 }

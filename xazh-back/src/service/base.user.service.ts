@@ -1,4 +1,4 @@
-import { Provide } from '@midwayjs/core';
+import { Provide, makeHttpRequest } from '@midwayjs/core';
 import UserBase from '../model/base.user.model';
 import { IAddUser } from '../interface/user.interface';
 import { Md5 } from 'ts-md5';
@@ -86,5 +86,26 @@ export class UserService {
   async existMail(mail: string): Promise<boolean> {
     return (await UserBase.model.findOne({ bind_mail: mail }))
       ? true : false
+  }
+
+  async pushIp(user: string, ip: string) {
+    const ipMaxCount = 20
+
+    const url = `http://ip-api.com/json/${ip}?fields=16409&lang=zh-CN`
+    const ipInfo = await makeHttpRequest(url, { dataType: 'json' })
+    const result = await UserBase.model.findOne({ user: user }, ['recent_ip'])
+
+    result?.recent_ip?.unshift({
+      ip: ip,
+      place: ipInfo.data['status'] != 'success' ? 'unknow'
+        : (ipInfo.data['country'] ?? 'unknow') + ','
+        + (ipInfo.data['regionName'] ?? 'unknow') + ','
+        + (ipInfo.data['city'] ?? 'unknow')
+    })
+    for (let i = 0; i < (result?.recent_ip?.length ?? 0) - ipMaxCount; ++i) {
+      result.recent_ip.pop()
+    }
+
+    result.save()
   }
 }

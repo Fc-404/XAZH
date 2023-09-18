@@ -6,13 +6,14 @@ import { join } from 'path';
 
 import { Mongod } from './util/mongod.util';
 
-import { GetUserIdentity } from './middleware/getUserIdentity.middleware';
+import { GetUserInfo } from './middleware/getUserInfo.middleware';
 import { ReportMiddleware } from './middleware/report.middleware';
 import { NormalizeResponse } from './middleware/response.middleware';
 
 import { GetBoundaryM } from './decorator/param/formdata.decorator';
 
-import { NotFoundFilter } from './filter/notfound.filter';
+import { ForbiddenErrorFilter } from './filter/forbidden.filter';
+import { NotFoundErrorFilter } from './filter/notfound.filter';
 import { DefaultErrorFilter } from './filter/default.filter';
 import { ValidateErrorFilter } from './filter/validate.filter';
 
@@ -43,15 +44,16 @@ export class ContainerLifeCycle {
     // add middleware
     this.app.useMiddleware([
       require('@koa/cors')(),
-      GetUserIdentity,
+      GetUserInfo,
       ReportMiddleware,
       NormalizeResponse,
     ]);
 
     // add filter
     this.app.useFilter([
+      ForbiddenErrorFilter,
       DefaultErrorFilter,
-      NotFoundFilter,
+      NotFoundErrorFilter,
       ValidateErrorFilter
     ]);
 
