@@ -1,31 +1,58 @@
 <template>
   <div id="selfp">
     <!-- Handle -->
-    <a-avatar
-      id="selfp-head"
-      :size="headImgSize"
-      @click="openSelfpc"
-    ></a-avatar>
+    <a-badge
+      :count="messageSumCount"
+      :offset="[-4, 4]"
+      :overflow-count="99"
+    >
+      <a-avatar
+        id="selfp-head"
+        :size="headImgSize"
+        @click="openSelfpc"
+      >{{ userInfo.userF }}
+      </a-avatar>
+    </a-badge>
 
     <!-- Panel -->
     <a-drawer
       v-model:open="selfpcOpen"
       :closable="false"
       :width="348"
+      :rootStyle="{ maxHeight: '100vh' }"
     >
       <div id="selfp-ctl">
         <div id="selfp-ctl-info">
-          <p>User</p>
-          <p>Exp | Level</p>
+          <p id="selfp-ctl-info-name">
+            {{ userInfo?.user ?? '请登录' }}
+          </p>
+          <p>
+            <a-tag
+              style="border: none;"
+              color="#fa8c16"
+            >{{ userInfo.level }}</a-tag>
+            <a-divider
+              type="vertical"
+              style="margin: 0 4px"
+            ></a-divider>
+            <span id="selfp-ctl-info-exp">
+              Exp:
+              <span :title="userInfo.exp.toString()">
+                {{ userInfo.exp ?? 999 }}
+              </span>
+            </span>
+          </p>
           <p>
             <a-tag style="border: none;">无头衔</a-tag>
           </p>
-          <p>
+          <p id="selfp-ctl-info-local">
             <EnvironmentOutlined />
-            local
+            {{ userInfo.local || '未知' }}
           </p>
         </div>
-        <a-avatar id="selfp-ctl-img"></a-avatar>
+        <a-avatar id="selfp-ctl-img">
+          {{ userInfo.userF }}
+        </a-avatar>
 
         <a-divider class="selfp-ctl-fun"></a-divider>
         <!-- Function -->
@@ -35,6 +62,11 @@
         >
           <MessageTwoTone two-tone-color="#73d13d" />
           消息
+          <a-badge
+            :count="messageCount"
+            :offset="[12, -5]"
+          >
+          </a-badge>
         </a-button>
         <a-button
           type="text"
@@ -102,7 +134,10 @@ import {
   BulbTwoTone, EnvironmentOutlined,
 } from '@ant-design/icons-vue';
 
+import { getUserLevelName } from '../../types/level.user.type'
+
 const store = useStore()
+
 
 // head-img size
 const headImgSize: number =
@@ -110,7 +145,7 @@ const headImgSize: number =
     window.getComputedStyle(document.body).getPropertyValue('--headerHeight').slice(0, -2)
   ) * 0.66
 
-const selfpcOpen = ref<boolean>(true)
+const selfpcOpen = ref<boolean>(false)
 // open self-panel
 const openSelfpc = function () {
   selfpcOpen.value = !selfpcOpen.value
@@ -118,9 +153,52 @@ const openSelfpc = function () {
 
 // Logout
 const logout = function () {
-  store.commit('signin/isSignin', false)
+  store.commit('signin/logout')
   message.success('账号已退出！')
 }
+
+/**
+ * Message System.
+ */
+const messageCount = ref(0)
+const messageSumCount = computed(() => {
+  return messageCount.value
+})
+
+/**
+ * Get User Info
+ */
+const userInfo = reactive({
+  user: '未登录',
+  userF: '',
+  userHimg: '',
+  level: '访客',
+  exp: 0,
+  ranks: [],
+  local: '未知'
+})
+const setUserInfo = function (v: any) {
+  v.user ? userInfo.user = v.user : null
+  v.level ? userInfo.level = getUserLevelName(v.level) : null
+  v.exp ? userInfo.exp = v.exp : null
+  v.ranks ? userInfo.ranks = v.ranks : null
+  v.local ? userInfo.local = v.local : null
+
+  userInfo.userF = /[\u4e00-\u9fa5]/.test(userInfo.user[0]) ?
+    userInfo.user[0] : userInfo.user.substring(0, 2)
+}
+setUserInfo(store.getters['signin/info'])
+watch(computed(() => {
+  return store.getters['signin/info']
+}), (v) => {
+  setUserInfo(v)
+})
+
+/**
+ * HOOK
+ */
+onMounted(() => {
+})
 </script>
 
 <style scoped lang="less">
@@ -130,6 +208,7 @@ const logout = function () {
 
   &-head {
     margin-bottom: 4px;
+    cursor: pointer;
   }
 
   &-ctl {
@@ -150,6 +229,24 @@ const logout = function () {
       >p {
         margin-top: .5rem;
       }
+
+      &-name {
+        font-size: 1.4rem !important;
+      }
+
+      &-exp {
+        font-size: .8rem;
+        display: inline-block;
+        width: 6rem;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      &-local {
+        color: var(--colorText);
+        font-size: .8rem !important;
+      }
     }
 
     &-img {
@@ -158,6 +255,10 @@ const logout = function () {
 
       width: 100%;
       height: 100%;
+
+      font-size: 3rem;
+      line-height: 100px;
+      cursor: pointer;
     }
 
     .selfp-ctl-fun {

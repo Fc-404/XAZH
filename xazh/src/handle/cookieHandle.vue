@@ -6,7 +6,8 @@ import cookie from 'js-cookie'
 import axios from 'axios'
 import { message } from 'ant-design-vue'
 
-import { base64WithDate } from '../tools/encodeMsg.tool'
+import { base64WithDate } from '../util/encodeMsg.tool'
+import { AxiosErrorCatch } from '../util/error.axios.tool'
 
 const store = useStore()
 
@@ -18,7 +19,7 @@ const testTokenValidity = function () {
   const token = cookie.get('token') || null
   if (!token || !user) {
     message.info('Not signin token.')
-    store.commit('signin/isSignin', false)
+    store.commit('signin/logout')
     // TODO
     return
   }
@@ -33,16 +34,13 @@ const testTokenValidity = function () {
   })
     .then((r) => {
       if (r.data.code == 0) {
-        store.commit('signin/isSignin', true)
-        store.commit('signin/signinToken', token)
+        store.commit('signin/signin', token)
       } else {
         message.warn('登录失效！')
-        store.commit('signin/isSignin', false)
+        store.commit('signin/logout')
       }
     })
-    .catch(() => {
-      message.error('服务器错误！')
-    })
+    .catch(AxiosErrorCatch)
 }
 
 /**
@@ -58,4 +56,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped></style>../util/encodeMsg.tool../util/error.axios.tool

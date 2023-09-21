@@ -1,5 +1,5 @@
 import { Module } from 'vuex'
-import { debounce } from '../tools/debounce.tool'
+import { debounce } from '../util/debounce.tool'
 
 type OnResizeEvent = {
   fn: Function,

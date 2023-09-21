@@ -1,12 +1,12 @@
 import { RouteRecordRaw, Router, createRouter, createWebHistory } from "vue-router"
 
-const SignupPage = () => import('../pages/SignupPage.vue')
-const Main = () => import('../pages/Main.vue')
-const Blogs = () => import('../pages/Blogs.vue')
-const Projects = () => import('../pages/Projects.vue')
-const Tools = () => import('../pages/Tools.vue')
-const Favors = () => import('../pages/Favors.vue')
-const XAZH = () => import('../pages/XAZH.vue')
+const SignupPage = () => import('../pages/func/SignupPage.vue')
+const Main = () => import('../pages/main/Main.vue')
+const Blogs = () => import('../pages/main/Blogs.vue')
+const Projects = () => import('../pages/main/Projects.vue')
+const Tools = () => import('../pages/main/Tools.vue')
+const Favors = () => import('../pages/main/Favors.vue')
+const XAZH = () => import('../pages/main/XAZH.vue')
 
 const routes: RouteRecordRaw[] = [
   {
@@ -46,7 +46,7 @@ const routes: RouteRecordRaw[] = [
         component: XAZH
       },
     ]
-  }
+  },
 ]
 
 const router: Router = createRouter({

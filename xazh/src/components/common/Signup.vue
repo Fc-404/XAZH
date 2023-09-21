@@ -185,7 +185,7 @@
       <!-- Other Signin -->
       <a-divider
         v-show="!isSignup"
-        style="font-size: .2rem; color: var(--colorTextTertiary);"
+        style="font-size: .7rem; color: var(--colorTextTertiary);"
       >
         其他方式登录
       </a-divider>
@@ -244,12 +244,13 @@ import {
   QqOutlined, WechatOutlined, GithubOutlined
 } from "@ant-design/icons-vue";
 
-import { checkMail, checkPswdLen, formatPswd, formatUser } from "../../tools/formCheck.tool";
+import { checkMail, checkPswdLen, formatPswd, formatUser } from "../../util/formCheck.tool";
 import { message } from "ant-design-vue";
 import axios from 'axios'
-import { debounceByName } from "../../tools/debounce.tool";
+import { debounceByName } from "../../util/debounce.tool";
 import { Md5 } from "ts-md5";
-import { base64WithDate, debase64WithDate } from "../../tools/encodeMsg.tool";
+import { base64WithDate, debase64WithDate } from "../../util/encodeMsg.tool";
+import { AxiosErrorCatch } from "../../util/error.axios.tool";
 
 const props = defineProps({
   type: { type: String, default: 'signin' },
@@ -311,9 +312,7 @@ const sendVerificationCode = function () {
         message.error('验证码发送失败！')
       }
     })
-    .catch(() => {
-      message.error('服务器错误！')
-    })
+    .catch(AxiosErrorCatch)
 
   verifyMailBtnData.timer = setInterval(() => {
     if (verifyMailBtnData.timeCount < 0) {
@@ -463,9 +462,7 @@ function signupSubmit() {
           break
       }
     })
-    .catch(() => {
-      message.error('服务器错误！')
-    })
+    .catch(AxiosErrorCatch)
     .finally(() => {
       invalidSubmit.value = false
     })
@@ -501,8 +498,7 @@ function signinSubmit() {
             date: r.data.body.date, data: r.data.body.token
           }) || 'aW52YWxpZDE='
 
-          store.commit('signin/signinToken', token)
-          store.commit('signin/isSignin', true)
+          store.commit('signin/signin', token)
 
           emit('signinSuccess')
           break
@@ -513,9 +509,7 @@ function signinSubmit() {
           message.error('密码错误！')
       }
     })
-    .catch(() => {
-      message.error('服务器错误！')
-    })
+    .catch(AxiosErrorCatch)
     .finally(() => {
       invalidSubmit.value = false
     })
@@ -582,7 +576,7 @@ onMounted(() => {
 
       >p {
         text-align: center;
-        font-size: .5rem;
+        font-size: .8rem;
         color: var(--colorTextSecondary);
 
         >span {
@@ -608,7 +602,7 @@ onMounted(() => {
         }
 
         >p:nth-child(2) {
-          font-size: .5rem;
+          font-size: .8rem;
           line-height: 1.8rem;
           color: var(--colorTextSecondary);
 
@@ -636,14 +630,16 @@ onMounted(() => {
 
       >span {
         margin: 0 .5rem;
-        font-size: .5rem;
+        font-size: .7rem;
+        line-height: 1.1rem;
         color: var(--colorTextSecondary);
+        vertical-align: bottom;
       }
     }
 
     &-forget {
       margin-right: 3rem;
-      font-size: .5rem;
+      font-size: .7rem;
       text-align: right;
       cursor: pointer;
     }
@@ -680,4 +676,4 @@ onMounted(() => {
     }
   }
 }
-</style>
+</style>../../util/formCheck.tool../../util/debounce.tool../../util/encodeMsg.tool../../util/error.axios.tool

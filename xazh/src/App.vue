@@ -174,15 +174,16 @@ onUpdated(() => {
 <template>
   <div id="app-">
     <a-config-provider :theme="Theme.appTheme.value">
-      <CookieHandle></CookieHandle>
       <SigninEventRegister></SigninEventRegister>
-      <RouterView></RouterView>
+      <CookieHandle></CookieHandle>
+      <!-- <RouterView></RouterView> -->
       <!-- <div style="height: 10rem;"></div> -->
       <!-- <Signup
         :panel-style="{
           background: '#ffffffdd',
         }"
       ></Signup> -->
+      <Editor></Editor>
     </a-config-provider>
   </div>
 </template>

@@ -7,7 +7,17 @@
         </a-layout-header>
       </a-affix>
       <a-layout-content id="main-">
-        <RouterView style="height: 1000px;"></RouterView>
+        <RouterView
+          style="min-height: 1024px;"
+          v-slot="{ Component }"
+        >
+          <transition
+            name="slide"
+            mode="out-in"
+          >
+            <component :is="Component" />
+          </transition>
+        </RouterView>
       </a-layout-content>
       <a-layout-footer id="main-footer">
         <Footer></Footer>

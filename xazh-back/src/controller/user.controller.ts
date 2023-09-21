@@ -15,6 +15,7 @@ import { base64WithDate, debase64WithDate } from '../util/encodeMsg.util';
 import { LevelGuard } from '../guard/level.guard';
 import { USER_LEVEL } from '../types/userLevel.types';
 import { Level } from '../decorator/auth/level.decorator';
+import { TokenGuard } from '../guard/token.guard';
 
 @Controller('/User')
 export class UserController {
@@ -98,8 +99,8 @@ export class UserController {
         }
         await this.userTokenService.setToken(useri.user, token)
         this.userBaseService.pushIp(
-          '夏至',
-          this.ctx.user.ipv4
+          useri.user,
+          this.ctx.user['ipv4']
         )
         return result
       case 1:
@@ -111,21 +112,20 @@ export class UserController {
     }
   }
 
-  @Level(USER_LEVEL.user)
-  @UseGuard(LevelGuard)
   @Post('/GetUserInfo')
+  @Level(USER_LEVEL.user)
+  @UseGuard([LevelGuard, TokenGuard])
   async getUserInfo() {
-    console.log('ok');
-    return 'ok'
+    const result = await this.userBaseService.getUserInfo(this.ctx.user.name)
+    return result
   }
 
   @Post('/VerifyToken')
   async verifyToken(@Body() body: TokenDTO) {
-    const dateC = new Date(body.date).getTime()
-    const dateS = new Date().getTime()
-    if (dateS - dateC > 30000) {
-      this.ctx.code = 999
-      return '请求超时！'
+    const haveUser = await this.userBaseService.haveUser(body.user)
+    if (!haveUser) {
+      this.ctx.code = 3
+      return '验证失败！'
     }
 
     const token = debase64WithDate({
@@ -137,6 +137,10 @@ export class UserController {
       await this.userTokenService.verifyToken(body.user, token as string)
 
     if (result) {
+      this.userBaseService.pushIp(
+        this.ctx.user['name'],
+        this.ctx.user['ipv4']
+      )
       return '验证成功！'
     } else {
       this.ctx.code = 1

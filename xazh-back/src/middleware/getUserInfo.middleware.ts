@@ -15,8 +15,11 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
   resolve() {
     return async (ctx: Context, next: NextFunction) => {
       ctx.user = {
+        name: undefined,
         level: 0,
-        ranks: []
+        ranks: [],
+        overtime: 0,
+        ipv4: undefined
       }
       const token = ctx.request.body['token'] ?? undefined
       const date = ctx.request.body['date'] ?? undefined
@@ -27,6 +30,12 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
         // Have valid token.
         while (rawToken) {
           try {
+            // Get difference of date both client and server.
+            const dateNow = new Date().getTime()
+            const differDate = (dateNow - new Date(date).getTime()) ?? -1
+            ctx.user['overtime'] = differDate
+
+            // Get user name and then get level and ranks.
             rawToken = Base64.decode(rawToken as string)
             const userIdentityService = await ctx.requestContext.getAsync(UserIdentityService)
             const user = (rawToken as string)
@@ -50,9 +59,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
       try {
         // Set user's ip, and format to ipv4
         ctx.user['ipv4'] = /(\d{1,3}.){3}.\d{1,3}/.exec(ctx.ip)[0]
-      } catch {
-        ctx.logger.warn('Exception IP: ' + ctx.ip)
-      }
+      } catch { }
 
       return await next()
     }

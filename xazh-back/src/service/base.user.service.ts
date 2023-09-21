@@ -88,24 +88,68 @@ export class UserService {
       ? true : false
   }
 
+  /**
+   * Add the signin or verify ip address.
+   * And calclate the belong_place.
+   * @param user 
+   * @param ip 
+   */
   async pushIp(user: string, ip: string) {
     const ipMaxCount = 20
 
     const url = `http://ip-api.com/json/${ip}?fields=16409&lang=zh-CN`
     const ipInfo = await makeHttpRequest(url, { dataType: 'json' })
-    const result = await UserBase.model.findOne({ user: user }, ['recent_ip'])
+    const result = await UserBase.model.findOne({ user: user }, ['recent_ip', 'belong_place'])
 
     result?.recent_ip?.unshift({
       ip: ip,
       place: ipInfo.data['status'] != 'success' ? 'unknow'
-        : (ipInfo.data['country'] ?? 'unknow') + ','
-        + (ipInfo.data['regionName'] ?? 'unknow') + ','
-        + (ipInfo.data['city'] ?? 'unknow')
+        : (ipInfo.data['country'] ?? 'unknow')
+        + ',' + (ipInfo.data['regionName'] ?? 'unknow')
+        + ',' + (ipInfo.data['city'] ?? 'unknow')
     })
+    // Limit the information to 20 pieces.
     for (let i = 0; i < (result?.recent_ip?.length ?? 0) - ipMaxCount; ++i) {
       result.recent_ip.pop()
     }
 
+    // Calclate the belong_place by the recent_ip.
+    const places = {}
+    const mostPlace = { key: '', count: 0 }
+    for (let i of result.recent_ip) {
+      if (i.place != 'unknow') {
+        let placeCount = places[i.place] ?? 0
+        places[i.place] = ++placeCount
+        if (placeCount > mostPlace.count) {
+          mostPlace.key = i.place
+          mostPlace.count = placeCount
+        }
+      }
+    }
+    const place = mostPlace.key.split(',')
+    result.belong_place =
+      place[0] == '中国'
+        ? (place[1] ?? place[0])
+        : (place[0] ?? result.belong_place)
+
     result.save()
+  }
+
+  /**
+   * Get User Info.
+   * @param user 
+   * @returns UserInfo
+   */
+  async getUserInfo(user: string): Promise<object> {
+    const userinfo = await UserBase.model.findOne(
+      { user: user },
+      [
+        'info', 'himg', 'user', 'belong_place',
+        'exp', 'level', 'ranks', 'signup_time',
+        'bind_qq', 'bind_we', 'bind_phone', "bind_mail",
+      ]
+    )
+
+    return userinfo
   }
 }

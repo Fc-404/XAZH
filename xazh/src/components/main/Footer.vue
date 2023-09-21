@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { useStore } from "vuex";
-import { clickCopy } from "../../tools/clickCopy.tool.ts";
+import { clickCopy } from "../../util/clickCopy.tool.ts";
 
 import { CopyrightOutlined, GithubOutlined, MailOutlined, DesktopOutlined } from "@ant-design/icons-vue";
 
@@ -89,4 +89,4 @@ const switchToDesktop = function (): void {
     font-size: 0.8rem;
     color: var(--colorTextSecondary);
   }
-}</style>
+}</style>../../util/clickCopy.tool.ts

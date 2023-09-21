@@ -54,7 +54,7 @@ export class ContainerLifeCycle {
       ForbiddenErrorFilter,
       DefaultErrorFilter,
       NotFoundErrorFilter,
-      ValidateErrorFilter
+      ValidateErrorFilter,
     ]);
 
     // add decorator

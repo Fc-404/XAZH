@@ -246,9 +246,9 @@ const toMenu = function (name: string) {
 /**
  * Self Panel
  */
-const isSignin = ref<boolean>(store.getters['signin/isSignin'])
+const isSignin = ref<boolean>(store.getters['signin/on'])
 watch(computed(() => {
-  return store.getters['signin/isSignin']
+  return store.getters['signin/on']
 }), (v) => {
   isSignin.value = v
 })

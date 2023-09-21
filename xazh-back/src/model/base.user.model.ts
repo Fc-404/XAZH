@@ -38,10 +38,13 @@ const schema = new mongoose.Schema({
         { ip: String, place: String }
     ],
     belong_place: String,               // Belong place, be got by last ip of signin
-    exp: Number,                        // Experience
+    exp: {                              // Experience
+        type: Number,
+        default: 0
+    },
     level: {                            // 'visitor', 'user', 'admin', 'master'
         type: Number,
-        default: USER_LEVEL.visitor
+        default: USER_LEVEL.user
     },
     ranks: [String],                    // Rank is to limit the use of specific functions
     signup_time: {                      // Signup time

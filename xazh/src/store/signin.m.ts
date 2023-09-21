@@ -5,39 +5,52 @@ import { Base64 } from "js-base64";
 const signinStore: Module<any, any> = {
   namespaced: true,
   state: () => ({
-    isSignin: false,
-    signinToken: '',
+    on: false,
+    user: '',
+    token: '',
+    info: {},
     signined: () => { },
     logout: () => { }
   }),
   mutations: {
-    isSignin(state, value: boolean) {
-      state.isSignin = value
-      if (value) {
-        state.signined()
-      } else {
-        state.logout()
-        cookie.remove('user')
-        cookie.remove('token')
-      }
-    },
-    signinToken(state, value: string) {
+    signin(state, value: string) {
       let rawToken = Base64.decode(value)
-      cookie.set('user', rawToken.slice(0, parseInt(rawToken.slice(-1), 36)))
+      let user = rawToken.slice(0, parseInt(rawToken.slice(-1), 36))
+      cookie.set('user', user)
       cookie.set('token', value)
-      state.signinToken = value
-      state.isSignin = true
+      state.user = user
+      state.token = value
+      state.signined(state)
+      state.on = true
     },
-    signined(state, value: Function) {
+    logout(state) {
+      state.logout(state)
+      cookie.remove('user')
+      cookie.remove('token')
+      state.on = false
+    },
+    info(state, value: object) {
+      state.info = value
+    },
+    setSignined(state, value: Function) {
       state.signined = value
     },
-    logout(state, value: Function) {
+    setLogout(state, value: Function) {
       state.logout = value
     }
   },
   getters: {
-    isSignin(state): boolean {
-      return state.isSignin
+    on(state): boolean {
+      return state.on
+    },
+    user(state): string {
+      return state.user
+    },
+    token(state): string {
+      return state.token
+    },
+    info(state): object {
+      return state.info
     }
   }
 }
