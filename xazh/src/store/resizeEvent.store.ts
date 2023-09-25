@@ -1,3 +1,8 @@
+/**
+ * The window of browser Event System.
+ * Multiple functions cannot be set up for native events.
+ */
+
 import { Module } from 'vuex'
 import { debounce } from '../util/debounce.tool'
 

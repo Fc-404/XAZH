@@ -11,6 +11,11 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+import './assets/css/style.less'
+import './assets/css/ants.less'
+import './assets/css/mavon.less'
+import './assets/css/transition.less'
+
 const app = createApp(App)
 app.use(router)
   .use(store)

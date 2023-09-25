@@ -1,3 +1,7 @@
+/**
+ * The config of the web that usually out of sync.
+ */
+
 import { Module } from "vuex";
 
 const config: Module<any, any> = {

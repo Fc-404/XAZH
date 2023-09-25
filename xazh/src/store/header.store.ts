@@ -1,3 +1,7 @@
+/**
+ * The config of Header in Main page.
+ */
+
 import { Module } from "vuex";
 import { ModeTitlePageI } from "../interface/page.i";
 

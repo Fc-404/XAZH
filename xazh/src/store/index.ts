@@ -1,9 +1,10 @@
 import { Store, createStore } from "vuex"
 
-import Config from './config.m.ts'
-import Header from './header.m.ts'
-import ResizeEvent from './resizeEvent.m.ts'
-import SigninStore from './signin.m.ts'
+import Config from './config.store.ts'
+import HeaderStore from './header.store.ts'
+import ResizeEvent from './resizeEvent.store.ts'
+import SigninStore from './signin.store.ts'
+import PersonalConfig from './pconf.store.ts'
 
 const store: Store<unknown> = createStore({
   state: () => { },
@@ -12,9 +13,10 @@ const store: Store<unknown> = createStore({
   actions: {},
   modules: {
     config: Config,
-    header: Header,
     resizeEvent: ResizeEvent,
-    signin: SigninStore
+    header: HeaderStore,
+    signin: SigninStore,
+    pconf: PersonalConfig
   }
 })
 

@@ -1,0 +1,52 @@
+// Custom mavon
+.v-note-wrapper {
+  border: none !important;
+}
+
+.v-note-op {
+  border: none !important;
+}
+
+.v-note-edit,
+.content-input,
+.content-input-wrapper,
+.auto-textarea-input {
+  background-color: var(--colorBgContainer) !important;
+  color: var(--colorText) !important;
+}
+
+.markdown-body {
+  color: var(--colorText) !important;
+
+  pre {
+    background-color: var(--colorBgContainer) !important;
+
+    .hljs {
+      background-color: var(--colorBgLayout) !important;
+      color: var(--colorText) !important;
+    }
+  }
+}
+
+.op-icon {
+  color: var(--colorText) !important;
+
+  &:hover {
+    color: var(--colorText) !important;
+    background-color: var(--colorFillSecondary) !important;
+  }
+
+  &.selected {
+    background-color: var(--colorFillSecondary) !important;
+  }
+}
+
+.popup-dropdown {
+  background-color: var(--colorBgContainer) !important;
+  border-color: var(--colorBgLayout) !important;
+
+  .dropdown-item:hover {
+    color: var(--colorText) !important;
+    background-color: var(--colorFillSecondary) !important;
+  }
+}

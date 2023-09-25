@@ -1,3 +1,7 @@
+/**
+ * Signin store.
+ */
+
 import { Module } from "vuex";
 import cookie from 'js-cookie'
 import { Base64 } from "js-base64";
