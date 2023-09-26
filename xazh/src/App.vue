@@ -176,7 +176,7 @@ onUpdated(() => {
     <a-config-provider :theme="Theme.appTheme.value">
       <SigninEventRegister></SigninEventRegister>
       <CookieHandle></CookieHandle>
-      <RouterView></RouterView>
+      <!-- <RouterView></RouterView> -->
       <!-- <div style="height: 10rem;"></div> -->
       <!-- <Signup
         :panel-style="{
@@ -184,13 +184,13 @@ onUpdated(() => {
         }"
       ></Signup> -->
 
-      <!-- <div style="height: 12px; background-color: red;"></div>
+      <div style="height: 12px; background-color: red;"></div>
       <Editor></Editor>
       <div style="height: 12px; background-color: red;"></div>
       <Editor type="show"></Editor>
       <div style="height: 12px; background-color: red;"></div>
       <Editor type="tiny"></Editor>
-      <div style="height: 12px; background-color: red;"></div> -->
+      <div style="height: 12px; background-color: red;"></div>
     </a-config-provider>
   </div>
 </template>

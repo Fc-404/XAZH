@@ -121,7 +121,7 @@ onMounted(() => {
 <style lang="less" scoped>
 #md-editor {
   width: 50vw;
-  height: 20vh;
+  height: 90vh;
   margin: auto;
 
   &- {

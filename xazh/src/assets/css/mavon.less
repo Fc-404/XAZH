@@ -26,6 +26,29 @@
       color: var(--colorText) !important;
     }
   }
+
+  thead>tr {
+    background-color: var(--colorBgLayout) !important;
+
+    th {
+      border-color: var(--colorBgContainer) !important;
+    }
+  }
+
+  tbody>tr {
+    background-color: var(--colorBgContainer) !important;
+
+    td {
+      border-color: var(--colorBgLayout) !important;
+
+      &:first-child {
+        border-left: 1px solid var(--colorBgContainer) !important;
+      }
+      &:last-child  {
+        border-right: 1px solid var(--colorBgContainer) !important;
+      }
+    }
+  }
 }
 
 .op-icon {
