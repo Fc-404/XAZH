@@ -141,9 +141,9 @@ class Theme {
 provide('onDark', Theme.onDark)
 
 /**
- * Get configure from cookie
+ * Theme style of dark or light.
  */
-const getCookie = function () {
+const initDarkStyle = function () {
   // Get onDark
   const ondarkC = cookie.get('ondark') == 'true' ? true : false
   if (ondarkC)
@@ -163,12 +163,13 @@ onMounted(() => {
     },
   })
 
-  // Get cookie
-  getCookie()
+  initDarkStyle()
 })
 onUpdated(() => {
   Theme.updateThemeToStyle()
 })
+
+import EditBlog from './pages/func/EditBlog.vue'
 </script>
 
 <template>
@@ -183,14 +184,7 @@ onUpdated(() => {
           background: '#ffffffdd',
         }"
       ></Signup> -->
-
-      <div style="height: 12px; background-color: red;"></div>
-      <Editor></Editor>
-      <div style="height: 12px; background-color: red;"></div>
-      <Editor type="show"></Editor>
-      <div style="height: 12px; background-color: red;"></div>
-      <Editor type="tiny"></Editor>
-      <div style="height: 12px; background-color: red;"></div>
+      <EditBlog></EditBlog>
     </a-config-provider>
   </div>
 </template>

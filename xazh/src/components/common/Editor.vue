@@ -1,3 +1,10 @@
+<!-- Editor
+  - You can use the getValue method within ref in the parent component
+  - to get the contents.
+  - And also use Component Event to write backcall function whereby
+  - that will be call if you click the send button in this component.
+ /-->
+
 <template>
   <div id="md-editor">
     <mavon-editor
@@ -12,27 +19,30 @@
       :editable="editorOptions.editable"
       :toolbarsFlag="editorOptions.toolbarsFlag"
       :placeholder="editorOptions.placeholder"
+      v-model="content"
     >
       <template
         #left-toolbar-before
-        v-if="porps.type == 'tiny'"
+        v-if="porps.mode == 'tiny'"
       >
         <a-button
           type="text"
           class="top-3"
+          title="表情"
         >
           <SmileOutlined />
         </a-button>
         <a-button
           type="text"
           class="top-3"
+          title="图片"
         >
           <PictureOutlined />
         </a-button>
       </template>
       <template
         #right-toolbar-after
-        v-if="porps.type == 'tiny'"
+        v-if="porps.mode == 'tiny'"
       >
         <a-button
           type="text"
@@ -52,6 +62,7 @@
           class="top-3"
           @mouseenter="tinyPreview(false)"
           @mouseleave="tinyPreview(true)"
+          @click="$emit('send', content)"
         >发送</a-button>
       </template>
     </mavon-editor>
@@ -67,12 +78,14 @@ import {
 } from '@ant-design/icons-vue';
 
 const porps = defineProps({
+  // MODE:
   // edit, show, tiny. 
-  type: { type: String, default: 'edit' },
+  mode: { type: String, default: 'edit' },
+  value: { type: String}
 })
 
 const mavonEditor = mavon.mavonEditor
-const toolbars = porps.type == 'edit' ? undefined : {}
+const toolbars = porps.mode == 'edit' ? undefined : {}
 const editorOptions = reactive({
   subfield: false,
   defaultOpen: 'edit',
@@ -81,9 +94,8 @@ const editorOptions = reactive({
   placeholder: '开始编辑...'
 })
 
-
 /**
- * Tiny Events
+ * Events for MODE of tiny.
  */
 const tinyData = reactive({
   preview: false
@@ -95,13 +107,24 @@ const tinyPreview = function (is?: boolean | undefined) {
   tinyData.preview = !p
 }
 
+/**
+ * Content deal.
+ */
+const content = ref<string>()
+const getValue = function () {
+  return content
+}
+
+defineExpose({
+  getValue
+})
 
 /**
  * HOOK
  */
 onMounted(() => {
   // Set editor options
-  switch (porps.type) {
+  switch (porps.mode) {
     case 'edit':
       editorOptions.subfield = true
       editorOptions.defaultOpen = ''
@@ -111,17 +134,20 @@ onMounted(() => {
       editorOptions.editable = false
       editorOptions.toolbarsFlag = false
       break
+    case 'tiny':
     default:
       editorOptions.placeholder = '回车键发送...'
   }
+
+  content.value = porps.value
 })
 
 </script>
 
 <style lang="less" scoped>
 #md-editor {
-  width: 50vw;
-  height: 90vh;
+  width: 100%;
+  height: 100%;
   margin: auto;
 
   &- {
