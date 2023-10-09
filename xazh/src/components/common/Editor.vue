@@ -19,6 +19,7 @@
       :editable="editorOptions.editable"
       :toolbarsFlag="editorOptions.toolbarsFlag"
       :placeholder="editorOptions.placeholder"
+      @save="save"
       v-model="content"
     >
       <template
@@ -77,11 +78,13 @@ import {
   SmileOutlined, PictureOutlined
 } from '@ant-design/icons-vue';
 
+
 const porps = defineProps({
   // MODE:
   // edit, show, tiny. 
   mode: { type: String, default: 'edit' },
-  value: { type: String}
+  value: { type: String },    // default value
+  save: { type: Function }    // backcall of save event
 })
 
 const mavonEditor = mavon.mavonEditor
@@ -110,14 +113,8 @@ const tinyPreview = function (is?: boolean | undefined) {
 /**
  * Content deal.
  */
-const content = ref<string>()
-const getValue = function () {
-  return content
-}
-
-defineExpose({
-  getValue
-})
+const content = ref<string>(porps.value ?? '')
+defineExpose({ content })
 
 /**
  * HOOK
@@ -138,8 +135,6 @@ onMounted(() => {
     default:
       editorOptions.placeholder = '回车键发送...'
   }
-
-  content.value = porps.value
 })
 
 </script>
