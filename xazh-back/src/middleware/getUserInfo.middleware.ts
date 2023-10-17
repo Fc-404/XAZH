@@ -16,6 +16,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
     return async (ctx: Context, next: NextFunction) => {
       ctx.user = {
         name: undefined,
+        token: undefined,
         level: 0,
         ranks: [],
         overtime: 0,
@@ -27,13 +28,15 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
         let rawToken = debase64WithDate({
           date: date, data: token
         })
+
         // Have valid token.
         while (rawToken) {
           try {
+            ctx.user['token'] = rawToken
+            
             // Get difference of date both client and server.
             const dateNow = new Date().getTime()
             const differDate = (dateNow - new Date(date).getTime()) ?? -1
-            ctx.user['overtime'] = differDate
 
             // Get user name and then get level and ranks.
             rawToken = Base64.decode(rawToken as string)
@@ -46,6 +49,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
 
             // Set user's name, level, and ranks
             ctx.user['name'] = user
+            ctx.user['overtime'] = differDate
             ctx.user['level'] = result.level
             ctx.user['ranks'] = result.ranks
           } catch {

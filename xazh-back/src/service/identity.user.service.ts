@@ -1,5 +1,6 @@
 import { Provide } from "@midwayjs/core"
 import UserBase from '../model/base.user.model'
+import { USER_LEVEL } from "../types/userLevel.types"
 
 
 @Provide()
@@ -22,7 +23,7 @@ export class UserIdentityService {
 
   async get(user: string): Promise<
     {
-      level: number,
+      level: USER_LEVEL,
       ranks: Array<string>
     }
   > {

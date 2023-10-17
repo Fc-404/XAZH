@@ -46,7 +46,7 @@ const store = useStore()
 const title = ref<string>()
 const draftContent = ref<string>()
 const editor = ref()
-let autoSaveHandle
+let autoSaveHandle:NodeJS.Timer
 
 /**
  * Save content to cookie.
@@ -78,11 +78,13 @@ const loadingDraft = function () {
       message: '加载草稿成功！',
       description: h('table', [
         h('tr', [
-          h('td', '标题：'),
+          h('td', '标题'),
+          h('td', '：'),
           h('td', `${title.value}`),
         ]),
         h('tr', [
-          h('td', '上次保存时间：'),
+          h('td', '上次保存时间'),
+          h('td', '：'),
           h('td', `${time.getFullYear()}年${time.getMonth()}月${time.getDate()}日`),
         ])
       ])
@@ -115,6 +117,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
   window.onbeforeunload = null
+  clearInterval(autoSaveHandle)
 })
 </script>
 

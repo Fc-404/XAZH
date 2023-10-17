@@ -496,7 +496,7 @@ function signinSubmit() {
           // Decode the Token
           const token = debase64WithDate({
             date: r.data.body.date, data: r.data.body.token
-          }) || 'aW52YWxpZDE='
+          }) || 'aW52YWxpZA=='
 
           store.commit('signin/signin', token)
 

@@ -5,24 +5,24 @@ export class SignupUserDTO extends ValidMailDTO {
   @Rule(RuleType.date().required())
   date: string
 
-  @Rule(RuleType.string().required().max(16).min(1))
+  @Rule(RuleType.string().max(16).min(1).required())
   user: string
 
-  @Rule(RuleType.string().required())
+  @Rule(RuleType.string().max(32).required())
   pswd: string
 }
 
 export class SigninUserDTO {
-  @Rule(RuleType.string().required())
+  @Rule(RuleType.string().max(64).required())
   account: string
-  @Rule(RuleType.string().required())
+  @Rule(RuleType.string().max(512).required())
   pswd: string
 }
 
 export class TokenDTO {
-  @Rule(RuleType.string().required().max(16).min(1))
+  @Rule(RuleType.string().max(16).min(1).required())
   user: string
-  @Rule(RuleType.string().required())
+  @Rule(RuleType.string().max(4096).required())
   token: string
   @Rule(RuleType.date().required())
   date: string

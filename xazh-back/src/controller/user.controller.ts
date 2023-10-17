@@ -12,9 +12,9 @@ import { UserService } from '../service/base.user.service';
 import { UserTokenService } from '../service/token.user.service';
 import { MailService } from '../service/mail.service';
 import { base64WithDate, debase64WithDate } from '../util/encodeMsg.util';
-import { LevelGuard } from '../guard/level.guard';
 import { USER_LEVEL } from '../types/userLevel.types';
 import { Level } from '../decorator/auth/level.decorator';
+import { LevelGuard } from '../guard/level.guard';
 import { TokenGuard } from '../guard/token.guard';
 
 @Controller('/User')
@@ -120,6 +120,13 @@ export class UserController {
     return result
   }
 
+  /**
+   * Necessary steps for automatic login.
+   * It will push ip into base info of user.
+   * And then request belong-place.
+   * @param body
+   * @returns 
+   */
   @Post('/VerifyToken')
   async verifyToken(@Body() body: TokenDTO) {
     const haveUser = await this.userBaseService.haveUser(body.user)

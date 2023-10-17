@@ -169,7 +169,6 @@ onUpdated(() => {
   Theme.updateThemeToStyle()
 })
 
-import EditBlog from './pages/func/EditBlog.vue'
 </script>
 
 <template>
@@ -177,14 +176,13 @@ import EditBlog from './pages/func/EditBlog.vue'
     <a-config-provider :theme="Theme.appTheme.value">
       <SigninEventRegister></SigninEventRegister>
       <CookieHandle></CookieHandle>
-      <!-- <RouterView></RouterView> -->
+      <RouterView></RouterView>
       <!-- <div style="height: 10rem;"></div> -->
       <!-- <Signup
         :panel-style="{
           background: '#ffffffdd',
         }"
       ></Signup> -->
-      <EditBlog></EditBlog>
     </a-config-provider>
   </div>
 </template>

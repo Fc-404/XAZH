@@ -7,6 +7,6 @@ export class MailDTO {
 }
 
 export class ValidMailDTO extends MailDTO {
-  @Rule(RuleType.string().required().max(6).min(4))
+  @Rule(RuleType.string().max(6).min(4).required())
   code: string
 }
