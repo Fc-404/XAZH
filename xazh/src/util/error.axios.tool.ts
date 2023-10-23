@@ -16,8 +16,11 @@ export function AxiosErrorCatch(error: any) {
       case 404:
         message.error('资源未找到！')
         break
-      case 433:
+      case 422:
         message.warn('请求参数错误！')
+        break
+      case 500:
+        message.error('服务器错误！')
         break
       default:
         message.warn('未知错误！')

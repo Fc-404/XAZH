@@ -114,7 +114,7 @@
           :status="validPswdR === false ? 'error' : undefined"
           type="password"
           placeholder="重复密码"
-          @blur="checkUserPswdR"
+          @change="checkUserPswdR"
         >
           <template #prefix>
             <lock-outlined />
@@ -277,7 +277,7 @@ const validPswd = ref<boolean | undefined>(undefined)
 const validPswdR = ref<boolean | undefined>(undefined)
 const validMail = ref<boolean | undefined>(undefined)
 const agreeProtlcal = ref<boolean>(false)
-const submitEvent = ref(signinSubmit)
+const submitEvent = ref(isSignup ? signupSubmit : signinSubmit)
 const invalidSubmit = ref<boolean | undefined>(false)
 
 const tipData = reactive({

@@ -20,10 +20,10 @@ import { TokenGuard } from '../guard/token.guard';
 @Controller('/User')
 export class UserController {
   @Inject()
-  ctx: Context;
+  ctx: Context
 
   @Inject()
-  userBaseService: UserService;
+  userBaseService: UserService
   @Inject()
   userTokenService: UserTokenService
 
@@ -43,10 +43,10 @@ export class UserController {
   @Post('/Signup')
   async addUser(@Body() userinfo: SignupUserDTO) {
 
-    if (await this.userBaseService.existMail(userinfo.mail)) {
-      this.ctx.code = 2
-      return '邮箱已被注册！'
-    }
+    // if (await this.userBaseService.existMail(userinfo.mail)) {
+    //   this.ctx.code = 2
+    //   return '邮箱已被注册！'
+    // }
 
     if (!(await this.mailService.verifyCode(userinfo.mail, userinfo.code))) {
       this.ctx.code = 1

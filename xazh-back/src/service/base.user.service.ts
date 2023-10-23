@@ -1,5 +1,6 @@
 import { Provide, makeHttpRequest } from '@midwayjs/core';
 import UserBase from '../model/base.user.model';
+import UserConfig from '../model/config.user.model'
 import { IAddUser } from '../interface/user.interface';
 import { Md5 } from 'ts-md5';
 
@@ -30,14 +31,20 @@ export class UserService {
       if (await this.haveUser(options.user))
         throw null
 
-      await UserBase.model.create([{
+      const user = await UserBase.model.create([{
         user: options.user,
         pswd: options.pswd,
         bind_mail: options.mail
       }], { session })
 
+      const config = await UserConfig.model.create([{
+        user: user[0]._id
+      }], { session })
+      user[0].set('config_link', config[0]._id)
+
       // TODO: Other Documents haven't create.
 
+      await user[0].save({ session })
       await session.commitTransaction()
     } catch {
       await session.abortTransaction()
