@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { theme } from 'ant-design-vue'
 import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
@@ -18,13 +17,6 @@ const store = useStore()
  * Set backend's base api for axios.
  */
 axios.defaults.baseURL = store.getters['config/baseApi']
-
-/**
- * Jump to the main page by default.
- */
-useRouter().replace({
-  name: 'Main'
-})
 
 /**
  * Switch what style of display in the light of

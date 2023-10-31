@@ -32,18 +32,22 @@
         >博客
         </div>
         <div
+          id="header-project"
           class="header-item"
           @click="toMenu('MainProjects')"
         >项目</div>
         <div
+          id="header-tool"
           class="header-item"
           @click="toMenu('MainTools')"
         >工具</div>
         <div
+          id="header-favor"
           class="header-item"
           @click="toMenu('MainFavors')"
         >推荐</div>
         <div
+          id="header-xazh"
           class="header-item"
           @click="toMenu('MainXAZH')"
         >夏至</div>
@@ -118,17 +122,50 @@ import { useRouter } from 'vue-router';
 
 const store = useStore()
 
+
+/**
+ * To Menu
+ */
+const router = useRouter()
+const toMenu = function (name: string) {
+  router.push({
+    name: name
+  })
+}
+console.log(router.currentRoute.value.path.split('/')[1]);
+
 /**
  * Set the slider.
  */
 const initSlider = function () {
   const hs = document.querySelector('#header-box > #header-slider') as HTMLElement
   const blog = document.querySelector('#header-box > #header-blog') as HTMLElement
+  const project = document.querySelector('#header-box > #header-project') as HTMLElement
+  const tool = document.querySelector('#header-box > #header-tool') as HTMLElement
+  const favor = document.querySelector('#header-box > #header-favor') as HTMLElement
+  const xazh = document.querySelector('#header-box > #header-xazh') as HTMLElement
   const items = document.querySelectorAll('#header-box > .header-item') as NodeListOf<HTMLElement>
-  let index: HTMLElement = blog
 
-  hs.style.left = blog.offsetLeft + 'px'
-  hs.style.width = blog.offsetWidth + 'px'
+  let initFunc = blog
+  const funcName = router.currentRoute.value.path.split('/')[1]
+  switch (funcName) {
+    case 'projects':
+      initFunc = project
+      break
+    case 'tools':
+      initFunc = tool
+      break
+    case 'favors':
+      initFunc = favor
+      break
+    case 'xazh':
+      initFunc = xazh
+      break
+  }
+  let index: HTMLElement = initFunc
+
+  hs.style.left = initFunc.offsetLeft + 'px'
+  hs.style.width = initFunc.offsetWidth + 'px'
   index.style.color = 'var(--colorPrimary)'
 
   // event
@@ -230,16 +267,6 @@ const titleDeal = function () {
 
   window.addEventListener('scroll', () => {
     dealCore()
-  })
-}
-
-/**
- * To Menu
- */
-const router = useRouter()
-const toMenu = function (name: string) {
-  router.push({
-    name: name
   })
 }
 

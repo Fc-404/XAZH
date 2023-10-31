@@ -277,7 +277,7 @@ const validPswd = ref<boolean | undefined>(undefined)
 const validPswdR = ref<boolean | undefined>(undefined)
 const validMail = ref<boolean | undefined>(undefined)
 const agreeProtlcal = ref<boolean>(false)
-const submitEvent = ref(isSignup ? signupSubmit : signinSubmit)
+const submitEvent = ref(isSignup.value ? signupSubmit : signinSubmit)
 const invalidSubmit = ref<boolean | undefined>(false)
 
 const tipData = reactive({

@@ -32,8 +32,8 @@ const routes: RouteRecordRaw[] = [
       },
       {
         name: 'MainTools',
-        path: 'tools',
-        component: Tools
+        path: 'tools/:name',
+        component: Tools,
       },
       {
         name: 'MainFavors',
