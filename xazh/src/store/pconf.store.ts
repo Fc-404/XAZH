@@ -19,7 +19,7 @@ const pconfStore: Module<any, any> = {
     /**
      * Style
      */
-    stylePrimaryColor: '',
+    stylePrimaryColor: ' ',
     stylePageAnimation: true,
 
     /**
