@@ -132,7 +132,6 @@ const toMenu = function (name: string) {
     name: name
   })
 }
-console.log(router.currentRoute.value.path.split('/')[1]);
 
 /**
  * Set the slider.

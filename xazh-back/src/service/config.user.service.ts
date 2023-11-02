@@ -15,11 +15,9 @@ export class UserConfigService {
    */
   async checkPConfVersion(id: ObjectId, version: string): Promise<boolean | undefined> {
     const config = await UserConfig.model.findById(id)
-    console.log(config.pconf);
-    if (!config.pconf) {
+    if (!config?.pconf) {
       return undefined
     }
-    console.log(config.pconf['version']);
     switch (config.pconf['version']) {
       case version:
         return true
@@ -38,7 +36,7 @@ export class UserConfigService {
   async getPConf(id: ObjectId): Promise<object> {
     const config = await UserConfig.model.findById(id)
 
-    return config.pconf
+    return config?.pconf || null
   }
 
   /**
@@ -50,7 +48,7 @@ export class UserConfigService {
   async setPCong(id: ObjectId, pconf: object): Promise<boolean> {
     const version = Md5.hashStr(pconf.toString())
     const result = await UserConfig.model.findByIdAndUpdate(
-      id, { pconf: { version: version, ...pconf } }
+      id, { pconf: { version: version, date: new Date(), ...pconf } }
     )
     return result ? true : false
   }

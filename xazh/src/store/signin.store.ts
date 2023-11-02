@@ -5,6 +5,7 @@
 import { Module } from "vuex";
 import cookie from 'js-cookie'
 import { Base64 } from "js-base64";
+import { base64WithDate } from "../util/encodeMsg.tool";
 
 const signinStore: Module<any, any> = {
   namespaced: true,
@@ -55,6 +56,14 @@ const signinStore: Module<any, any> = {
     },
     info(state): object {
       return state.info
+    },
+    requireParam(state): object {
+      const param = base64WithDate(state.token)
+      return {
+        date: param.date,
+        user: state.user,
+        token: param.data
+      }
     }
   }
 }

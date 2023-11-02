@@ -32,7 +32,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         name: 'MainTools',
-        path: 'tools/:name',
+        path: 'tools',
         component: Tools,
       },
       {

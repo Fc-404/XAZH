@@ -2,7 +2,9 @@
  * Personal config.
  */
 
+import { Md5 } from "ts-md5";
 import { Module } from "vuex";
+import cookie from 'js-cookie'
 
 const pconfStore: Module<any, any> = {
   namespaced: true,
@@ -46,17 +48,23 @@ const pconfStore: Module<any, any> = {
     },
   },
   mutations: {
-    init: function (state, config) {
+    set: function (state, config) {
       try {
-        JSON.stringify(config)
+        for (let i of Object.keys(config)) {
+          if (state[i])
+            state[i] = config[i]
+        }
+        const { version, ...param } = state
+        state.version = Md5.hashStr(JSON.stringify(param))
+        cookie.set('pconf', JSON.stringify({
+          version: state.version,
+          date: config['date'] || new Date(),
+          ...param
+        }))
       } catch {
         return
       }
-      for (let i of Object.keys(config)) {
-        if (state[i])
-          state[i] = config[i]
-      }
-    }
+    },
   }
 }
 

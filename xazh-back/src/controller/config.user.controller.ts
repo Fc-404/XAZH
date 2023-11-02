@@ -21,6 +21,13 @@ export class UserConfigController {
   @Inject()
   userConfigService: UserConfigService
 
+  /**
+   * If the code is 1, return the pconf.
+   * If the code is 0, return nothing.
+   * If the code is -1, there haven't pconf in server.
+   * @param body 
+   * @returns 
+   */
   @Post('/PConf/Sync')
   async pconfSync(@Body() body: PConfDTO) {
     const configId = await this.userConfigService.getConfigId(body.user)

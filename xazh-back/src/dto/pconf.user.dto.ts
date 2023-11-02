@@ -13,7 +13,7 @@ export class PConfDTO extends TokenDTO {
   headerTitleRoll: boolean
 
   // Style
-  @Rule(RuleType.string().max(32))
+  @Rule(RuleType.string().min(0).max(32))
   stylePrimaryColor: string
 
   @Rule(RuleType.boolean())
