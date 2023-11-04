@@ -1,4 +1,4 @@
-import { Provide, makeHttpRequest } from '@midwayjs/core';
+import { Context, Inject, Provide, makeHttpRequest } from '@midwayjs/core';
 import UserBase from '../model/base.user.model';
 import UserConfig from '../model/config.user.model'
 import { IAddUser } from '../interface/user.interface';
@@ -6,6 +6,9 @@ import { Md5 } from 'ts-md5';
 
 @Provide()
 export class UserService {
+
+  @Inject()
+  ctx: Context
 
   /**
    * Determine if the user exists.
@@ -105,7 +108,10 @@ export class UserService {
     const ipMaxCount = 20
 
     const url = `http://ip-api.com/json/${ip}?fields=16409&lang=zh-CN`
-    const ipInfo = await makeHttpRequest(url, { dataType: 'json' })
+    let ipInfo
+    await makeHttpRequest(url, { dataType: 'json' }).then(v => ipInfo = v).catch((e) => {
+      this.ctx.logger.error('Failed to require information of ip.\n' + e)
+    })
     const result = await UserBase.model.findOne({ user: user }, ['recent_ip', 'belong_place'])
 
     result?.recent_ip?.unshift({

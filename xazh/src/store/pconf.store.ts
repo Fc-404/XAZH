@@ -19,7 +19,7 @@ const pconfStore: Module<any, any> = {
     /**
      * Style
      */
-    stylePrimaryColor: ' ',
+    stylePrimaryColor: '',
     stylePageAnimation: true,
 
     /**
@@ -54,6 +54,9 @@ const pconfStore: Module<any, any> = {
           if (state[i])
             state[i] = config[i]
         }
+      } catch {
+        return
+      } finally {
         const { version, ...param } = state
         state.version = Md5.hashStr(JSON.stringify(param))
         cookie.set('pconf', JSON.stringify({
@@ -61,8 +64,6 @@ const pconfStore: Module<any, any> = {
           date: config['date'] || new Date(),
           ...param
         }))
-      } catch {
-        return
       }
     },
   }

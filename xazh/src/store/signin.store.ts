@@ -14,8 +14,8 @@ const signinStore: Module<any, any> = {
     user: '',
     token: '',
     info: {},
-    signined: () => { },
-    logout: () => { }
+    signined: [],
+    logout: []
   }),
   mutations: {
     signin(state, value: string) {
@@ -25,11 +25,17 @@ const signinStore: Module<any, any> = {
       cookie.set('token', value)
       state.user = user
       state.token = value
-      state.signined(state)
+      try {
+        for (let i of state.signined)
+          i(state)
+      } catch { }
       state.on = true
     },
     logout(state) {
-      state.logout(state)
+      try {
+        for (let i of state.logout)
+          i(state)
+      } catch { }
       cookie.remove('user')
       cookie.remove('token')
       state.on = false
@@ -38,10 +44,10 @@ const signinStore: Module<any, any> = {
       state.info = value
     },
     setSignined(state, value: Function) {
-      state.signined = value
+      state.signined.push(value)
     },
     setLogout(state, value: Function) {
-      state.logout = value
+      state.logout.push(value)
     }
   },
   getters: {
