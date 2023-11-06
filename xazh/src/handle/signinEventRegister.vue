@@ -44,7 +44,6 @@ const syncPconf = async function () {
         case -1:
           // No pconf on the server.
           store.commit('pconf/set', null)
-          console.log(cookie.get('pconf'));
           await uploadPConf(cookie.get('pconf'))
           break
       }
@@ -77,6 +76,12 @@ const syncPconf = async function () {
   }
 
   const uploadPConf = async function (client: any) {
+    try {
+      client = JSON.parse(client)
+    } catch {
+      console.log('The local configure have error. Will not be upload.');
+      return
+    }
     const { version, date, ...pconf } = client
 
     await axios.post('/User/Config/PConf/Upload', {

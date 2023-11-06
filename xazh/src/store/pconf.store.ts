@@ -25,7 +25,7 @@ const pconfStore: Module<any, any> = {
     /**
      * Blogs Editor
      */
-    blogsEditorAutoSave: '30000'
+    blogsEditorAutoSave: 30000
   }),
   getters: {
     version: function (state) {
@@ -49,22 +49,22 @@ const pconfStore: Module<any, any> = {
   },
   mutations: {
     set: function (state, config) {
+      let date = new Date()
       try {
         for (let i of Object.keys(config)) {
           if (state[i])
             state[i] = config[i]
         }
-      } catch {
-        return
-      } finally {
-        const { version, ...param } = state
-        state.version = Md5.hashStr(JSON.stringify(param))
-        cookie.set('pconf', JSON.stringify({
-          version: state.version,
-          date: config['date'] || new Date(),
-          ...param
-        }))
-      }
+        date = config['date']
+      } catch { }
+      const { version, ...param } = state
+      state.version = Md5.hashStr(JSON.stringify(param))
+      console.log(JSON.stringify(param));
+      cookie.set('pconf', JSON.stringify({
+        version: state.version,
+        date: date,
+        ...param
+      }))
     },
   }
 }
