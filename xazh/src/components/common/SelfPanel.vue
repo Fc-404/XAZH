@@ -22,103 +22,106 @@
       :rootStyle="{ maxHeight: '100vh' }"
     >
       <div id="selfp-ctl">
-        <div id="selfp-ctl-info">
-          <p id="selfp-ctl-info-name">
-            {{ userInfo?.user ?? '请登录' }}
-          </p>
-          <p>
-            <a-tag
-              style="border: none;"
-              color="#fa8c16"
-            >{{ userInfo.level }}</a-tag>
-            <a-divider
-              type="vertical"
-              style="margin: 0 4px"
-            ></a-divider>
-            <span id="selfp-ctl-info-exp">
-              Exp:
-              <span :title="userInfo.exp.toString()">
-                {{ userInfo.exp ?? 999 }}
+        <div id="selfp-ctl-">
+          <div id="selfp-ctl-info">
+            <p id="selfp-ctl-info-name">
+              {{ userInfo?.user ?? '请登录' }}
+            </p>
+            <p>
+              <a-tag
+                style="border: none;"
+                color="#fa8c16"
+              >{{ userInfo.level }}</a-tag>
+              <a-divider
+                type="vertical"
+                style="margin: 0 4px"
+              ></a-divider>
+              <span id="selfp-ctl-info-exp">
+                Exp:
+                <span :title="userInfo.exp.toString()">
+                  {{ userInfo.exp ?? 999 }}
+                </span>
               </span>
-            </span>
-          </p>
-          <p>
-            <a-tag style="border: none;">无头衔</a-tag>
-          </p>
-          <p id="selfp-ctl-info-local">
-            <EnvironmentOutlined />
-            {{ userInfo.local || '未知' }}
-          </p>
+            </p>
+            <p>
+              <a-tag style="border: none;">无头衔</a-tag>
+            </p>
+            <p id="selfp-ctl-info-local">
+              <EnvironmentOutlined />
+              {{ userInfo.local || '未知' }}
+            </p>
+          </div>
+          <a-avatar id="selfp-ctl-img">
+            {{ userInfo.userF }}
+          </a-avatar>
         </div>
-        <a-avatar id="selfp-ctl-img">
-          {{ userInfo.userF }}
-        </a-avatar>
 
-        <a-divider class="selfp-ctl-fun"></a-divider>
+        <a-divider></a-divider>
         <!-- Function -->
-        <a-button
-          type="text"
-          class="selfp-ctl-fun"
-        >
-          <MessageTwoTone two-tone-color="#73d13d" />
-          消息
-          <a-badge
-            :count="messageCount"
-            :offset="[12, -5]"
+        <div id="selfp-ctl-fun">
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
           >
-          </a-badge>
-        </a-button>
-        <a-button
-          type="text"
-          class="selfp-ctl-fun"
-        >
-          <FileTwoTone two-tone-color="#4096ff" />
-          文章管理
-        </a-button>
-        <a-button
-          type="text"
-          class="selfp-ctl-fun"
-        >
-          <StarTwoTone two-tone-color="#f759ab" />
-          我的收藏
-        </a-button>
-        <a-button
-          type="text"
-          class="selfp-ctl-fun"
-        >
-          <ContactsTwoTone two-tone-color="#36cfc9" />
-          个人中心
-        </a-button>
-        <a-button
-          type="text"
-          class="selfp-ctl-fun"
-        >
-          <SettingTwoTone two-tone-color="#ffc53d" />
-          设置
-        </a-button>
-        <a-button
-          type="text"
-          class="selfp-ctl-fun"
-        >
-          <BulbTwoTone two-tone-color="#9254de" />
-          反馈 & 建议
-        </a-button>
+            <MessageTwoTone two-tone-color="#73d13d" />
+            消息
+            <a-badge
+              :count="messageCount"
+              :offset="[12, -5]"
+            >
+            </a-badge>
+          </a-button>
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+          >
+            <FileTwoTone two-tone-color="#4096ff" />
+            文章管理
+          </a-button>
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+          >
+            <StarTwoTone two-tone-color="#f759ab" />
+            我的收藏
+          </a-button>
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+          >
+            <ContactsTwoTone two-tone-color="#36cfc9" />
+            个人中心
+          </a-button>
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+          >
+            <SettingTwoTone two-tone-color="#ffc53d" />
+            设置
+          </a-button>
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+          >
+            <BulbTwoTone two-tone-color="#9254de" />
+            反馈 & 建议
+          </a-button>
+        </div>
+        <div style="height: 7rem;"></div>
 
-        <a-divider
-          class="selfp-ctl-fun"
-          style="grid-row: -3 / -2;"
-        ></a-divider>
-        <!-- Logout -->
-        <a-button
-          danger
-          type="primary"
-          class="selfp-ctl-fun"
-          style="grid-row: -2 / -1;"
-          @click="logout"
-        >
-          <ImportOutlined />
-          退出登录
-        </a-button>
+        <div id="selfp-ctl-exit">
+          <a-divider style="margin-top: 0;"></a-divider>
+          <!-- Logout -->
+          <a-button
+            id="selfp-ctl-exit-btn"
+            danger
+            type="primary"
+            @click="logout"
+          >
+            <ImportOutlined />
+            退出登录
+          </a-button>
+        </div>
       </div>
     </a-drawer>
   </div>
@@ -214,59 +217,62 @@ onMounted(() => {
   &-ctl {
     width: 100%;
     height: 100%;
-    display: grid;
-    grid-template-columns: repeat(6, 50px);
-    grid-template-rows: repeat(auto-fill, 50px);
 
-    &-info {
-      grid-column: 4 / 7;
-      grid-row: 1 / 3;
-      margin-top: -1rem;
-      margin-left: -20px;
-      font-size: 1rem;
-      color: var(--colorTextBase);
+    &- {
+      display: grid;
+      grid-template-columns: repeat(6, 50px);
+      grid-template-rows: repeat(2, 50px);
 
-      >p {
-        margin-top: .5rem;
+      &info {
+        grid-column: 4 / 7;
+        grid-row: 1 / 3;
+        margin-top: -1rem;
+        margin-left: -20px;
+        font-size: 1rem;
+        color: var(--colorTextBase);
+
+        >p {
+          margin-top: .5rem;
+        }
+
+        &-name {
+          font-size: 1.4rem !important;
+        }
+
+        &-exp {
+          font-size: .8rem;
+          display: inline-block;
+          width: 6rem;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        &-local {
+          color: var(--colorText);
+          font-size: .8rem !important;
+        }
       }
 
-      &-name {
-        font-size: 1.4rem !important;
+      &img {
+        grid-column: 1 / 3;
+        grid-row: 1 / 3;
+
+        width: 100%;
+        height: 100%;
+
+        font-size: 3rem;
+        line-height: 100px;
+        cursor: pointer;
       }
-
-      &-exp {
-        font-size: .8rem;
-        display: inline-block;
-        width: 6rem;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-
-      &-local {
-        color: var(--colorText);
-        font-size: .8rem !important;
-      }
-    }
-
-    &-img {
-      grid-column: 1 / 3;
-      grid-row: 1 / 3;
-
-      width: 100%;
-      height: 100%;
-
-      font-size: 3rem;
-      line-height: 100px;
-      cursor: pointer;
     }
 
     .selfp-ctl-fun {
-      grid-column: 1 / fill;
+      width: 100%;
+      height: 3rem;
       font-size: 1.1rem;
       line-height: 1.1rem;
-      padding-left: 1rem;
-      height: 100%;
+      padding-left: 1.1rem;
       text-align: left;
 
       user-select: none;
@@ -275,13 +281,21 @@ onMounted(() => {
       >.anticon {
         margin-right: 1.1rem;
       }
+    }
 
-      &:last-child {
+    &-exit {
+      position: absolute;
+      bottom: 0;
+      width: calc(100% - 3rem);
+      padding-bottom: 2rem;
+
+      background-color: var(--colorBgContainer);
+
+      &-btn {
+        width: 100%;
+        font-size: 1.1rem;
+        height: 2.7rem;
         text-align: center;
-
-        >.anticon {
-          margin-right: 0 !important;
-        }
       }
     }
   }
