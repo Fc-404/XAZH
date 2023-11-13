@@ -1,11 +1,11 @@
-import { Controller, Inject, Post } from "@midwayjs/core";
+import { Controller, Get, Inject, Post } from "@midwayjs/core";
 import { Context } from "@midwayjs/koa";
 import { UploadFileService } from "../service/upload.file.service";
 
 import { GetBoundary } from "../decorator/param/formdata.decorator";
 import parseFormData from "../util/parseFormData.util";
 
-@Controller('/Upload')
+@Controller('/File')
 export class FileUploadController {
 
   @Inject()
@@ -14,7 +14,7 @@ export class FileUploadController {
   @Inject()
   uf: UploadFileService
 
-  @Post('/')
+  @Post('/Upload')
   async uploadFile(@GetBoundary() boundary: string): Promise<any> {
     // TODO: Empty of form will lead to error, that because the func parseFormData.
     return new Promise((resolve, reject) => {
@@ -33,17 +33,32 @@ export class FileUploadController {
         for (let i of dataArr) {
           let r = await this.uf.upload({
             name: i.filename,
+            author: 'fjeifj',
             data: i.body
           })
 
           result.push(r)
         }
 
-
         resolve(result)
       })
 
     })
+
+  }
+
+  @Post('/Delete')
+  async deleteFile() {
+
+  }
+
+  @Get('/:md5')
+  async getFile() {
+
+  }
+
+  @Post('/Get')
+  async getFiles() {
 
   }
 }

@@ -7,16 +7,23 @@ const schema = new mongoose.Schema({
     type: String,
     unique: true,
   },
-  fileName: String,         // File name
+  fileName: String,         // File name, just save name that the first give.
   fileSize: Number,         // File size, that unit is the Byte
   fileType: String,         // File type, such as 'jpg', 'mp3'
-  firstAuthor: mongoose.Types.ObjectId,
-  // The author of the first upload
   uploadTime: {             // The time of upload
     type: Date,
     default: Date.now,
   },
-  data: [String]            // The list of the Data.File Document. It is MD5 string.
+  level: Number,            // User level
+  // The list of the Data.File Document.
+  data: [mongoose.Types.ObjectId],
+  // who uploaded. Type is user.
+  author: [String],
+  // whether delete. If true, never delete.
+  persitent: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const model = mongoose.model(name, schema, name)
