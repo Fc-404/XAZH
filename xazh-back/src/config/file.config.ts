@@ -3,8 +3,9 @@
  */
 
 export default {
+  mongodbCellSize: 1600000,
   maxSize: {
-    default: 16000000,
+    default: 160000000,
     himg: 2000000,
   },
 }

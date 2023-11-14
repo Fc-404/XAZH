@@ -16,7 +16,12 @@ const split = function (data: Buffer, separator: string): Array<Buffer> {
   return dataArr
 }
 
-export default function parseFormData(data: Buffer, boundary: string): Array<any> {
+export default function parseFormData(data: Buffer, boundary: string): Array<{
+  'form-data': string,
+  name: string,
+  filename: string,
+  body: Buffer
+}> {
   if (!data.length)
     return []
 

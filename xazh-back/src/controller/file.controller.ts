@@ -4,6 +4,7 @@ import { UploadFileService } from "../service/upload.file.service";
 
 import { GetBoundary } from "../decorator/param/formdata.decorator";
 import parseFormData from "../util/parseFormData.util";
+import { Md5 } from "ts-md5";
 
 @Controller('/File')
 export class FileUploadController {
@@ -31,9 +32,11 @@ export class FileUploadController {
 
         const result = []
         for (let i of dataArr) {
+          const filemd5 = new Md5().appendByteArray(i.body).end()
           let r = await this.uf.upload({
             name: i.filename,
-            author: 'fjeifj',
+            author: 'fjeifj123',
+            md5: filemd5 as string,
             data: i.body
           })
 

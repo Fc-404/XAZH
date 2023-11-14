@@ -5,7 +5,6 @@ import FileData from '../model/data.file.model'
 import FileInfo from '../model/info.file.model'
 
 import fileConfig from "../config/file.config";
-import { Md5 } from "ts-md5";
 
 @Provide()
 export class UploadFileService {
@@ -15,29 +14,30 @@ export class UploadFileService {
    * Here had handled the respond.
    * TODO: Due to handle the req necessarily, so cann't return status.
    * @param options 
-   * @returns Number | Object
+   * @returns Number
+   * code:
    * 1: The file size is too large.
    * -1: The file is alread exist.
    * 2: Save file had been Exception.
    */
   async upload(options: IUploadFile) {
+
     const filel = options.data.length
     if (filel > fileConfig.maxSize[options.type as string || 'default']) {
       return 1
     }
 
-    // TODO: Not auther. And Not size judge. And Not routine.
-    const filemd5 = new Md5().appendByteArray(options.data).end()
+    // TODO: Not author. And Not size judge. And Not routine.
 
-    let result: any = await FileInfo.model.findOne({ fileMd5: filemd5 })
+    let result: any = await FileInfo.model.findOne({ fileMd5: options.md5 })
     if (result) {
-      let autherL = result.data.auther.length
+      let authorL = result.author.length
       // ! The number 100 is threshold to set the field of persitend.
-      if (autherL > 100) {
+      if (authorL > 100) {
         result.persitent = true
       } else {
-        result.auther.indexOf(options.author) == -1
-          ? result.auther.push(options.author)
+        result.author.indexOf(options.author) == -1
+          ? result.author.push(options.author)
           : null
       }
       await result.save()
@@ -47,21 +47,21 @@ export class UploadFileService {
     const session = await FileInfo.model.startSession()
     session.startTransaction()
     let filedata = []
-    let fileinfo
     try {
-      for (let i = 0; i < filel; i += 16000000) {
-        let end = i + 16000000
+      const cellL = fileConfig.mongodbCellSize
+      for (let i = 0; i < filel; i += cellL) {
+        let end = i + cellL
         end = end > filel ? filel : end
         let d: Buffer = options.data.slice(i, end)
 
         let filed = await FileData.model.create([{
           data: d
         }], { session })
-        filedata.push(filed['_id'])
+        filedata.push(filed[0]['_id'])
       }
 
-      fileinfo = await FileInfo.model.create([{
-        fileMd5: filemd5,
+      await FileInfo.model.create([{
+        fileMd5: options.md5,
         fileName: options.name,
         fileSize: filel,
         fileType: options.type,
@@ -77,7 +77,7 @@ export class UploadFileService {
       session.endSession()
     }
 
-    return fileinfo
+    return 0
   }
 
   /**
