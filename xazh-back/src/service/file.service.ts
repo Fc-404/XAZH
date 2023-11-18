@@ -1,5 +1,6 @@
 import { Provide } from "@midwayjs/core";
 import { IDeleteFile, IGetFile, IUploadFile } from "../interface/file.interface";
+import { Readable } from "stream";
 
 import FileData from '../model/data.file.model'
 import FileInfo from '../model/info.file.model'
@@ -7,7 +8,7 @@ import FileInfo from '../model/info.file.model'
 import fileConfig from "../config/file.config";
 
 @Provide()
-export class UploadFileService {
+export class FileService {
 
   /**
    * Upload File.
@@ -138,16 +139,34 @@ export class UploadFileService {
    * @returns -1 | Object
    * -1: means that no authority.
    */
+  async getAll(options: IGetFile) {
+    const filei = await FileInfo.model.findOne({ fileMd5: options.md5 })
+    if (filei.level > options.level)
+      return -1
+
+    const filed = []
+    for (let i of filei.data) {
+     filed.push((await FileData.model.findById(i)).data)
+    }
+
+    // return {
+    //   info: filei,
+    //   data: Buffer.concat(filed)
+    // }
+    return Buffer.concat(filed)
+  }
+
   async get(options: IGetFile) {
     const filei = await FileInfo.model.findOne({ fileMd5: options.md5 })
     if (filei.level > options.level)
       return -1
 
-    const filed = await FileData.model.findById({ _id: filei.data[0] })
-
-    return {
-      info: filei,
-      data: filed
+    const s = new Readable()
+    for (let i of filei.data) {
+      s.push((await FileData.model.findById(i)).data)
     }
+    s.push(null)
+
+    return s
   }
 }

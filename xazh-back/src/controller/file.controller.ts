@@ -1,19 +1,19 @@
-import { Controller, Get, Inject, Post } from "@midwayjs/core";
+import { Body, Controller, Get, Inject, Param, Post } from "@midwayjs/core";
 import { Context } from "@midwayjs/koa";
-import { UploadFileService } from "../service/upload.file.service";
+import { FileService } from "../service/file.service";
 
 import { GetBoundary } from "../decorator/param/formdata.decorator";
 import parseFormData from "../util/parseFormData.util";
 import { Md5 } from "ts-md5";
 
 @Controller('/File')
-export class FileUploadController {
+export class FileController {
 
   @Inject()
   ctx: Context
 
   @Inject()
-  uf: UploadFileService
+  fs: FileService
 
   @Post('/Upload')
   async uploadFile(@GetBoundary() boundary: string): Promise<any> {
@@ -33,7 +33,7 @@ export class FileUploadController {
         const result = []
         for (let i of dataArr) {
           const filemd5 = new Md5().appendByteArray(i.body).end()
-          let r = await this.uf.upload({
+          let r = await this.fs.upload({
             name: i.filename,
             author: 'fjeifj123',
             md5: filemd5 as string,
@@ -56,12 +56,39 @@ export class FileUploadController {
   }
 
   @Get('/:md5')
-  async getFile() {
+  async getFile(@Param('md5') md5) {
+    this.ctx.set('Content-type', 'video/mp4')
 
+    const result = await this.fs.getAll({
+      level: 3,
+      md5
+    })
+
+    // console.log(result);
+    this.ctx.form = false
+    return result
   }
 
   @Post('/Get')
-  async getFiles() {
+  async getFiles(@Body('md5') md5) {
+    this.ctx.set('Transfer-Encoding', 'chunked')
+    this.ctx.set('Access-Control-Allow-Origin', '*')
+    this.ctx.set('Content-Type', 'text/plain')
 
+    for (let i = 0; i < 10000; ++i)
+      this.ctx.res.write(Buffer.from(i.toString()))
+
+    this.ctx.res.end()
+
+
+    // const result = await this.fs.getAll({
+    //   level: 3,
+    //   md5
+    // })
+
+    // console.log(result);
+
+    this.ctx.form = false
+    return null
   }
 }
