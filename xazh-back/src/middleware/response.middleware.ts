@@ -2,7 +2,7 @@
  * This middleware function is to normalize response.
  */
 
-import { Middleware, IMiddleware, httpError } from "@midwayjs/core"
+import { Middleware, IMiddleware } from "@midwayjs/core"
 import { NextFunction, Context } from "@midwayjs/koa"
 import { DefaultErrorFilter } from "../filter/default.filter"
 
@@ -30,8 +30,7 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
           result = body
       } catch (error) {
         ctx.logger.error(error)
-        ctx.status = 500
-        return new httpError.InternalServerErrorError()
+        throw DefaultErrorFilter
       }
 
       return result

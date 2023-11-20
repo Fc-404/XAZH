@@ -1,11 +1,12 @@
 import { Provide } from "@midwayjs/core";
 import { IDeleteFile, IGetFile, IUploadFile } from "../interface/file.interface";
-import { Readable } from "stream";
 
 import FileData from '../model/data.file.model'
 import FileInfo from '../model/info.file.model'
 
 import fileConfig from "../config/file.config";
+import { DefaultErrorFilter } from "../filter/default.filter";
+import { Readable } from "stream";
 
 @Provide()
 export class FileService {
@@ -33,7 +34,7 @@ export class FileService {
     let result: any = await FileInfo.model.findOne({ fileMd5: options.md5 })
     if (result) {
       let authorL = result.author.length
-      // ! The number 100 is threshold to set the field of persitend.
+      // ! The number 100 is the threshold to set the field of persitend.
       if (authorL > 100) {
         result.persitent = true
       } else {
@@ -134,32 +135,70 @@ export class FileService {
   }
 
   /**
-   * Get File
+   * Get infomation about the file.
+   * @param md5 
+   * @returns FileInfo
+   */
+  async getInfo(md5: string) {
+    return await FileInfo.model.findOne({ fileMd5: md5 }) ?? null
+  }
+
+  /**
+   * Get full file.
+   * ! This function is not recommended.
+   * ! Unless it is explicitly known that 
+   * ! the file is less than 1.6M.
    * @param options 
-   * @returns -1 | Object
-   * -1: means that no authority.
+   * @returns null | Object
+   * null: means that no authority.
    */
   async getAll(options: IGetFile) {
-    const filei = await FileInfo.model.findOne({ fileMd5: options.md5 })
-    if (filei.level > options.level)
-      return -1
+    const filei = await this.getInfo(options.md5)
+    if (filei?.level > options.level)
+      return null
 
     const filed = []
     for (let i of filei.data) {
-     filed.push((await FileData.model.findById(i)).data)
+      filed.push((await FileData.model.findById(i)).data)
     }
 
-    // return {
-    //   info: filei,
-    //   data: Buffer.concat(filed)
-    // }
-    return Buffer.concat(filed)
+    return {
+      info: filei,
+      data: Buffer.concat(filed)
+    }
   }
 
+  /**
+   * Get deals, anyone of which will get cell of file.
+   * @param options 
+   * @returns Object | null
+   */
   async get(options: IGetFile) {
-    const filei = await FileInfo.model.findOne({ fileMd5: options.md5 })
-    if (filei.level > options.level)
-      return -1
+    const filei = await this.getInfo(options.md5)
+    if (filei?.level > options.level)
+      return null
+
+    const fileDeals: Array<Function> = []
+    for (let i of filei.data) {
+      fileDeals.push(async () => {
+        try {
+          return (await FileData.model.findById(i)).data
+        } catch (e) {
+          throw DefaultErrorFilter
+        }
+      })
+    }
+
+    return {
+      filei: filei,
+      filed: fileDeals
+    }
+  }
+
+  async getI(options: IGetFile) {
+    const filei = await this.getInfo(options.md5)
+    if (filei?.level > options.level)
+      return null
 
     const s = new Readable()
     for (let i of filei.data) {

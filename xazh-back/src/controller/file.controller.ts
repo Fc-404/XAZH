@@ -59,35 +59,41 @@ export class FileController {
   async getFile(@Param('md5') md5) {
     this.ctx.set('Content-type', 'video/mp4')
 
+    console.log('请求', process.memoryUsage());
     const result = await this.fs.getAll({
       level: 3,
       md5
     })
+    console.log('请求结束', process.memoryUsage());
 
     // console.log(result);
     this.ctx.form = false
-    return result
+    return result?.data
   }
 
   @Post('/Get')
   async getFiles(@Body('md5') md5) {
     this.ctx.set('Transfer-Encoding', 'chunked')
     this.ctx.set('Access-Control-Allow-Origin', '*')
-    this.ctx.set('Content-Type', 'text/plain')
+    this.ctx.set('Content-Type', 'video/mp4')
 
-    for (let i = 0; i < 10000; ++i)
-      this.ctx.res.write(Buffer.from(i.toString()))
+    console.log('请求', process.memoryUsage());
 
-    this.ctx.res.end()
+    const result = await this.fs.get({
+      level: 3,
+      md5
+    })
 
+    console.log('获取数据', process.memoryUsage());
 
-    // const result = await this.fs.getAll({
-    //   level: 3,
-    //   md5
-    // })
+    let ii = 0
+    for (let i of result.filed) {
+      this.ctx.res.write(await i())
+      console.log(`数据${ii++}已发送`, process.memoryUsage());
+    }
 
-    // console.log(result);
-
+    this.ctx.res.end
+    console.log('请求结束', process.memoryUsage());
     this.ctx.form = false
     return null
   }
