@@ -40,6 +40,8 @@ export default function parseFormData(data: Buffer, boundary: string): Array<{
       object[hvk] = hvv.toString()
     })
     object['body'] = body
+    // remove character "
+    object['filename'] = object['filename'].slice(1, -1)
 
     result.push(object)
   }

@@ -4,32 +4,32 @@
 
 export enum FILE_TYPE {
   // Text
-  txt = 'txt',
-  htmp = 'html',
-  md = 'md',
+  txt = 'text/txt',
+  htmp = 'text/html',
+  md = 'text/md',
 
   // Audio
-  mp3 = 'mp3',
-  wav = 'wav',
-  ogg = 'ogg',
-  aac = 'aac',
+  mp3 = 'audio/mp3',
+  wav = 'audio/wav',
+  ogg = 'audio/ogg',
+  aac = 'audio/aac',
 
   // Video
-  mp4 = 'mp4',
-  webm = 'webm',
+  mp4 = 'video/mp4',
+  webm = 'video/webm',
 
   // Picture
-  jpg = 'jpg',
-  jpeg = 'jpeg',
-  png = 'png',
-  gif = 'gif',
-  svg = 'svg',
-  apng = 'apng',
-  webp = 'webp',
-  avif = 'avif',
+  jpg = 'image/jpg',
+  jpeg = 'image/jpeg',
+  png = 'image/png',
+  gif = 'image/gif',
+  svg = 'image/svg',
+  apng = 'image/apng',
+  webp = 'image/webp',
+  avif = 'image/avif',
 
   // Other
-  zip = 'zip',
-  rar = 'rar',
-  '7z' = '7z',
+  zip = 'other/zip',
+  rar = 'other/rar',
+  '7z' = 'other/7z',
 }

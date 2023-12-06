@@ -4,7 +4,6 @@
 
 import { Middleware, IMiddleware } from "@midwayjs/core"
 import { NextFunction, Context } from "@midwayjs/koa"
-import { DefaultErrorFilter } from "../filter/default.filter"
 
 @Middleware()
 export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
@@ -30,7 +29,7 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
           result = body
       } catch (error) {
         ctx.logger.error(error)
-        throw DefaultErrorFilter
+        throw error
       }
 
       return result

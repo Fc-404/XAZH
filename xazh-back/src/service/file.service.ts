@@ -23,13 +23,10 @@ export class FileService {
    * 2: Save file had been Exception.
    */
   async upload(options: IUploadFile) {
-
     const filel = options.data.length
     if (filel > fileConfig.maxSize[options.type as string || 'default']) {
       return 1
     }
-
-    // TODO: Not author. And Not size judge. And Not routine.
 
     let result: any = await FileInfo.model.findOne({ fileMd5: options.md5 })
     if (result) {
@@ -154,7 +151,7 @@ export class FileService {
    */
   async getAll(options: IGetFile) {
     const filei = await this.getInfo(options.md5)
-    if (filei?.level > options.level)
+    if (filei?.level > (options.level ?? 0))
       return null
 
     const filed = []
@@ -175,7 +172,7 @@ export class FileService {
    */
   async get(options: IGetFile) {
     const filei = await this.getInfo(options.md5)
-    if (filei?.level > options.level)
+    if (filei?.level > (options.level ?? 0))
       return null
 
     const fileDeals: Array<Function> = []
@@ -195,6 +192,9 @@ export class FileService {
     }
   }
 
+  /**
+   * ! This way is to get file by the Readable Function.
+
   async getI(options: IGetFile) {
     const filei = await this.getInfo(options.md5)
     if (filei?.level > options.level)
@@ -208,4 +208,5 @@ export class FileService {
 
     return s
   }
+  */
 }
