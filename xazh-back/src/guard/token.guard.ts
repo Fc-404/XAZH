@@ -5,6 +5,7 @@
 import { Guard, IGuard } from "@midwayjs/core";
 import { Context } from "@midwayjs/koa";
 import { UserTokenService } from "../service/token.user.service";
+import { Base64 } from "js-base64";
 
 const overtimeMax: number = 30000
 
@@ -20,7 +21,7 @@ export class TokenGuard implements IGuard {
       && ctx.user['overtime'] >= 0)
       timeout = true
 
-    if (ctx.user['name'] == ctx.request.body['user'])
+    if (ctx.user['name'] == (ctx.request.body['user'] ?? Base64.decode(ctx.get('Custom-User'))))
       identicalUser = true
 
     // Verify the token correctness.
@@ -28,7 +29,7 @@ export class TokenGuard implements IGuard {
     identicalToken = await tokenService.verifyToken(
       ctx.user['name'], ctx.user['token']
     )
-    
+
     return (timeout && identicalUser && identicalToken)
   }
 }

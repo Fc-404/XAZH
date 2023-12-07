@@ -15,15 +15,16 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
   resolve() {
     return async (ctx: Context, next: NextFunction) => {
       ctx.user = {
-        name: undefined,
-        token: undefined,
-        level: 0,
-        ranks: [],
-        overtime: 0,
-        ipv4: undefined
+        name: undefined,      // User name
+        token: undefined,     // User token
+        level: 0,             // User level
+        ranks: [],            // User ranks
+        overtime: 0,          // Time difference from user request to this service acceptance.
+        ipv4: undefined       // User accessing ip
       }
-      const token = ctx.request.body['token'] ?? undefined
-      const date = ctx.request.body['date'] ?? undefined
+      const token = ctx.request.body['token'] ?? ctx.get('Custom-Token') ?? undefined
+      const date = ctx.request.body['date'] ?? ctx.get('Custom-Date') ?? undefined
+
       if (token && date) {
         let rawToken = debase64WithDate({
           date: date, data: token
@@ -64,6 +65,8 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
         // Set user's ip, and format to ipv4
         ctx.user['ipv4'] = /(\d{1,3}.){3}.\d{1,3}/.exec(ctx.ip)[0]
       } catch { }
+
+      console.log(ctx.user);
 
       return await next()
     }

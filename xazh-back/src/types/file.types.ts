@@ -5,7 +5,7 @@
 export enum FILE_TYPE {
   // Text
   txt = 'text/txt',
-  htmp = 'text/html',
+  html = 'text/html',
   md = 'text/md',
 
   // Audio

@@ -5,10 +5,11 @@ import { Context } from '@midwayjs/koa';
 export class ForbiddenErrorFilter {
   async catch(err: MidwayHttpError, ctx: Context) {
     ctx.status = 403
-
+    
     return {
       status: 403,
       message: 'Forbidden.',
+      type: err.message == 'Forbidden' ? undefined : err.message
     };
   }
 }

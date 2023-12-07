@@ -6,7 +6,6 @@ import FileInfo from '../model/info.file.model'
 
 import fileConfig from "../config/file.config";
 import { DefaultErrorFilter } from "../filter/default.filter";
-import { Readable } from "stream";
 
 @Provide()
 export class FileService {

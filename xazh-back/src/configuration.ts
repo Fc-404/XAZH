@@ -16,6 +16,7 @@ import { ForbiddenErrorFilter } from './filter/forbidden.filter';
 import { NotFoundErrorFilter } from './filter/notfound.filter';
 import { DefaultErrorFilter } from './filter/default.filter';
 import { ValidateErrorFilter } from './filter/validate.filter';
+import { BadRequestErrorFilter } from './filter/badrequest.filter';
 
 @Configuration({
   imports: [
@@ -55,6 +56,7 @@ export class ContainerLifeCycle {
       DefaultErrorFilter,
       NotFoundErrorFilter,
       ValidateErrorFilter,
+      BadRequestErrorFilter
     ]);
 
     // add decorator
