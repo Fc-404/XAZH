@@ -48,7 +48,7 @@ export class FileController {
       throw new httpError.BadRequestError('Not Body.')
     }
 
-    //- Limit file size.
+    //- Limit file size. 16M
     if (filesize > 16000000) {
       throw new httpError.ForbiddenError('File too large.')
     }
@@ -85,21 +85,33 @@ export class FileController {
   }
 
   @Post('/Delete')
-  async deleteFile() {
+  @Level(USER_LEVEL.user)
+  @UseGuard([LevelGuard, TokenGuard])
+  async deleteFile(@Body('md5') md5: string) {
+    console.log(this.ctx.user['level']);
 
+    const result = await this.fs.delete({
+      author: this.ctx.user['name'],
+      level: this.ctx.user['level'],
+      md5: md5
+    })
+
+    return result
   }
 
   @Get('/:md5')
   async getFile(@Param('md5') md5: string, @Query('save') save: boolean) {
     const filei = await this.fs.getInfo(md5)
 
-    if (filei.fileSize > 16000000) {
-      console.log(filei.fileSize);
+    if (!filei)
+      throw new httpError.NotFoundError('There is no such file.')
+    // 1.6M file size limit.
+    if (filei.fileSize > 1600000) {
       throw new httpError.ForbiddenError('File size limit, switch to post.')
     }
 
     // Set file type.
-    const filetype = filei.fileType?.split('/')[1]
+    const filetype = filei.fileType
     if (filetype)
       this.ctx.set('Content-Type', filetype)
     // Whether download the file for save.
@@ -108,9 +120,16 @@ export class FileController {
         'attachment')
 
     const result = await this.fs.getAll({
-      level: 3,
+      level: this.ctx.user['level'],
       md5
     })
+
+    if (result == -1) {
+      throw new httpError.NotFoundError('There is no such file.')
+    }
+    if (result == 1) {
+      throw new httpError.ForbiddenError('There is no permission to access the file.')
+    }
 
     this.ctx.form = false
     return result?.data
@@ -119,22 +138,29 @@ export class FileController {
   @Post('/Get')
   @Level(USER_LEVEL.user)
   @UseGuard([LevelGuard, TokenGuard])
-  async getBigFile(@Body('md5') md5: string, @Body('save') save: boolean) {
+  async getFiles(@Body('md5') md5: string, @Body('save') save: boolean) {
     this.ctx.set('Transfer-Encoding', 'chunked')
     this.ctx.set('Access-Control-Allow-Origin', '*')
 
     const result = await this.fs.get({
-      level: 3,
+      level: this.ctx.user['level'],
       md5
     })
 
+    if (result == -1) {
+      throw new httpError.NotFoundError('There is no such file.')
+    }
+    if (result == 1) {
+      throw new httpError.ForbiddenError('There is no permission to access the file.')
+    }
+
     // Set file type.
-    const filetype = result.filei.fileType?.split('/')[1]
+    const filetype = result.filei.fileType
     if (filetype)
       this.ctx.set('Content-Type', filetype)
 
+
     // Whether download the file for save.
-    console.log('attachment; filename="' + result.filei.fileName + '"');
     if (save)
       this.ctx.set('Content-Disposition',
         'attachment')

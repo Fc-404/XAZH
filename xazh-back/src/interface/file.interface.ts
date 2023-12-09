@@ -16,6 +16,7 @@ export interface IUploadFile {
 
 export interface IDeleteFile {
   author: string,
+  level?: USER_LEVEL,
   md5: string,
 }
 

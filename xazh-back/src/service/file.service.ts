@@ -94,20 +94,23 @@ export class FileService {
     if (!file)
       return -1
 
-    // Can't delete
-    if (file.persitent)
-      return 1
+    // If user's level higher than or equal 2, remove it directly.
+    if (options?.level < 2) {
+      // Can't delete
+      if (file.persitent)
+        return 1
 
-    // Delete user
-    const userIndex = file.author.indexOf(options.author as string)
-    if (userIndex > -1) {
-      file.author.splice(userIndex, 1)
-    }
+      // Delete user
+      const userIndex = file.author.indexOf(options.author as string)
+      if (userIndex > -1) {
+        file.author.splice(userIndex, 1)
+      }
 
-    // Have somebody is author of the file
-    if (file.author.length > 0) {
-      await file.save()
-      return 0
+      // Have somebody is author of the file
+      if (file.author.length > 0) {
+        await file.save()
+        return 0
+      }
     }
 
     // Nobody have this file, and delete it.
@@ -145,13 +148,14 @@ export class FileService {
    * ! Unless it is explicitly known that 
    * ! the file is less than 1.6M.
    * @param options 
-   * @returns null | Object
-   * null: means that no authority.
+   * @returns Object | number
    */
   async getAll(options: IGetFile) {
     const filei = await this.getInfo(options.md5)
+    if (!filei)
+      return -1
     if (filei?.level > (options.level ?? 0))
-      return null
+      return 1
 
     const filed = []
     for (let i of filei.data) {
@@ -167,12 +171,16 @@ export class FileService {
   /**
    * Get deals, anyone of which will get cell of file.
    * @param options 
-   * @returns Object | null
+   * @returns Object | number
+   * -1: There is no such file.
+   * 1: There is no permission to access the file.
    */
   async get(options: IGetFile) {
     const filei = await this.getInfo(options.md5)
+    if (!filei)
+      return -1
     if (filei?.level > (options.level ?? 0))
-      return null
+      return 1
 
     const fileDeals: Array<Function> = []
     for (let i of filei.data) {
