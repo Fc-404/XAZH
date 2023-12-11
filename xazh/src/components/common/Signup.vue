@@ -30,7 +30,7 @@
           size="50"
           color="var(--colorPrimary)"
         ></Logo>
-        <span>夏至 De 主页</span>
+        <span>夏至星球</span>
         <p>没有账号？去<span @click="signUpOrIn">注册</span></p>
       </div>
 

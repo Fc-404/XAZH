@@ -20,7 +20,7 @@
             size="3rem"
             color="var(--colorPrimary)"
           ></Logo>
-          <label>夏至De主页</label>
+          <label>夏至星球</label>
         </div>
         <div style="flex-grow: 1;"></div>
 

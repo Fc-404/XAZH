@@ -15,7 +15,7 @@ import { useRoute, useRouter } from "vue-router";
 const route = useRoute()
 const router = useRouter()
 
-document.title = '夏至De主页 ' + route.query?.type
+document.title = '夏至星球 ' + route.query?.type
 
 const signinSuccess = function () {
   // router.push({
