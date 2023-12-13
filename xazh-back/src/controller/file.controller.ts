@@ -48,7 +48,7 @@ export class FileController {
       throw new httpError.BadRequestError('Not Body.')
     }
 
-    //- Limit file size. 16M
+    // //- Limit file size. 16M
     if (filesize > 16000000) {
       throw new httpError.ForbiddenError('File too large.')
     }
@@ -57,20 +57,20 @@ export class FileController {
     return new Promise((resolve, reject) => {
 
       let data: Buffer = Buffer.alloc(0)
-      const datas = []
+      let datas = []
       this.ctx.req.on('data', (s) => {
         datas.push(s)
       })
 
       this.ctx.req.on('end', async () => {
         data = Buffer.concat(datas)
-        const dataArr = parseFormData(data, boundary)
-
+        datas = []
+        const dataArr = parseFormData(data, boundary, true)
         const result = []
         for (let i of dataArr) {
           const filemd5 = new Md5().appendByteArray(i.body).end()
           let r = await this.fs.upload({
-            name: i.filename,
+            name: filename,
             type: FILE_TYPE[fileSuffix],
             author: this.ctx.user['name'],
             md5: filemd5 as string,
@@ -131,6 +131,8 @@ export class FileController {
       throw new httpError.ForbiddenError('There is no permission to access the file.')
     }
 
+    this.ctx.set('Content-Length', result.info.fileSize.toString())
+
     this.ctx.form = false
     return result?.data
   }
@@ -158,7 +160,6 @@ export class FileController {
     const filetype = result.filei.fileType
     if (filetype)
       this.ctx.set('Content-Type', filetype)
-
 
     // Whether download the file for save.
     if (save)

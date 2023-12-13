@@ -15,24 +15,24 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
       ctx.message = 'I know you know I like you.'
       ctx.form = true
 
-      let result = {
-        code: ctx.code,
-        status: ctx.status,
-        message: ctx.message,
-        body: ''
-      }
       try {
         const body = await next()
-        if (ctx.form)
-          result.body = body
-        else
+
+        let result = {
+          code: ctx.code,
+          status: ctx.status,
+          message: ctx.message,
+          body: body
+        }
+
+        if (!ctx.form)
           result = body
+
+        return result
       } catch (error) {
         ctx.logger.error(error)
         throw error
       }
-
-      return result
     }
   }
 }

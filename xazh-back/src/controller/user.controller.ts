@@ -60,7 +60,7 @@ export class UserController {
 
     if (!pswd) {
       this.ctx.status = 500
-      this.ctx.code = -1
+      this.ctx.code = 2
       return '服务器错误！'
     }
 
@@ -82,7 +82,6 @@ export class UserController {
   @Post('/Signin')
   async verifyUser(@Body() userinfo: SigninUserDTO) {
     const useri = { user: '' }
-
     const result = await this.userBaseService.verifyPswd(userinfo.account, userinfo.pswd, useri)
 
     switch (result) {

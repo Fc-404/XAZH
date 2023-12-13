@@ -23,7 +23,7 @@ export class FileService {
    */
   async upload(options: IUploadFile) {
     const filel = options.data.length
-    if (filel > fileConfig.maxSize[options.type as string || 'default']) {
+    if (filel > fileConfig.maxSize['default']) {
       return 1
     }
 

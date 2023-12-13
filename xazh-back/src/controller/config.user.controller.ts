@@ -11,7 +11,7 @@ import { PConfDTO } from "../dto/pconf.user.dto";
 import { UserConfigService } from "../service/config.user.service";
 
 @Controller('/User/Config')
-@CLevel(USER_LEVEL.visitor)
+@CLevel(USER_LEVEL.user)
 @UseGuard([LevelGuard, TokenGuard])
 export class UserConfigController {
 

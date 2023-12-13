@@ -62,6 +62,6 @@ export class UserConfigService {
   async getConfigId(user: string): Promise<ObjectId> {
     const result = await UserBase.model.findOne({ user: user }, ['config_link'])
 
-    return result.config_link as ObjectId
+    return result?.config_link as ObjectId
   }
 }
