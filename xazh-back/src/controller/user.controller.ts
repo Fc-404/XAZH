@@ -81,7 +81,7 @@ export class UserController {
 
   @Post('/Signin')
   async verifyUser(@Body() userinfo: SigninUserDTO) {
-    const useri = { user: '' }
+    const useri = { _id: undefined, user: '' }
     const result = await this.userBaseService.verifyPswd(userinfo.account, userinfo.pswd, useri)
 
     switch (result) {
@@ -96,9 +96,9 @@ export class UserController {
           token: tokenN.data,
           date: tokenN.date,
         }
-        await this.userTokenService.setToken(useri.user, token)
+        await this.userTokenService.setToken(useri._id, token)
         this.userBaseService.pushIp(
-          useri.user,
+          useri._id,
           this.ctx.user['ipv4']
         )
         return result
@@ -115,7 +115,7 @@ export class UserController {
   @Level(USER_LEVEL.user)
   @UseGuard([LevelGuard, TokenGuard])
   async getUserInfo() {
-    const result = await this.userBaseService.getUserInfo(this.ctx.user.name)
+    const result = await this.userBaseService.getUserInfo(this.ctx.user['id'])
     return result
   }
 
@@ -128,11 +128,11 @@ export class UserController {
    */
   @Post('/VerifyToken')
   async verifyToken(@Body() body: TokenDTO) {
-    const haveUser = await this.userBaseService.haveUser(body.user)
-    if (!haveUser) {
-      this.ctx.code = 3
-      return '验证失败！'
-    }
+    // const haveUser = await this.userBaseService.haveUser()
+    // if (!haveUser) {
+    //   this.ctx.code = 3
+    //   return '验证失败！'
+    // }
 
     const token = debase64WithDate({
       date: body.date,
@@ -140,11 +140,11 @@ export class UserController {
     }) || 'invalid'
 
     const result =
-      await this.userTokenService.verifyToken(body.user, token as string)
+      await this.userTokenService.verifyToken(this.ctx.user['id'], token as string)
 
     if (result) {
       this.userBaseService.pushIp(
-        this.ctx.user['name'],
+        this.ctx.user['id'],
         this.ctx.user['ipv4']
       )
       return '验证成功！'

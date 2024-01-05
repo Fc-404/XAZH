@@ -72,7 +72,7 @@ export class FileController {
           let r = await this.fs.upload({
             name: filename,
             type: FILE_TYPE[fileSuffix],
-            author: this.ctx.user['name'],
+            author: this.ctx.user['id'],
             md5: filemd5 as string,
             data: i.body
           })
@@ -88,10 +88,8 @@ export class FileController {
   @Level(USER_LEVEL.user)
   @UseGuard([LevelGuard, TokenGuard])
   async deleteFile(@Body('md5') md5: string) {
-    console.log(this.ctx.user['level']);
-
     const result = await this.fs.delete({
-      author: this.ctx.user['name'],
+      author: this.ctx.user['id'],
       level: this.ctx.user['level'],
       md5: md5
     })

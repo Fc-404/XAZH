@@ -1,5 +1,6 @@
 import { Provide } from "@midwayjs/core";
 import UToken from '../model/token.user.model'
+import { ObjectId } from "mongoose";
 
 @Provide()
 export class UserTokenService {
@@ -10,11 +11,12 @@ export class UserTokenService {
    * @param token 
    * @returns true | false
    */
-  async setToken(user: string, token: string): Promise<boolean> {
+  async setToken(userid: ObjectId, token: string): Promise<boolean> {
     const result = await UToken.model.findOneAndUpdate({
-      _id: user
+      _id: userid
     }, {
-      token: token
+      token: token,
+      date: Date.now()
     }, {
       upsert: true
     })
@@ -28,9 +30,9 @@ export class UserTokenService {
    * @param token 
    * @returns true | false
    */
-  async verifyToken(user: string, token: string): Promise<boolean> {
+  async verifyToken(userid: ObjectId, token: string): Promise<boolean> {
     const result = await UToken.model.findOne({
-      _id: user,
+      _id: userid,
       token: token,
     })
 

@@ -30,7 +30,7 @@ export class UserConfigController {
    */
   @Post('/PConf/Sync')
   async pconfSync(@Body() body: PConfDTO) {
-    const configId = await this.userConfigService.getConfigId(body.user)
+    const configId = await this.userConfigService.getConfigId(this.ctx.user['id'])
     const sameVersion = await this.userConfigService.checkPConfVersion(configId, body.version)
 
     if (sameVersion === false) {
@@ -48,10 +48,10 @@ export class UserConfigController {
 
   @Post('/PConf/Upload')
   async pconfUpload(@Body() body: PConfDTO) {
-    const configId = await this.userConfigService.getConfigId(body.user)
+    const configId = await this.userConfigService.getConfigId(this.ctx.user['id'])
 
     const {
-      token, date, user, version,
+      token, date, id, version,
       ...pconf
     } = body
 

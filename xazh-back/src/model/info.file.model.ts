@@ -17,8 +17,8 @@ const schema = new mongoose.Schema({
   level: Number,            // User level
   // The list of the Data.File Document.
   data: [mongoose.Types.ObjectId],
-  // who uploaded. Type is user.
-  author: [String],
+  // who uploaded. Type is userid.
+  author: [mongoose.Types.ObjectId],
   // whether delete. If true, never delete.
   persitent: {
     type: Boolean,

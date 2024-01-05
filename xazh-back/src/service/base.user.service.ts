@@ -3,6 +3,9 @@ import UserBase from '../model/base.user.model';
 import UserConfig from '../model/config.user.model'
 import { IAddUser } from '../interface/user.interface';
 import { Md5 } from 'ts-md5';
+import mongoose from 'mongoose';
+
+type ObjectId = mongoose.Types.ObjectId
 
 @Provide()
 export class UserService {
@@ -60,6 +63,25 @@ export class UserService {
   }
 
   /**
+   * Delete User
+   */
+  async deleteUser(id: string, user: string): Promise<boolean> {
+    const result = await UserBase.model.findOneAndUpdate(
+      {
+        _id: new mongoose.Types.ObjectId(id)
+      },
+      {
+        $set: { 
+          deleted: true,
+          user: user + '.' + Date.now()
+        }
+      }
+    )
+
+    return result ? true : false
+  }
+
+  /**
    * Verify password.
    * 0 means validation success
    * 1 means account not exist
@@ -69,7 +91,7 @@ export class UserService {
    * @returns number
    */
   async verifyPswd(account: string, pswd: string, userInfo?: Object): Promise<number> {
-    const filter = ['user', 'pswd']
+    const filter = ['_id', 'user', 'pswd']
 
     var result = await UserBase.model.findOne({ user: account }, filter)
     if (!result)
@@ -104,7 +126,7 @@ export class UserService {
    * @param user 
    * @param ip 
    */
-  async pushIp(user: string, ip: string) {
+  async pushIp(userid: ObjectId, ip: string) {
     const ipMaxCount = 20
 
     const url = `http://ip-api.com/json/${ip}?fields=16409&lang=zh-CN`
@@ -112,7 +134,7 @@ export class UserService {
     await makeHttpRequest(url, { dataType: 'json' }).then(v => ipInfo = v).catch((e) => {
       this.ctx.logger.error('Failed to require information of ip.\n' + e)
     })
-    const result = await UserBase.model.findOne({ user: user }, ['recent_ip', 'belong_place'])
+    const result = await UserBase.model.findOne({ _id: userid }, ['recent_ip', 'belong_place'])
 
     result?.recent_ip?.unshift({
       ip: ip,
@@ -153,12 +175,12 @@ export class UserService {
    * @param user 
    * @returns UserInfo
    */
-  async getUserInfo(user: string): Promise<object> {
+  async getUserInfo(userid: ObjectId, options = null): Promise<object> {
     const userinfo = await UserBase.model.findOne(
-      { user: user },
-      [
+      { _id: userid },
+      options ?? [
         'info', 'himg', 'user', 'belong_place',
-        'exp', 'level', 'ranks', 'signup_time',
+        'exp', 'level', 'ranks', 'signup_date',
         'bind_qq', 'bind_we', 'bind_phone', "bind_mail",
       ]
     )

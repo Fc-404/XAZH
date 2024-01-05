@@ -9,11 +9,7 @@ const name: string = 'User.Base'
 
 const schema = new mongoose.Schema({
     info: {                             // User Base Info
-        privacy: {                      // About who can or not see the info
-            type: String,               // 'public', 'privacy', 'whocan', 'whocannot'
-            whocan: [ObjectId],
-            whocannot: [ObjectId],      // The type in List is UserId 
-        },
+        privacy: String,                // About who can or not see the info. ['public', 'onlyself', 'onlyfriend']
         name: String,                   // User name
         age: Number,                    // User Age
         sex: Boolean,                   // User sex
@@ -47,10 +43,13 @@ const schema = new mongoose.Schema({
         default: USER_LEVEL.user
     },
     ranks: [String],                    // Rank is to limit the use of specific functions
-    signup_time: {                      // Signup time
+    signup_date: {                      // Signup date
         type: Date,
         default: Date.now,
     },
+
+    disabled: Boolean,                  // Whether disable the account
+    deleted: Boolean,                   // Whether delete the account
 
     bind_qq: String,                          // Bind QQ
     bind_we: String,                          // Bind Wechat

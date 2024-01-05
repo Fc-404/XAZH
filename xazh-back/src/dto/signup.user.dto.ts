@@ -20,8 +20,8 @@ export class SigninUserDTO {
 }
 
 export class TokenDTO {
-  @Rule(RuleType.string().max(16).min(1))
-  user: string
+  @Rule(RuleType.string().max(64))
+  id: string
   @Rule(RuleType.string().max(4096))
   token: string
   @Rule(RuleType.date())
