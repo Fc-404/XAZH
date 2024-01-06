@@ -19,6 +19,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
       ctx.user = {
         id: undefined,        // User ID
         name: undefined,      // User name
+        deleted: false,       // User deleted
         token: undefined,     // User token
         tokename: undefined,  // User name in Token
         level: 0,             // User level
@@ -51,11 +52,12 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
                 (rawToken as string).slice(-1), 36
               ))
             const result = await (await ctx.requestContext.getAsync(UserIdentityService)).get(id)
-            const username = await (await ctx.requestContext.getAsync(UserService)).getUserInfo(id, ['user'])
+            const username = await (await ctx.requestContext.getAsync(UserService)).getUserInfo(id, ['user', 'deleted'])
 
             // Set user's name, level, and ranks
             ctx.user['id'] = new mongoose.Types.ObjectId(id)
-            ctx.user['name'] = username['user']
+            ctx.user['name'] = username?.user
+            ctx.user['deleted'] = username?.deleted
             ctx.user['tokename'] = tokename
             ctx.user['overtime'] = differDate
             ctx.user['level'] = result.level
@@ -69,11 +71,12 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
         }
       }
 
-      try {
-        // Set user's ip, and format to ipv4
-        ctx.user['ipv4'] = /(\d{1,3}.){3}.\d{1,3}/.exec(ctx.ip)[0]
-      } catch { }
+      // try {
+      //   // Set user's ip, and format to ipv4
+      //   ctx.user['ipv4'] = /(\d{1,3}.){3}.\d{1,3}/.exec(ctx.ip)[0]
+      // } catch { }
 
+      console.log(ctx.ip);
       console.log(ctx.user);
       return await next()
     }

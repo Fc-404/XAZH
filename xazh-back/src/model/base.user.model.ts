@@ -30,9 +30,7 @@ const schema = new mongoose.Schema({
     },
     pswd: String,                       // User password, pswd + time then md5 operate
 
-    recent_ip: [                        // IP list for recent signin
-        { ip: String, place: String }
-    ],
+    recent_ip: [Object],                // IP list for recent signin
     belong_place: String,               // Belong place, be got by last ip of signin
     exp: {                              // Experience
         type: Number,

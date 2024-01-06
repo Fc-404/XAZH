@@ -15,6 +15,7 @@ export class TokenGuard implements IGuard {
     let timeout: boolean = true
     let identicalUser: boolean = false
     let identicalToken: boolean = false
+    let isDeleted: boolean = ctx.user['deleted']
 
     if (ctx.user['overtime'] <= overtimeMax
       && ctx.user['overtime'] >= 0)
@@ -22,6 +23,8 @@ export class TokenGuard implements IGuard {
 
     if (ctx.user['name'] == ctx.user['tokename'])
       identicalUser = true
+    else
+      false
 
     // Verify the token correctness.
     const tokenService = await ctx.requestContext.getAsync(UserTokenService)
@@ -29,6 +32,6 @@ export class TokenGuard implements IGuard {
       ctx.user['id'], ctx.user['token']
     )
 
-    return (timeout && identicalUser && identicalToken)
+    return (timeout && identicalUser && identicalToken && !isDeleted)
   }
 }

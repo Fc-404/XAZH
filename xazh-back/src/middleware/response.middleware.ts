@@ -30,7 +30,7 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
 
         return result
       } catch (error) {
-        ctx.logger.error(error)
+        ctx.logger.warn(error)
         throw error
       }
     }

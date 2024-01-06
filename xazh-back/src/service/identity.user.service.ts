@@ -32,8 +32,8 @@ export class UserIdentityService {
       ['level', 'ranks']
     )
     return {
-      level: result.level ?? 0,
-      ranks: result.ranks ?? []
+      level: result?.level ?? 0,
+      ranks: result?.ranks ?? []
     }
   }
 }

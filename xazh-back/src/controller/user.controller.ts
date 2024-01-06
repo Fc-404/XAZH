@@ -12,9 +12,6 @@ import { UserService } from '../service/base.user.service';
 import { UserTokenService } from '../service/token.user.service';
 import { MailService } from '../service/mail.service';
 import { base64WithDate, debase64WithDate } from '../util/encodeMsg.util';
-import { USER_LEVEL } from '../types/userLevel.types';
-import { Level } from '../decorator/auth/level.decorator';
-import { LevelGuard } from '../guard/level.guard';
 import { TokenGuard } from '../guard/token.guard';
 
 @Controller('/User')
@@ -92,6 +89,7 @@ export class UserController {
         const tokenN = base64WithDate(token)
 
         const result = {
+          id: useri._id,
           user: useri.user,
           token: tokenN.data,
           date: tokenN.date,
@@ -99,7 +97,7 @@ export class UserController {
         await this.userTokenService.setToken(useri._id, token)
         this.userBaseService.pushIp(
           useri._id,
-          this.ctx.user['ipv4']
+          this.ctx.ip
         )
         return result
       case 1:
@@ -111,9 +109,21 @@ export class UserController {
     }
   }
 
+  @Post('/Delete')
+  @UseGuard(TokenGuard)
+  async deleteUser() {
+    const result = await this.userBaseService.deleteUser(this.ctx.user['id'], this.ctx.user['name'])
+    if (result) {
+      await this.userTokenService.deleteToken(this.ctx.user['id'])
+      return '注销成功！'
+    } else {
+      this.ctx.code = 1
+      return '注销失败！'
+    }
+}
+
   @Post('/GetUserInfo')
-  @Level(USER_LEVEL.user)
-  @UseGuard([LevelGuard, TokenGuard])
+  @UseGuard([TokenGuard])
   async getUserInfo() {
     const result = await this.userBaseService.getUserInfo(this.ctx.user['id'])
     return result
@@ -128,12 +138,6 @@ export class UserController {
    */
   @Post('/VerifyToken')
   async verifyToken(@Body() body: TokenDTO) {
-    // const haveUser = await this.userBaseService.haveUser()
-    // if (!haveUser) {
-    //   this.ctx.code = 3
-    //   return '验证失败！'
-    // }
-
     const token = debase64WithDate({
       date: body.date,
       data: body.token

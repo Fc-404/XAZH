@@ -6,6 +6,7 @@ import { Md5 } from 'ts-md5';
 import mongoose from 'mongoose';
 
 type ObjectId = mongoose.Types.ObjectId
+const ipMaxCount = 20
 
 @Provide()
 export class UserService {
@@ -71,9 +72,9 @@ export class UserService {
         _id: new mongoose.Types.ObjectId(id)
       },
       {
-        $set: { 
+        $set: {
           deleted: true,
-          user: user + '.' + Date.now()
+          user: user + '.del.' + Date.now()
         }
       }
     )
@@ -116,7 +117,7 @@ export class UserService {
    * @returns true | false
    */
   async existMail(mail: string): Promise<boolean> {
-    return (await UserBase.model.findOne({ bind_mail: mail }))
+    return (await UserBase.model.findOne({ bind_mail: mail, deleted: { $ne: true } }))
       ? true : false
   }
 
@@ -127,21 +128,46 @@ export class UserService {
    * @param ip 
    */
   async pushIp(userid: ObjectId, ip: string) {
-    const ipMaxCount = 20
+    if (!ip) {
+      this.ctx.logger.warn(`The user ${userid} has no ip when signin.`)
+      return false
+    }
 
-    const url = `http://ip-api.com/json/${ip}?fields=16409&lang=zh-CN`
+    /**
+     const url = `http://ip-api.com/json/${ip}?fields=16409&lang=zh-CN`
+     ipInfo?.data['status'] != 'success' ? 'unknow'
+        : (ipInfo?.data['country'] ?? 'unknow')
+        + ',' + (ipInfo?.data['regionName'] ?? 'unknow')
+        + ',' + (ipInfo?.data['city'] ?? 'unknow')
+     */
+    const url = `https://www.ip.cn/api/index?ip=${ip}&type=1`
     let ipInfo
-    await makeHttpRequest(url, { dataType: 'json' }).then(v => ipInfo = v).catch((e) => {
+    await makeHttpRequest(url, {
+      headers: {
+        'User-Agent': 'XAZH/1.0(http://xazh.cc)',
+        'Accept': '*/*',
+        'Host': 'www.ip.cn',
+        'Connection': 'keep-alive'
+      }
+    }).then(v => {
+      if (v.status == 200)
+        ipInfo = JSON.parse(v.data.toString())
+      else
+        throw 'Status error.'
+    }).catch((e) => {
       this.ctx.logger.error('Failed to require information of ip.\n' + e)
     })
+
+    if (ipInfo?.rs != 1) {
+      this.ctx.logger.warn(`The user ${userid} has error ip when signin.`)
+      return false
+    }
+
     const result = await UserBase.model.findOne({ _id: userid }, ['recent_ip', 'belong_place'])
 
     result?.recent_ip?.unshift({
       ip: ip,
-      place: ipInfo.data['status'] != 'success' ? 'unknow'
-        : (ipInfo.data['country'] ?? 'unknow')
-        + ',' + (ipInfo.data['regionName'] ?? 'unknow')
-        + ',' + (ipInfo.data['city'] ?? 'unknow')
+      place: ipInfo.address.replace(/ +/g, ',').replace(/^,|,$/g, '')
     })
     // Limit the information to 20 pieces.
     for (let i = 0; i < (result?.recent_ip?.length ?? 0) - ipMaxCount; ++i) {

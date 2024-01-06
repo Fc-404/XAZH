@@ -7,7 +7,7 @@ export class UserTokenService {
 
   /**
    * Set User's Token.
-   * @param user 
+   * @param userid
    * @param token 
    * @returns true | false
    */
@@ -26,7 +26,7 @@ export class UserTokenService {
 
   /**
    * Verify user's token.
-   * @param user 
+   * @param userid
    * @param token 
    * @returns true | false
    */
@@ -34,6 +34,19 @@ export class UserTokenService {
     const result = await UToken.model.findOne({
       _id: userid,
       token: token,
+    })
+
+    return result ? true : false
+  }
+
+  /**
+   * Delete user's token.
+   * @param userid
+   * @returns true | false
+   */
+  async deleteToken(userid: ObjectId): Promise<boolean> {
+    const result = await UToken.model.deleteOne({
+      _id: userid
     })
 
     return result ? true : false
