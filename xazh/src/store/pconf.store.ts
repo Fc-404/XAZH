@@ -25,7 +25,8 @@ const pconfStore: Module<any, any> = {
     /**
      * Blogs Editor
      */
-    blogsEditorAutoSave: 30000
+    blogsEditorAutoSave: true,
+    blogsEditorAutoSaveTimeout: 60,
   }),
   getters: {
     version: function (state) {
@@ -46,20 +47,26 @@ const pconfStore: Module<any, any> = {
     blogsEditorAutoSave: function (state) {
       return state.blogsEditorAutoSave
     },
+    blogsEditorAutoSaveTimeout: function (state) {
+      return state.blogsEditorAutoSaveTimeout
+    }
   },
   mutations: {
     set: function (state, config) {
       let date = new Date()
       try {
         for (let i of Object.keys(config)) {
-          if (state[i])
-            state[i] = config[i]
+          if (state[i]) {
+            if (typeof config[i] == typeof state[i])
+              state[i] = config[i]
+          }
         }
-        date = config['date']
-      } catch { }
+        config['date'] ? date = config['date'] : null
+      } catch {
+        console.warn('pconf: set error');
+      }
       const { version, ...param } = state
       state.version = Md5.hashStr(JSON.stringify(param))
-      console.log(JSON.stringify(param));
       cookie.set('pconf', JSON.stringify({
         version: state.version,
         date: date,

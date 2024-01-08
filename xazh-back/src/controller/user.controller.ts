@@ -4,7 +4,7 @@ import {
 } from '@midwayjs/core';
 import {
   SigninUserDTO, SignupUserDTO,
-  TokenDTO
+  TokenRDTO
 } from '../dto/signup.user.dto';
 import { Base64 } from 'js-base64';
 import { Context } from '@midwayjs/koa';
@@ -27,6 +27,11 @@ export class UserController {
   @Inject()
   mailService: MailService
 
+  /**
+   * Whether the user exists.
+   * @param username 
+   * @returns code 0: exist, 1: not exist.
+   */
   @Get('/isExist/:username')
   async isExist(@Param('username') username: string) {
     if (await this.userBaseService.haveUser(username)) {
@@ -37,13 +42,18 @@ export class UserController {
     }
   }
 
+  /**
+   * Add a new user.
+   * @param userinfo 
+   * @returns 
+   */
   @Post('/Signup')
   async addUser(@Body() userinfo: SignupUserDTO) {
 
-    // if (await this.userBaseService.existMail(userinfo.mail)) {
-    //   this.ctx.code = 2
-    //   return '邮箱已被注册！'
-    // }
+    if (await this.userBaseService.existMail(userinfo.mail)) {
+      this.ctx.code = 2
+      return '邮箱已被注册！'
+    }
 
     if (!(await this.mailService.verifyCode(userinfo.mail, userinfo.code))) {
       this.ctx.code = 1
@@ -76,6 +86,12 @@ export class UserController {
     }
   }
 
+  /**
+   * Sign in.
+   * That just judging whether the user exists and password is correct.
+   * @param userinfo 
+   * @returns 
+   */
   @Post('/Signin')
   async verifyUser(@Body() userinfo: SigninUserDTO) {
     const useri = { _id: undefined, user: '' }
@@ -109,6 +125,10 @@ export class UserController {
     }
   }
 
+  /**
+   * Delete the user.
+   * @returns 
+   */
   @Post('/Delete')
   @UseGuard(TokenGuard)
   async deleteUser() {
@@ -120,8 +140,12 @@ export class UserController {
       this.ctx.code = 1
       return '注销失败！'
     }
-}
+  }
 
+  /**
+   * Get user info.
+   * @returns 
+   */
   @Post('/GetUserInfo')
   @UseGuard([TokenGuard])
   async getUserInfo() {
@@ -137,7 +161,7 @@ export class UserController {
    * @returns 
    */
   @Post('/VerifyToken')
-  async verifyToken(@Body() body: TokenDTO) {
+  async verifyToken(@Body() body: TokenRDTO) {
     const token = debase64WithDate({
       date: body.date,
       data: body.token

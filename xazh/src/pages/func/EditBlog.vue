@@ -1,7 +1,10 @@
 <template>
   <div id="editp">
     <div id="editp-head">
-      <a-button type="text" @click="back">
+      <a-button
+        type="text"
+        @click="back"
+      >
         <LeftOutlined style="margin-left: -6px;" />
         返回
       </a-button>
@@ -23,6 +26,46 @@
       ></a-divider>
       <div style="width: 1.8rem;"></div>
       <a-button type="primary">发布</a-button>
+      <a-popover
+        placement="bottomRight"
+        trigger="click"
+      >
+        <template #content>
+          <table id="editp-head-setting-table">
+            <tr>
+              <td>自动保存</td>
+              <td>
+                <a-switch
+                  v-model:checked="autoSave"
+                  @click="changeAutoSave"
+                ></a-switch>
+              </td>
+            </tr>
+            <tr v-show="autoSave">
+              <td>保存间隔</td>
+              <td>
+                <a-input-number
+                  size="small"
+                  :bordered="false"
+                  :controls="false"
+                  :precision="0"
+                  v-model:value="autoSaveTimeout"
+                  max="300"
+                  min="10"
+                  style="width: 2.4rem"
+                  @change="changeAutoSaveTimeout"
+                ></a-input-number>秒
+              </td>
+            </tr>
+          </table>
+        </template>
+        <a-button
+          id="editp-head-setting"
+          type="text"
+        >
+          <SettingOutlined></SettingOutlined>
+        </a-button>
+      </a-popover>
     </div>
     <div id="editp-">
       <Editor
@@ -36,17 +79,21 @@
 </template>
 
 <script setup lang="ts">
-import { LeftOutlined } from '@ant-design/icons-vue';
+import { LeftOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { message, notification } from 'ant-design-vue';
 import cookie from 'js-cookie'
 import { useStore } from 'vuex';
+import { UploadPConfAPI } from '../../api/config.user.api'
 
 const store = useStore()
 
 const title = ref<string>()
-const draftContent = ref<string>()
 const editor = ref()
-let autoSaveHandle:NodeJS.Timer
+const draftContent = ref<string>()
+let autoSaveHandle: NodeJS.Timer
+
+const autoSave = ref<boolean>(true)
+const autoSaveTimeout = ref<number>(store.getters['pconf/blogsEditorAutoSaveTimeout'])
 
 /**
  * Save content to cookie.
@@ -95,9 +142,25 @@ const loadingDraft = function () {
 }
 
 /**
- * back
+ * Change auto save option.
  */
-const back = function() {
+const changeAutoSave = function () {
+  store.commit('pconf/set', {
+    blogsEditorAutoSave: autoSave.value
+  })
+  UploadPConfAPI()
+}
+const changeAutoSaveTimeout = function (v: any) {
+  store.commit('pconf/set', {
+    blogsEditorAutoSaveTimeout: v
+  })
+  UploadPConfAPI()
+}
+
+/**
+ * Back
+ */
+const back = function () {
   save(editor.value.content)
 }
 
@@ -111,9 +174,9 @@ onMounted(() => {
   window.onbeforeunload = function () {
     return '未保存草稿！'
   }
-  autoSaveHandle = setInterval(()=>{
+  autoSaveHandle = setInterval(() => {
     save(editor.value.content)
-  }, store.getters['pconf/blogsEditorAutoSave'] || 30000)
+  }, store.getters['pconf/blogsEditorAutoSaveTimeout'] * 1000 || 30000)
 })
 onUnmounted(() => {
   window.onbeforeunload = null
@@ -127,8 +190,29 @@ onUnmounted(() => {
 
   &-head {
     height: 2rem;
-    padding: .2rem 1.8rem .2rem .2rem;
+    padding: .2rem .2rem .2rem .2rem;
     display: flex;
+
+    &-setting {
+      margin-left: .2rem;
+      transition: height 1s;
+
+      &-table {
+        width: 16rem;
+
+        td {
+          padding: .4rem;
+        }
+
+        tr td:last-child {
+          float: right;
+        }
+      }
+    }
+
+    .ant-divider {
+      height: 100%;
+    }
 
     .ant-input-affix-wrapper {
       font-size: 1.1rem;
@@ -139,4 +223,17 @@ onUnmounted(() => {
     height: calc(100vh - 2.4rem);
   }
 }
-</style>
+</style>float: right;
+}
+}
+}
+
+.ant-input-affix-wrapper {
+  font-size: 1.1rem;
+}
+}
+
+&- {
+  height: calc(100vh - 2.4rem);
+}
+}../../api/config.user.api

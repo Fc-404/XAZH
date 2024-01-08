@@ -4,47 +4,70 @@
 import axios from 'axios';
 import cookie from 'js-cookie'
 import { useStore } from 'vuex'
-import { AxiosErrorCatch } from '../util/error.axios.tool';
+import { AxiosErrorCatch } from '../axios/error.axios';
 import { Modal } from 'ant-design-vue';
+import { PConfSyncAPI, UploadPConfAPI } from '../api/config.user.api';
+import { xazhAxios } from '../axios/xazh.axios';
+import { base64WithDate } from '../util/encodeMsg.tool';
+import { GetUserInfoAPI } from '../api/base.user.api';
+
+
 const store = useStore()
 
-const getUserInfo = function () {
-  // const userInfo
-  axios.post('/User/GetUserInfo', {
-    ...store.getters['signin/requireParam']
+/**
+ * Configure XAZH Axios.
+ */
+const configureXazhAxios = async function () {
+  xazhAxios.interceptors.request.use((config) => {
+    const result = base64WithDate(store.getters['signin/token'])
+    config.headers['Custom-ID'] = store.getters['signin/id']
+    config.headers['Custom-Token'] = result.data
+    config.headers['Custom-Date'] = result.date.toISOString()
+    return config
+  }, (error) => {
+    console.log('XAZH: request error.');
+    return Promise.reject(error)
   })
+}
+
+/**
+ * Get user info
+ */
+const getUserInfo = async function () {
+  // const userInfo
+  await GetUserInfoAPI()
     .then((r) => {
-      store.commit('signin/info', r.data.body)
+      store.commit('signin/info', r.body)
     })
-    .catch(AxiosErrorCatch)
+
+  await GetUserInfoAPI()
 }
 
 /**
  * Sync the PConf
  */
-const syncPconf = async function () {
+const syncPconf = function () {
+  if (cookie.get('pconf/useLocal') == 'true')
+    return
+
   let pconf: any = cookie.get('pconf')
   try {
     pconf = JSON.parse(pconf as string)
   } catch { }
 
-  axios.post('/User/Config/PConf/Sync', {
-    ...store.getters['signin/requireParam'],
-    version: pconf?.version ?? 'undefined'
-  })
-    .then(async (r) => {
-      switch (r.data.code) {
+  PConfSyncAPI(pconf?.version)
+    .then((r) => {
+      switch (r.code) {
         case 0:
           // The cookie of pconf is consistent.
           break
         case 1:
-          // cookie.set('pconf', JSON.stringify(r.data.body))
-          choosePConf(r.data.body, pconf)
+          choosePConf(r.body, pconf)
           break
         case -1:
           // No pconf on the server.
           store.commit('pconf/set', null)
-          await uploadPConf(cookie.get('pconf'))
+          UploadPConfAPI()
           break
       }
     })
@@ -52,7 +75,7 @@ const syncPconf = async function () {
 
   const choosePConf = function (server: any, client: any) {
     const serverDate = new Date(server.date)
-    const clientDate = new Date(client.date)
+    const clientDate = new Date(client?.date)
 
     Modal.confirm({
       title: '提示',
@@ -71,29 +94,23 @@ const syncPconf = async function () {
       okText: '同步云端配置',
       onOk: async () => {
         store.commit('pconf/set', server)
+        cookie.remove('pconf/useLocal')
+
+        // Judge deference of pconf version
+        if (Object.keys(server).length
+          != Object.keys(client ?? {}).length) {
+          UploadPConfAPI(cookie.get('pconf'))
+        }
       },
+      onCancel: async () => {
+        cookie.set('pconf/useLocal', 'true')
+      }
     })
-  }
-
-  const uploadPConf = async function (client: any) {
-    try {
-      client = JSON.parse(client)
-    } catch {
-      console.log('The local configure have error. Will not be upload.');
-      return
-    }
-    const { version, date, ...pconf } = client
-
-    await axios.post('/User/Config/PConf/Upload', {
-      version: version,
-      ...store.getters['signin/requireParam'],
-      ...pconf
-    })
-      .catch(AxiosErrorCatch)
   }
 }
 
 onMounted(() => {
+  store.commit('signin/setSignined', configureXazhAxios)
   store.commit('signin/setSignined', getUserInfo)
   store.commit('signin/setSignined', syncPconf)
   // store.commit('logout', () => {})
@@ -101,4 +118,4 @@ onMounted(() => {
 </script>
 <template>
   <div></div>
-</template>
+</template>../api/config.user.api

@@ -20,6 +20,8 @@ export class PConfDTO extends TokenDTO {
   stylePageAnimation: boolean
 
   // Blogs Editor
-  @Rule(RuleType.number().min(10000).max(180000))
-  blogsEditorAutoSave: number
+  @Rule(RuleType.boolean())
+  blogsEditorAutoSave: boolean
+  @Rule(RuleType.number().min(10).max(300))
+  blogsEditorAutoSaveTimeout: number
 }

@@ -29,4 +29,5 @@ export function AxiosErrorCatch(error: any) {
     // No response received
     message.error('服务器未响应！')
   }
+  throw error
 }

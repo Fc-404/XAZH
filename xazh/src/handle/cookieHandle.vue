@@ -3,21 +3,21 @@
 <script setup lang="ts">
 import { useStore } from 'vuex'
 import cookie from 'js-cookie'
-import axios from 'axios'
 import { message } from 'ant-design-vue'
 
 import { base64WithDate } from '../util/encodeMsg.tool'
-import { AxiosErrorCatch } from '../util/error.axios.tool'
+import { VerifyTokenAPI } from '../api/base.user.api'
 
 const store = useStore()
 
 /**
- * Signin test with token
+ * Signin test useing the token in cookie
  */
 const testTokenValidity = async function () {
+  const id = cookie.get('id') || null
   const user = cookie.get('user') || null
   const token = cookie.get('token') || null
-  if (!token || !user) {
+  if (!token || !user || !id) {
     message.info('Not signin token.')
     store.commit('signin/logout')
     // TODO
@@ -26,21 +26,19 @@ const testTokenValidity = async function () {
 
   const param = base64WithDate(token)
 
-  // test token
-  await axios.post('/User/VerifyToken', {
-    date: param.date,
-    user: user,
-    token: param.data
+  await VerifyTokenAPI({
+    id: id, token: param.data, date: param.date
   })
-    .then((r) => {
-      if (r.data.code == 0) {
-        store.commit('signin/signin', token)
+    .then(r => {
+      if (r) {
+        store.commit('signin/signin', {
+          id: id, token: token
+        })
       } else {
         message.warn('登录失效！')
         store.commit('signin/logout')
       }
     })
-    .catch(AxiosErrorCatch)
 }
 
 /**
@@ -52,4 +50,4 @@ onMounted(async () => {
 </script>
 <template>
   <div></div>
-</template>
+</template>../assets/error.axios.tool

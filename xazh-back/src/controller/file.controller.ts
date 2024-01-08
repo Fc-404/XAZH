@@ -9,9 +9,6 @@ import { FileService } from "../service/file.service";
 import { GetBoundary } from "../decorator/param/formdata.decorator";
 import parseFormData from "../util/parseFormData.util";
 import { Md5 } from "ts-md5";
-import { Level } from "../decorator/auth/level.decorator";
-import { USER_LEVEL } from "../types/userLevel.types";
-import { LevelGuard } from "../guard/level.guard";
 import { TokenGuard } from "../guard/token.guard";
 import { MidwayValidationError } from "@midwayjs/validate";
 import { FILE_TYPE } from "../types/file.types";
@@ -25,9 +22,16 @@ export class FileController {
   @Inject()
   fs: FileService
 
+  /**
+   * Upload file.
+   * You have to provide the file name and size in the header.
+   * @param boundary 
+   * @param filesize 
+   * @param filename 
+   * @returns 
+   */
   @Post('/Upload')
-  @Level(USER_LEVEL.user)
-  @UseGuard([LevelGuard, TokenGuard])
+  @UseGuard(TokenGuard)
   async uploadFile(
     @GetBoundary() boundary: string,
     @Headers('Content-Length') filesize: number,
@@ -84,9 +88,13 @@ export class FileController {
     })
   }
 
+  /**
+   * Delete the file.
+   * @param md5 
+   * @returns 
+   */
   @Post('/Delete')
-  @Level(USER_LEVEL.user)
-  @UseGuard([LevelGuard, TokenGuard])
+  @UseGuard(TokenGuard)
   async deleteFile(@Body('md5') md5: string) {
     const result = await this.fs.delete({
       author: this.ctx.user['id'],
@@ -97,6 +105,12 @@ export class FileController {
     return result
   }
 
+  /**
+   * Get the file.
+   * @param md5 
+   * @param save 
+   * @returns 
+   */
   @Get('/:md5')
   async getFile(@Param('md5') md5: string, @Query('save') save: boolean) {
     const filei = await this.fs.getInfo(md5)
@@ -135,9 +149,14 @@ export class FileController {
     return result?.data
   }
 
+  /**
+   * Get the big file.
+   * @param md5 
+   * @param save 
+   * @returns 
+   */
   @Post('/Get')
-  @Level(USER_LEVEL.user)
-  @UseGuard([LevelGuard, TokenGuard])
+  @UseGuard(TokenGuard)
   async getFiles(@Body('md5') md5: string, @Body('save') save: boolean) {
     this.ctx.set('Transfer-Encoding', 'chunked')
     this.ctx.set('Access-Control-Allow-Origin', '*')

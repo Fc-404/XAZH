@@ -202,15 +202,9 @@ export class UserService {
    * @returns UserInfo
    */
   async getUserInfo(userid: ObjectId, options = null): Promise<object> {
-    const userinfo = await UserBase.model.findOne(
+    return await UserBase.model.findOne(
       { _id: userid },
-      options ?? [
-        'info', 'himg', 'user', 'belong_place',
-        'exp', 'level', 'ranks', 'signup_date',
-        'bind_qq', 'bind_we', 'bind_phone', "bind_mail",
-      ]
+      options ?? { pswd: 0 }
     )
-
-    return userinfo
   }
 }

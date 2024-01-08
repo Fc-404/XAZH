@@ -3,16 +3,12 @@ import {
   Post, UseGuard
 } from "@midwayjs/core";
 import { Context } from "koa";
-import { CLevel } from "../decorator/auth/level.decorator";
-import { USER_LEVEL } from "../types/userLevel.types";
 import { TokenGuard } from "../guard/token.guard";
-import { LevelGuard } from "../guard/level.guard";
 import { PConfDTO } from "../dto/pconf.user.dto";
 import { UserConfigService } from "../service/config.user.service";
 
 @Controller('/User/Config')
-@CLevel(USER_LEVEL.user)
-@UseGuard([LevelGuard, TokenGuard])
+@UseGuard(TokenGuard)
 export class UserConfigController {
 
   @Inject()
@@ -30,6 +26,8 @@ export class UserConfigController {
    */
   @Post('/PConf/Sync')
   async pconfSync(@Body() body: PConfDTO) {
+    console.log(body.version);
+
     const configId = await this.userConfigService.getConfigId(this.ctx.user['id'])
     const sameVersion = await this.userConfigService.checkPConfVersion(configId, body.version)
 
@@ -51,7 +49,7 @@ export class UserConfigController {
     const configId = await this.userConfigService.getConfigId(this.ctx.user['id'])
 
     const {
-      token, date, id, version,
+      id, date, token, version,
       ...pconf
     } = body
 

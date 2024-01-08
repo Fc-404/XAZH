@@ -246,11 +246,13 @@ import {
 
 import { checkMail, checkPswdLen, formatPswd, formatUser } from "../../util/formCheck.tool";
 import { message } from "ant-design-vue";
-import axios from 'axios'
 import { debounceByName } from "../../util/debounce.tool";
 import { Md5 } from "ts-md5";
 import { base64WithDate, debase64WithDate } from "../../util/encodeMsg.tool";
-import { AxiosErrorCatch } from "../../util/error.axios.tool";
+import {
+  SendMailValidCodeAPI, UserExistAPI,
+  UserSignupAPI, UserSigninAPI
+} from "../../api/base.user.api";
 
 const props = defineProps({
   type: { type: String, default: 'signin' },
@@ -306,13 +308,12 @@ const sendVerificationCode = function () {
 
   verifyMailBtnData.loading = true
 
-  axios.post('/SendMailValidCode', { mail: usermail.value })
-    .then((r) => {
-      if (!r.data.body) {
+  SendMailValidCodeAPI(usermail.value as string)
+    .then(r => {
+      if (!r) {
         message.error('验证码发送失败！')
       }
     })
-    .catch(AxiosErrorCatch)
 
   verifyMailBtnData.timer = setInterval(() => {
     if (verifyMailBtnData.timeCount < 0) {
@@ -406,12 +407,12 @@ const checkUserValid = function () {
   if (isSignup.value) {
     validUser.value = null
     debounceByName('/CheckUserValid', () => {
-      axios.get('User/isExist/' + (username.value || '夏至'))
+      UserExistAPI(username.value || '夏至')
         .then((r) => {
-          if (r.data.code) {
-            validUser.value = true
-          } else {
+          if (r) {
             validUser.value = false
+          } else {
+            validUser.value = true
           }
         })
     }, 1000)
@@ -444,9 +445,9 @@ function signupSubmit() {
   }
 
   invalidSubmit.value = true
-  axios.post('/User/Signup', userInfo)
-    .then((r) => {
-      switch (r.data.code) {
+  UserSignupAPI(userInfo)
+    .then(r => {
+      switch (r.code) {
         case -1:
           message.error('注册失败！')
           break
@@ -462,7 +463,6 @@ function signupSubmit() {
           break
       }
     })
-    .catch(AxiosErrorCatch)
     .finally(() => {
       invalidSubmit.value = false
     })
@@ -488,17 +488,20 @@ function signinSubmit() {
   }
 
   invalidSubmit.value = true
-  axios.post('/User/Signin', userInfo)
-    .then((r) => {
-      switch (r.data.code) {
+  UserSigninAPI(userInfo)
+    .then(r => {
+      switch (r.code) {
         case 0:
           message.success('登录成功！')
           // Decode the Token
           const token = debase64WithDate({
-            date: r.data.body.date, data: r.data.body.token
+            date: r.body.date, data: r.body.token
           }) || 'aW52YWxpZA=='
 
-          store.commit('signin/signin', token)
+          store.commit('signin/signin', {
+            id: r.body.id,
+            token: token,
+          })
 
           emit('signinSuccess')
           break
@@ -509,7 +512,6 @@ function signinSubmit() {
           message.error('密码错误！')
       }
     })
-    .catch(AxiosErrorCatch)
     .finally(() => {
       invalidSubmit.value = false
     })
@@ -676,4 +678,4 @@ onMounted(() => {
     }
   }
 }
-</style>../../util/formCheck.tool../../util/debounce.tool../../util/encodeMsg.tool../../util/error.axios.tool
+</style>../../assets/error.axios.tool

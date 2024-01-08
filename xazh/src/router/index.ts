@@ -1,6 +1,8 @@
 import { RouteRecordRaw, Router, createRouter, createWebHistory } from "vue-router"
 
 const SignupPage = () => import('../pages/func/SignupPage.vue')
+const BlogEdit = () => import('../pages/func/EditBlog.vue')
+
 const Main = () => import('../pages/main/Main.vue')
 const Blogs = () => import('../pages/main/Blogs.vue')
 const Projects = () => import('../pages/main/Projects.vue')
@@ -13,6 +15,11 @@ const routes: RouteRecordRaw[] = [
     name: 'Signup',
     path: '/signup',
     component: SignupPage,
+  },
+  {
+    name: 'BlogEdit',
+    path: '/blogs/edit',
+    component: BlogEdit
   },
   {
     name: 'Main',

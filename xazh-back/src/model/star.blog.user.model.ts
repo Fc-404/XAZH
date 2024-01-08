@@ -1,10 +1,18 @@
 import mongoose from "mongoose";
 
-const ObjectId = mongoose.Types.ObjectId
 const name: string = 'User.Blog.Star'
 
+// list = {
+//   key: blogid,
+//   value: {
+//     date: Date.now,
+//     group: String,
+//   }
+// }
+
 const schema = new mongoose.Schema({
-  list: [ObjectId]
+  group: [String],
+  list: Object
 })
 
 const model = mongoose.model(name, schema, name)

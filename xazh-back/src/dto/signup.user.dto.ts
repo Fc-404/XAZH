@@ -27,3 +27,11 @@ export class TokenDTO {
   @Rule(RuleType.date())
   date: string
 }
+export class TokenRDTO {
+  @Rule(RuleType.string().max(64).required())
+  id: string
+  @Rule(RuleType.string().max(4096).required())
+  token: string
+  @Rule(RuleType.date().required())
+  date: string
+}

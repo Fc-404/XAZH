@@ -5,9 +5,11 @@ import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
 import { GlobalToken } from 'ant-design-vue/es/theme'
 import axios from 'axios'
 import cookie from 'js-cookie'
+import { setXazhAxios } from './axios/xazh.axios'
 
 import SigninEventRegister from './handle/signinEventRegister.vue'
 import CookieHandle from './handle/cookieHandle.vue'
+import { AxiosErrorCatch } from './axios/error.axios'
 
 // import Modal from 'ant-design-vue/es/modal/Modal'
 
@@ -16,7 +18,12 @@ const store = useStore()
 /**
  * Set backend's base api for axios.
  */
-axios.defaults.baseURL = store.getters['config/baseApi']
+axios.interceptors.response.use(response => response,
+  error => {
+    AxiosErrorCatch(error)
+    return Promise.reject(error)
+  })
+setXazhAxios({ baseURL: store.getters['config/baseApi'] })
 
 /**
  * Switch what style of display in the light of

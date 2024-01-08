@@ -11,6 +11,7 @@ const signinStore: Module<any, any> = {
   namespaced: true,
   state: () => ({
     on: false,
+    id: '',
     user: '',
     token: '',
     info: {},
@@ -18,24 +19,31 @@ const signinStore: Module<any, any> = {
     logout: []
   }),
   mutations: {
-    signin(state, value: string) {
-      let rawToken = Base64.decode(value)
+    async signin(state, value: { id: string, token: string }) {
+      let rawToken = Base64.decode(value.token)
       let user = rawToken.slice(0, parseInt(rawToken.slice(-1), 36))
+      cookie.set('id', value.id)
       cookie.set('user', user)
-      cookie.set('token', value)
+      cookie.set('token', value.token)
+      state.id = value.id
       state.user = user
-      state.token = value
+      state.token = value.token
       try {
         for (let i of state.signined)
-          i(state)
-      } catch { }
+          await i(state)
+      } catch (e) {
+        console.error(e);
+      }
       state.on = true
     },
-    logout(state) {
+    async logout(state) {
       try {
         for (let i of state.logout)
-          i(state)
-      } catch { }
+          await i(state)
+      } catch (e) {
+        console.error(e);
+      }
+      cookie.remove('id')
       cookie.remove('user')
       cookie.remove('token')
       state.on = false
@@ -54,6 +62,9 @@ const signinStore: Module<any, any> = {
     on(state): boolean {
       return state.on
     },
+    id(state): string {
+      return state.id
+    },
     user(state): string {
       return state.user
     },
@@ -66,8 +77,8 @@ const signinStore: Module<any, any> = {
     requireParam(state): object {
       const param = base64WithDate(state.token)
       return {
+        id: state.id,
         date: param.date,
-        user: state.user,
         token: param.data
       }
     }

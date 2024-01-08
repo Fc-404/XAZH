@@ -46,12 +46,14 @@ export class UserConfigService {
    * @returns boolean
    */
   async setPCong(id: ObjectId, pconf: object): Promise<boolean> {
-    const version = Md5.hashStr(JSON.stringify(pconf))
-    console.log(JSON.stringify(pconf));
-    const result = await UserConfig.model.findByIdAndUpdate(
-      id, { pconf: { version: version, date: new Date(), ...pconf } }
-    )
-    return result ? true : false
+    const result = await UserConfig.model.findById(id)
+    const spconf = result?.pconf as any
+    for (let i of Object.keys(pconf))
+      spconf[i] = pconf[i]
+    const { version, date, ...newpconf } = spconf
+    spconf['version'] = Md5.hashStr(JSON.stringify(newpconf))
+
+    return (await result.save()) ? true : false
   }
 
   /**
