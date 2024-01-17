@@ -176,12 +176,6 @@ onUpdated(() => {
       <SigninEventRegister></SigninEventRegister>
       <CookieHandle></CookieHandle>
       <RouterView></RouterView>
-      <!-- <div style="height: 10rem;"></div> -->
-      <!-- <Signup
-        :panel-style="{
-          background: '#ffffffdd',
-        }"
-      ></Signup> -->
     </a-config-provider>
   </div>
 </template>

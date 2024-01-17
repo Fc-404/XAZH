@@ -56,9 +56,10 @@ const pconfStore: Module<any, any> = {
       let date = new Date()
       try {
         for (let i of Object.keys(config)) {
-          if (state[i]) {
-            if (typeof config[i] == typeof state[i])
+          if (state[i] != undefined) {
+            if (typeof config[i] == typeof state[i]) {
               state[i] = config[i]
+            }
           }
         }
         config['date'] ? date = config['date'] : null

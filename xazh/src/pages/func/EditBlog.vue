@@ -25,7 +25,10 @@
         style="height: 100%;"
       ></a-divider>
       <div style="width: 1.8rem;"></div>
-      <a-button type="primary">发布</a-button>
+      <a-button
+        type="primary"
+        @click="publishBtn"
+      >发布</a-button>
       <a-popover
         placement="bottomRight"
         trigger="click"
@@ -75,15 +78,95 @@
         ref="editor"
       ></Editor>
     </div>
+    <div id="editp-publish">
+      <a-modal
+        v-model:open="blogPublishOpen"
+        width="44rem"
+      >
+        <p id="editp-publish-title">发布文章</p>
+        <form id="editp-publish-form">
+          <tr>
+            <td>文章封面</td>
+            <td>h</td>
+          </tr>
+          <tr>
+            <td>文章标签</td>
+            <td>nihao, haha</td>
+          </tr>
+          <tr>
+            <td>文章摘要</td>
+            <td>fjieajfowieajfoi</td>
+          </tr>
+          <tr>
+            <td>文章专栏</td>
+            <td>哈哈</td>
+          </tr>
+          <tr>
+            <td>文章类型</td>
+            <td>
+              <a-radio-group
+                v-model:value="blogInfo.type"
+                button-style="solid"
+              >
+                <a-radio-button value="original">原创</a-radio-button>
+                <a-radio-button value="retransmit">转载</a-radio-button>
+                <a-radio-button value="modification">二创</a-radio-button>
+              </a-radio-group>
+            </td>
+          </tr>
+          <tr>
+            <td>访问权限</td>
+            <td>
+              <a-radio-group
+                v-model:value="blogInfo.privacy"
+                buttonStyle="solid"
+              >
+                <a-radio-button value="public">公开</a-radio-button>
+                <a-radio-button value="follow">关注&粉丝</a-radio-button>
+                <a-radio-button value="friend">仅好友</a-radio-button>
+                <a-radio-button value="self">仅自己</a-radio-button>
+              </a-radio-group>
+            </td>
+          </tr>
+          <tr>
+            <td :class="[blogInfoValid.timing ? '' : 'error']">定时发送
+            </td>
+            <td>
+              <a-checkbox v-model:checked="blogInfo.timing.open">开启</a-checkbox>
+              <span v-show=blogInfo.timing.open>
+                <a-divider type="vertical"></a-divider> {{
+                  Number.isNaN(blogInfoTimingResult.getTime()) ? '' :
+                  (blogInfoTimingResult.getFullYear() + '-' +
+                    (blogInfoTimingResult.getMonth() + 1) + '-' +
+                    blogInfoTimingResult.getDate() + ' ' +
+                    blogInfoTimingResult.getHours() + ':' +
+                    blogInfoTimingResult.getMinutes() + ':' +
+                    blogInfoTimingResult.getSeconds())
+                }}</span><br>
+              <div v-show="blogInfo.timing.open">
+                <a-date-picker v-model:value="blogInfo.timing.date"></a-date-picker>
+                <a-divider type="vertical"></a-divider>
+                <a-time-picker v-model:value="blogInfo.timing.time"></a-time-picker>
+              </div>
+            </td>
+          </tr>
+        </form>
+        <template #footer>
+          <a-button>取消</a-button>
+          <a-button @click="save">保存草稿</a-button>
+          <a-button type="primary">发布文章</a-button>
+        </template>
+      </a-modal>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { LeftOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { message, notification } from 'ant-design-vue';
-import cookie from 'js-cookie'
 import { useStore } from 'vuex';
 import { UploadPConfAPI } from '../../api/config.user.api'
+import { debounceByName } from '../../util/debounce.tool';
 
 const store = useStore()
 
@@ -92,21 +175,54 @@ const editor = ref()
 const draftContent = ref<string>()
 let autoSaveHandle: NodeJS.Timer
 
-const autoSave = ref<boolean>(true)
+const autoSave = ref<boolean>(store.getters['pconf/blogsEditorAutoSave'])
 const autoSaveTimeout = ref<number>(store.getters['pconf/blogsEditorAutoSaveTimeout'])
+
+const blogPublishOpen = ref<boolean>(false)
+const blogInfo = reactive({
+  type: 'original',
+  privacy: 'public',
+  timing: {
+    open: false,
+    date: '',
+    time: '',
+  }
+})
+const blogInfoValid = reactive({
+  timing: true,
+})
+
+/**
+ * Compute the timing result.
+ */
+const blogInfoTimingResult = computed(() => {
+  const date = new Date(blogInfo.timing.date)
+  const time = new Date(blogInfo.timing.time)
+
+  const result = new Date(`
+  ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 
+  ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}
+  `)
+
+  blogInfoValid.timing = !blogInfo.timing.open ||
+    !!(result.getTime() - new Date().getTime() > 0)
+  return result
+})
+
 
 /**
  * Save content to cookie.
- * @param v Editor content.
  */
-const save = function (v: string) {
+const save = function () {
   const draft = {
     title: title.value,
-    content: v,
+    content: editor.value.content,
     time: new Date(),
   }
 
-  cookie.set('EditBlog/draft', JSON.stringify(draft))
+  // cookie.set('EditBlog/draft', JSON.stringify(draft))
+  localStorage.setItem('EditBlog/draft', JSON.stringify(draft))
+  blogPublishOpen.value = false
   message.success('草稿已保存到本地！')
 }
 
@@ -115,7 +231,8 @@ const save = function (v: string) {
  */
 const loadingDraft = function () {
   try {
-    const draft = JSON.parse(cookie.get('EditBlog/draft') || '')
+    // const draft = JSON.parse(cookie.get('EditBlog/draft') || '')
+    const draft = JSON.parse(localStorage.getItem('EditBlog/draft') || '')
 
     title.value = draft.title
     draftContent.value = draft.content
@@ -125,14 +242,19 @@ const loadingDraft = function () {
       message: '加载草稿成功！',
       description: h('table', [
         h('tr', [
-          h('td', '标题'),
-          h('td', '：'),
+          // h('td', '标题'),
+          // h('td', '：'),
           h('td', `${title.value}`),
         ]),
         h('tr', [
-          h('td', '上次保存时间'),
-          h('td', '：'),
-          h('td', `${time.getFullYear()}年${time.getMonth()}月${time.getDate()}日`),
+          // h('td', '上次保存时间'),
+          // h('td', '：'),
+          h('td', {
+            innerText: `${time.getFullYear()}年${time.getMonth()}月${time.getDate()}日`,
+            style: {
+              float: 'right'
+            }
+          }),
         ])
       ])
     })
@@ -148,20 +270,42 @@ const changeAutoSave = function () {
   store.commit('pconf/set', {
     blogsEditorAutoSave: autoSave.value
   })
+
+  autoSave.value
+    ? autoSaveHandle = setInterval(() => { save() },
+      autoSaveTimeout.value * 1000)
+    : clearInterval(autoSaveHandle)
+
   UploadPConfAPI()
 }
 const changeAutoSaveTimeout = function (v: any) {
-  store.commit('pconf/set', {
-    blogsEditorAutoSaveTimeout: v
-  })
-  UploadPConfAPI()
+  debounceByName('EditBlog/changeAutoSaveTimeout', () => {
+    if (v < 10 || v > 300)
+      return
+
+    store.commit('pconf/set', {
+      blogsEditorAutoSaveTimeout: v
+    })
+
+    clearInterval(autoSaveHandle)
+    autoSaveHandle = setInterval(() => { save() },
+      autoSaveTimeout.value * 1000)
+    UploadPConfAPI()
+  }, 200)
+}
+
+/**
+ * Publish
+ */
+const publishBtn = function () {
+  blogPublishOpen.value = true
 }
 
 /**
  * Back
  */
 const back = function () {
-  save(editor.value.content)
+  save()
 }
 
 /**
@@ -174,9 +318,6 @@ onMounted(() => {
   window.onbeforeunload = function () {
     return '未保存草稿！'
   }
-  autoSaveHandle = setInterval(() => {
-    save(editor.value.content)
-  }, store.getters['pconf/blogsEditorAutoSaveTimeout'] * 1000 || 30000)
 })
 onUnmounted(() => {
   window.onbeforeunload = null
@@ -222,18 +363,28 @@ onUnmounted(() => {
   &- {
     height: calc(100vh - 2.4rem);
   }
-}
-</style>float: right;
-}
-}
+
+  &-publish {
+    &-title {
+      font-size: 1.1rem;
+      font-weight: bolder;
+    }
+
+    &-form {
+      margin: 1rem;
+
+      tr td {
+        padding: .8rem;
+      }
+
+      tr td:first-child {
+        padding-right: 1rem;
+      }
+    }
+  }
 }
 
-.ant-input-affix-wrapper {
-  font-size: 1.1rem;
+.error {
+  color: var(--red-6);
 }
-}
-
-&- {
-  height: calc(100vh - 2.4rem);
-}
-}../../api/config.user.api
+</style>

@@ -50,4 +50,4 @@ onMounted(async () => {
 </script>
 <template>
   <div></div>
-</template>../assets/error.axios.tool
+</template>

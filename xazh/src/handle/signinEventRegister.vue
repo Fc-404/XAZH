@@ -1,7 +1,6 @@
 <!-- Signin event register -->
 
 <script setup lang="ts">
-import axios from 'axios';
 import cookie from 'js-cookie'
 import { useStore } from 'vuex'
 import { AxiosErrorCatch } from '../axios/error.axios';
@@ -39,21 +38,21 @@ const getUserInfo = async function () {
     .then((r) => {
       store.commit('signin/info', r.body)
     })
-
-  await GetUserInfoAPI()
 }
 
 /**
  * Sync the PConf
  */
 const syncPconf = function () {
-  if (cookie.get('pconf/useLocal') == 'true')
-    return
-
   let pconf: any = cookie.get('pconf')
   try {
     pconf = JSON.parse(pconf as string)
   } catch { }
+
+  if (cookie.get('pconf/useLocal') == 'true') {
+    store.commit('pconf/set', pconf)
+    return
+  }
 
   PConfSyncAPI(pconf?.version)
     .then((r) => {
@@ -103,6 +102,7 @@ const syncPconf = function () {
         }
       },
       onCancel: async () => {
+        store.commit('pconf/set', client)
         cookie.set('pconf/useLocal', 'true')
       }
     })
@@ -118,4 +118,4 @@ onMounted(() => {
 </script>
 <template>
   <div></div>
-</template>../api/config.user.api
+</template>

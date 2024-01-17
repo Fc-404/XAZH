@@ -19,11 +19,16 @@ export class Mongod {
   constructor() {
     this.log = loggers.getLogger('logger')
 
-    mongoose.connect(mongodConfig.socket()).then((db) => {
-      this.conn = db
-      this.log.info('数据库连接成功！')
-    }).catch((e) => {
-      this.log.error('数据库连接失败！\n', e)
-    })
+    const connMongod = () => {
+      mongoose.connect(mongodConfig.socket()).then((db) => {
+        this.conn = db
+        this.log.info('数据库连接成功！')
+      }).catch((e) => {
+        this.log.error('数据库连接失败！\n', e)
+        setTimeout(connMongod, 3000)
+      })
+    }
+
+    connMongod()
   }
 }

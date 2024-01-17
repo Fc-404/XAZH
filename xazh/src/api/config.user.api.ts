@@ -7,6 +7,9 @@ import { xazhAxios } from "../axios/xazh.axios";
  * @returns true if success.
  */
 export async function UploadPConfAPI(pconf: any = null) {
+  if (cookie.get('pconf/useLocal') == 'true')
+    return
+
   if (pconf == null) {
     pconf = cookie.get('pconf')
   }
@@ -14,7 +17,7 @@ export async function UploadPConfAPI(pconf: any = null) {
   try {
     pconf = JSON.parse(pconf)
   } catch {
-    console.log('The local configuration have error. Will not be upload.');
+    console.warn('The local configuration have error. Will not be upload.');
     return
   }
   const { version, date, ...pconfT } = pconf
