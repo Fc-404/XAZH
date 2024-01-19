@@ -13,6 +13,7 @@ const schema = new mongoose.Schema({
   },
   body: ObjectId,
   comment_like: ObjectId,
+  type: String,
   abstract: String,
   createtime: {
     type: Date,

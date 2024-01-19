@@ -87,19 +87,67 @@
         <form id="editp-publish-form">
           <tr>
             <td>文章封面</td>
-            <td>h</td>
+            <td>
+              <a-space style="align-items: flex-start;">
+                <PicUpload></PicUpload>
+                <a-tabs :tabBarStyle="{
+                  marginTop: '-1rem'
+                } ">
+                  <a-tab-pane
+                    key="1"
+                    tab="推荐"
+                  ></a-tab-pane>
+                  <a-tab-pane
+                    key="2"
+                    tab="语言"
+                  ></a-tab-pane>
+                  <a-tab-pane
+                    key="3"
+                    tab="分区"
+                  ></a-tab-pane>
+                  <a-tab-pane
+                    key="4"
+                    tab="风景"
+                  ></a-tab-pane>
+                  <a-tab-pane
+                    key="5"
+                    tab="其他"
+                  ></a-tab-pane>
+                </a-tabs>
+              </a-space>
+            </td>
           </tr>
           <tr>
             <td>文章标签</td>
-            <td>nihao, haha</td>
+            <td>
+              <SelectFlex
+                style="width: 25rem;"
+                :options="['1', '2', '3']"
+                v-model:value="blogInfo.tags"
+              ></SelectFlex>
+            </td>
           </tr>
           <tr>
             <td>文章摘要</td>
-            <td>fjieajfowieajfoi</td>
+            <td>
+              <a-textarea
+                v-model:value="blogInfo.abstract"
+                show-count
+                :maxlength="100"
+                style="width: 25rem; height: 8rem; resize: none;"
+                placeholder="请输入文章摘要，最多100字"
+              ></a-textarea>
+            </td>
           </tr>
           <tr>
             <td>文章专栏</td>
-            <td>哈哈</td>
+            <td>
+              <SelectFlex
+                style="width: 25rem;"
+                :flex="false"
+                v-model:value="blogInfo.collection"
+              ></SelectFlex>
+            </td>
           </tr>
           <tr>
             <td>文章类型</td>
@@ -178,8 +226,11 @@ let autoSaveHandle: NodeJS.Timer
 const autoSave = ref<boolean>(store.getters['pconf/blogsEditorAutoSave'])
 const autoSaveTimeout = ref<number>(store.getters['pconf/blogsEditorAutoSaveTimeout'])
 
-const blogPublishOpen = ref<boolean>(false)
+const blogPublishOpen = ref<boolean>(true)
 const blogInfo = reactive({
+  tags: [],
+  collection: [],
+  abstract: '',
   type: 'original',
   privacy: 'public',
   timing: {
@@ -191,6 +242,8 @@ const blogInfo = reactive({
 const blogInfoValid = reactive({
   timing: true,
 })
+
+
 
 /**
  * Compute the timing result.
@@ -373,8 +426,14 @@ onUnmounted(() => {
     &-form {
       margin: 1rem;
 
+      tr {
+        display: block;
+        width: 100%;
+      }
+
       tr td {
         padding: .8rem;
+        vertical-align: top;
       }
 
       tr td:first-child {
