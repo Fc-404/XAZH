@@ -19,7 +19,10 @@
           </transition>
         </RouterView>
       </a-layout-content>
-      <a-layout-footer id="main-footer">
+      <a-layout-footer
+        id="main-footer"
+        :style="footerStyle"
+      >
         <Footer></Footer>
       </a-layout-footer>
     </a-layout>
@@ -27,6 +30,23 @@
 </template>
 
 <script setup lang="ts">
+
+/**
+ * Configure the footer size.
+ */
+const footerStyle = reactive({
+  width: '100%',
+  marginLeft: '0'
+})
+provide('setFooterMargin', (x: string = '') => {
+  if (!x) {
+    footerStyle.width = '100%'
+    footerStyle.marginLeft = '0'
+  }
+  footerStyle.width = `calc(100% - ${x[0] == '-' ? x.slice(1) : x})`
+  x[0] == '-' ? footerStyle.marginLeft = x.slice(1) : null
+})
+
 </script>
 
 <style scoped lang="less">
@@ -34,14 +54,6 @@
   #main-header {
     padding: 0;
     background-color: var(--colorBgLayout);
-  }
-
-  #main- {
-
-    // background-color: red;
-    >div {
-      margin: auto 10vw;
-    }
   }
 }
 </style>

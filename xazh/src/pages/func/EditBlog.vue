@@ -221,7 +221,7 @@ const store = useStore()
 const title = ref<string>()
 const editor = ref()
 const draftContent = ref<string>()
-let autoSaveHandle: NodeJS.Timer
+let autoSaveHandle: NodeJS.Timeout
 
 const autoSave = ref<boolean>(store.getters['pconf/blogsEditorAutoSave'])
 const autoSaveTimeout = ref<number>(store.getters['pconf/blogsEditorAutoSaveTimeout'])

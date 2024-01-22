@@ -28,10 +28,7 @@
               {{ userInfo?.user ?? '请登录' }}
             </p>
             <p>
-              <a-tag
-                style="border: none;"
-                color="#fa8c16"
-              >{{ userInfo.level }}</a-tag>
+              <a-tag :color="getUserLevelTagColor(userInfo.level)">{{ getUserLevelName(userInfo.level) }}</a-tag>
               <a-divider
                 type="vertical"
                 style="margin: 0 4px"
@@ -89,7 +86,7 @@
             type="text"
             class="selfp-ctl-fun"
           >
-            <ContactsTwoTone two-tone-color="#36cfc9" />
+            <IdcardTwoTone two-tone-color="#36cfc9" />
             个人中心
           </a-button>
           <a-button
@@ -109,11 +106,28 @@
         </div>
         <div style="height: 7rem;"></div>
 
-        <div id="selfp-ctl-exit">
+        <div id="selfp-ctl-bottom">
+          <div v-if="userInfo.level >= 2">
+            <a-button
+              type="text"
+              class="selfp-ctl-fun"
+              @click="toRouter('WEBPanel')"
+            >
+              <FundTwoTone two-tone-color="#2f54eb" />
+              网站面板
+            </a-button>
+            <a-button
+              type="text"
+              class="selfp-ctl-fun"
+            >
+              <ControlTwoTone two-tone-color="#fa541c" />
+              管理员面板
+            </a-button>
+          </div>
           <a-divider style="margin-top: 0;"></a-divider>
           <!-- Logout -->
           <a-button
-            id="selfp-ctl-exit-btn"
+            id="selfp-ctl-bottom-exit"
             danger
             type="primary"
             @click="logout"
@@ -132,12 +146,14 @@ import { useStore } from 'vuex';
 import { message } from 'ant-design-vue'
 import {
   MessageTwoTone, FileTwoTone,
-  StarTwoTone, ContactsTwoTone,
+  StarTwoTone, IdcardTwoTone,
   SettingTwoTone, ImportOutlined,
   BulbTwoTone, EnvironmentOutlined,
+  ControlTwoTone, FundTwoTone
 } from '@ant-design/icons-vue';
 
-import { getUserLevelName } from '../../types/level.user.type'
+import { getUserLevelName, getUserLevelTagColor } from '../../types/level.user.type'
+import { useRouter } from 'vue-router';
 
 const store = useStore()
 
@@ -175,14 +191,14 @@ const userInfo = reactive({
   user: '未登录',
   userF: '',
   userHimg: '',
-  level: '访客',
+  level: 0,
   exp: 0,
   ranks: [],
   local: '未知'
 })
 const setUserInfo = function (v: any) {
   v.user ? userInfo.user = v.user : null
-  v.level ? userInfo.level = getUserLevelName(v.level) : null
+  v.level ? userInfo.level = v.level : null
   v.exp ? userInfo.exp = v.exp : null
   v.ranks ? userInfo.ranks = v.ranks : null
   v.local ? userInfo.local = v.local : null
@@ -196,6 +212,17 @@ watch(computed(() => {
 }), (v) => {
   setUserInfo(v)
 })
+
+/**
+ * Go to router.
+ */
+const router = useRouter()
+const toRouter = function (name: string) {
+  router.push({
+    name: name
+  })
+  selfpcOpen.value = false
+}
 
 /**
  * HOOK
@@ -272,7 +299,7 @@ onMounted(() => {
       height: 3rem;
       font-size: 1.1rem;
       line-height: 1.1rem;
-      padding-left: 1.1rem;
+      padding-left: 1rem;
       text-align: left;
 
       user-select: none;
@@ -283,15 +310,13 @@ onMounted(() => {
       }
     }
 
-    &-exit {
+    &-bottom {
       position: absolute;
       bottom: 0;
       width: calc(100% - 3rem);
       padding-bottom: 2rem;
 
-      background-color: var(--colorBgContainer);
-
-      &-btn {
+      &-exit {
         width: 100%;
         font-size: 1.1rem;
         height: 2.7rem;

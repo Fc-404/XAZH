@@ -15,7 +15,8 @@ const header: Module<any, any> = {
     title: null,
     titleMode: ModeTitlePageI.SCROLL,
     changeTitleHandle: () => { },
-    closeTitleHandle: () => { }
+    closeTitleHandle: () => { },
+    // Footer
   }),
   getters: {
     progress(state): number {
@@ -29,7 +30,7 @@ const header: Module<any, any> = {
     },
     titleMode(state): ModeTitlePageI {
       return state.titleMode
-    }
+    },
   },
   mutations: {
     onProgress(state, v: boolean) {
@@ -61,7 +62,7 @@ const header: Module<any, any> = {
     },
     closeTitleHandle(state, v: Function) {
       state.closeTitleHandle = v
-    }
+    },
   },
   actions: {}
 }

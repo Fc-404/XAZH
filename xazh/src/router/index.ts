@@ -9,6 +9,9 @@ const Projects = () => import('../pages/main/Projects.vue')
 const Tools = () => import('../pages/main/Tools.vue')
 const Favors = () => import('../pages/main/Favors.vue')
 const XAZH = () => import('../pages/main/XAZH.vue')
+// Panel
+import WEBPanel from './webpanel'
+const AdminPanel = () => import('../pages/panel/AdminPanel.vue')
 
 const routes: RouteRecordRaw[] = [
   {
@@ -52,6 +55,13 @@ const routes: RouteRecordRaw[] = [
         path: 'xazh',
         component: XAZH
       },
+      // Panel
+      WEBPanel,
+      {
+        name: 'AdminPanel',
+        path: 'panel/admin',
+        component: AdminPanel
+      }
     ]
   },
 ]

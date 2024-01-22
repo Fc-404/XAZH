@@ -1,5 +1,5 @@
 
-const events: Map<Function, NodeJS.Timer> = new Map<Function, NodeJS.Timer>()
+const events: Map<Function, NodeJS.Timeout> = new Map<Function, NodeJS.Timeout>()
 const eventsN: Map<string, Function> = new Map<string, Function>()
 
 export function debounce(fn: Function, ms: number = 44) {

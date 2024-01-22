@@ -11,3 +11,14 @@ export function getUserLevelName(index: number) {
 
   return names[index] ?? names[0]
 }
+
+export function getUserLevelTagColor(index: number) {
+  const colors = [
+    '',
+    'cyan',
+    'blue',
+    '#faad14'
+  ]
+
+  return colors[index] ?? colors[0]
+}

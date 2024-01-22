@@ -118,7 +118,7 @@ import { useStore } from 'vuex'
 import { ModeTitlePageI } from '../../interface/page.i.ts'
 
 import { SearchOutlined } from '@ant-design/icons-vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const store = useStore()
 
@@ -127,6 +127,7 @@ const store = useStore()
  * To Menu
  */
 const router = useRouter()
+const route = useRoute()
 const toMenu = function (name: string) {
   router.push({
     name: name
@@ -166,6 +167,22 @@ const initSlider = function () {
   hs.style.left = initFunc.offsetLeft + 'px'
   hs.style.width = initFunc.offsetWidth + 'px'
   index.style.color = 'var(--colorPrimary)'
+
+  const otherPathDeal = function (path: string) {
+    if (['blogs', 'projects', 'tools', 'favors', 'xazh'].indexOf(path) == -1) {
+      hs.style.left = '-' + hs.style.width
+      index.style.color = 'var(--colorTextBase)'
+      index = {
+        style: { color: '' },
+        offsetWidth: 0,
+        offsetLeft: Number(hs.style.left.slice(0, -2)),
+      } as HTMLElement
+    }
+  }
+  otherPathDeal(funcName)
+  watch(() => route.path, (path) => {
+    otherPathDeal(path.slice(1))
+  })
 
   // event
   items.forEach((v) => {
@@ -238,15 +255,16 @@ const titleDeal = function () {
       if (store.getters['header/title'] === null)
         return
 
-      if (store.getters['header/titleMode'] == ModeTitlePageI.SCROLL) {
-        var scrollTopForTitleT = document.documentElement.scrollTop
+      const titleMode = store.getters['header/titleMode']
+      const scrollTopForTitleT = document.documentElement.scrollTop
+      if (titleMode == ModeTitlePageI.SCROLL) {
         if (scrollTopForTitleT > scrollTopForTitle) {
           headerContainer.style.top = 'calc(var(--headerHeight) * -1)'
         } else {
           headerContainer.style.top = '0'
         }
         scrollTopForTitle = scrollTopForTitleT
-      } else if (store.getters['header/titleMode'] == ModeTitlePageI.CONSTANT) {
+      } else if (titleMode == ModeTitlePageI.CONSTANT) {
         headerContainer.style.top = 'calc(var(--headerHeight) * -1)'
       }
     }, 44)

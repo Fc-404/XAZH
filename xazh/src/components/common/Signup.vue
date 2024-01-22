@@ -298,7 +298,7 @@ const verifyMailBtnData = reactive({
   disabled: false,
   text: '验证',
   timeCount: 60,
-  timer: ref<NodeJS.Timer>()
+  timer: ref<NodeJS.Timeout>()
 })
 const sendVerificationCode = function () {
   if (!validMail.value) {
