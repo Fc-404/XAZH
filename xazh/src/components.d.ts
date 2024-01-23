@@ -36,6 +36,7 @@ declare module 'vue' {
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASpace: typeof import('ant-design-vue/es')['Space']
     ASpaceCompact: typeof import('ant-design-vue/es')['Compact']
+    ASpin: typeof import('ant-design-vue/es')['Spin']
     ASwitch: typeof import('ant-design-vue/es')['Switch']
     ATabPane: typeof import('ant-design-vue/es')['TabPane']
     ATabs: typeof import('ant-design-vue/es')['Tabs']
@@ -64,5 +65,6 @@ declare module 'vue' {
     SelectFlex: typeof import('./components/common/SelectFlex.vue')['default']
     SelfPanel: typeof import('./components/common/SelfPanel.vue')['default']
     Signup: typeof import('./components/common/Signup.vue')['default']
+    UploadPicList: typeof import('./components/upload/UploadPicList.vue')['default']
   }
 }

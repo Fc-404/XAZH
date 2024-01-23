@@ -9,7 +9,7 @@
       }"
     >
       <div
-        v-for="i in 200"
+        v-for="i in 20"
         :style="{
           margin: props.gap
         }"
@@ -23,6 +23,8 @@
           }"
         ></a-image>
       </div>
+      <!-- <PicUpload id="piclist-upload-upload"></PicUpload> -->
+      <a-upload></a-upload>
     </div>
   </a-image-preview-group>
 </template>
@@ -54,10 +56,14 @@ const props = defineProps({
 
 </script>
 
-<style scoped>
+<style scoped lang="less">
 #piclist-upload {
   display: flex;
   flex-wrap: wrap;
   align-content: start;
+
+  &-upload {
+    padding: 1rem;
+  }
 }
 </style>

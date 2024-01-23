@@ -8,7 +8,6 @@ import { FileService } from "../service/file.service";
 
 import { GetBoundary } from "../decorator/param/formdata.decorator";
 import parseFormData from "../util/parseFormData.util";
-import { Md5 } from "ts-md5";
 import { TokenGuard } from "../guard/token.guard";
 import { MidwayValidationError } from "@midwayjs/validate";
 import { FILE_TYPE } from "../types/file.types";
@@ -36,10 +35,11 @@ export class FileController {
     @GetBoundary() boundary: string,
     @Headers('Content-Length') filesize: number,
     @Headers('Custom-Filename') filename: string,
+    @Headers('Custom-MD5') filemd5: string,
   ): Promise<any> {
-    //- Require filename.
-    if (!filename)
-      throw new MidwayValidationError('Not filename.', 422, null)
+    //- Require param.
+    if (!filename || !filemd5)
+      throw new MidwayValidationError('No filename.', 422, null)
 
     //- Judge file type.
     const fileSuffix = filename.slice(filename.lastIndexOf('.') + 1)
@@ -52,9 +52,14 @@ export class FileController {
       throw new httpError.BadRequestError('Not Body.')
     }
 
-    // //- Limit file size. 16M
+    //- Limit file size. 16M
     if (filesize > 16000000) {
       throw new httpError.ForbiddenError('File too large.')
+    }
+
+    //- Whether exist file.
+    if (await this.fs.getInfo(filemd5)) {
+      return filemd5
     }
 
     //- Receive file.
@@ -72,18 +77,24 @@ export class FileController {
         const dataArr = parseFormData(data, boundary, true)
         const result = []
         for (let i of dataArr) {
-          const filemd5 = new Md5().appendByteArray(i.body).end()
+          // const filemd5 = new Md5().appendByteArray(i.body).end()
           let r = await this.fs.upload({
             name: filename,
             type: FILE_TYPE[fileSuffix],
             author: this.ctx.user['id'],
-            md5: filemd5 as string,
+            md5: filemd5,
             data: i.body
           })
-          result.push(r)
+          if (r == 0)
+            result.push(filemd5)
+          else {
+            this.ctx.code = 1
+            this.ctx.message = '上传失败'
+            reject(filename)
+          }
         }
 
-        resolve(result)
+        resolve(result.pop())
       })
     })
   }
@@ -106,6 +117,20 @@ export class FileController {
   }
 
   /**
+   * Get information of file.
+   */
+  @Get('/GetInfo/:md5')
+  async getInfoByMD5(@Param('md5') md5: string) {
+    const filter = ['fileMd5', 'fileName', 'fileSize', 'fileType']
+    const result = await this.fs.getInfo(md5, filter)
+    if (!result) {
+      this.ctx.code = 1
+      return 'No information.'
+    }
+    return result
+  }
+
+  /**
    * Get the file.
    * @param md5 
    * @param save 
@@ -113,25 +138,10 @@ export class FileController {
    */
   @Get('/:md5')
   async getFile(@Param('md5') md5: string, @Query('save') save: boolean) {
-    const filei = await this.fs.getInfo(md5)
+    this.ctx.set('Transfer-Encoding', 'chunked')
+    this.ctx.set('Access-Control-Allow-Origin', '*')
 
-    if (!filei)
-      throw new httpError.NotFoundError('There is no such file.')
-    // 1.6M file size limit.
-    if (filei.fileSize > 1600000) {
-      throw new httpError.ForbiddenError('File size limit, switch to post.')
-    }
-
-    // Set file type.
-    const filetype = filei.fileType
-    if (filetype)
-      this.ctx.set('Content-Type', filetype)
-    // Whether download the file for save.
-    if (save)
-      this.ctx.set('Content-Disposition',
-        'attachment')
-
-    const result = await this.fs.getAll({
+    const result = await this.fs.get({
       level: this.ctx.user['level'],
       md5
     })
@@ -143,14 +153,28 @@ export class FileController {
       throw new httpError.ForbiddenError('There is no permission to access the file.')
     }
 
-    this.ctx.set('Content-Length', result.info.fileSize.toString())
+    // Set file type.
+    const filetype = result.filei.fileType
+    if (filetype)
+      this.ctx.set('Content-Type', filetype)
 
+    // Whether download the file for save.
+    if (save)
+      this.ctx.set('Content-Disposition',
+        'attachment')
+
+    for (let i of result.filed) {
+      this.ctx.res.write(await i())
+    }
+
+    this.ctx.res.end
     this.ctx.form = false
-    return result?.data
+    return null
   }
 
   /**
-   * Get the big file.
+   * TODO
+   * Get list of file.
    * @param md5 
    * @param save 
    * @returns 

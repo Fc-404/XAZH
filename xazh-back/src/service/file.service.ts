@@ -139,8 +139,8 @@ export class FileService {
    * @param md5 
    * @returns FileInfo
    */
-  async getInfo(md5: string) {
-    return await FileInfo.model.findOne({ fileMd5: md5 }) ?? null
+  async getInfo(md5: string, filter: Array<string> = []) {
+    return await FileInfo.model.findOne({ fileMd5: md5 }, filter) ?? null
   }
 
   /**

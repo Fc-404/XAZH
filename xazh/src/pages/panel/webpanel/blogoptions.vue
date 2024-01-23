@@ -1,6 +1,9 @@
 <template>
-  <div>
-    <section name="cover">
+  <div id="blogoptions">
+    <section
+      name="cover"
+      id="blogoptions-cover"
+    >
       <p class="title">博客封面</p>
       <a-tabs
         tabPosition="left"
@@ -13,15 +16,28 @@
           :key="k"
           :tab="k"
         >
-          <div style="height: 20rem; overflow-x: auto;">
-            <PicListAndUpload gap="0" size="6rem"></PicListAndUpload>
+          <div id="blogoptions-cover-tag-view">
+            <UploadPicList :list="['8b6681e58c8735fa671da6fc18a85706']"></UploadPicList>
           </div>
         </a-tab-pane>
       </a-tabs>
-      <a-space-compact style="margin-top: 2rem;">
-        <a-input></a-input>
-        <a-button type="primary">添加标签</a-button>
-      </a-space-compact>
+      <div id="blogoptions-cover-tags-">
+        <a-space
+          id="blogoptions-cover-tags-view"
+          :wrap="true"
+        >
+          <a-tag
+            :closable="true"
+            v-for="i in 6"
+          >123</a-tag>
+        </a-space>
+        <div id="blogoptions-cover-tags-add">
+          <a-space-compact>
+            <a-input></a-input>
+            <a-button type="primary">添加标签</a-button>
+          </a-space-compact>
+        </div>
+      </div>
     </section>
     <section name="tags">
       <p class="title">博客标签</p>
@@ -60,10 +76,30 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="less">
 @import url(../../../assets/css/ctlpanel.less);
 
-section {
-  min-height: 100rem;
+#blogoptions {
+  &-cover {
+    &-tag-view {
+      height: 20rem;
+      overflow-x: auto;
+    }
+
+    &-tags- {
+      padding: 3rem 6rem;
+
+      &view {
+        width: 100%;
+      }
+
+      &add {
+        margin-top: 2rem;
+        padding-right: 2rem;
+        display: flex;
+        justify-content: end;
+      }
+    }
+  }
 }
 </style>
