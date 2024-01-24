@@ -219,7 +219,7 @@ watch(computed(() => {
 const router = useRouter()
 const toRouter = function (name: string) {
   router.push({
-    name: name
+    name: name,
   })
   selfpcOpen.value = false
 }

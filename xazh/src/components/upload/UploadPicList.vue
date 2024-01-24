@@ -59,17 +59,10 @@ const props = defineProps({
   list: {
     type: Array<string>,
     default: []
-  },
-  onUploaded: {
-    type: Function,
-    default: () => { }
-  },
-  onDelect: {
-    type: Function,
-    default: () => { }
   }
 })
 
+const emit = defineEmits(['onUpload', 'onDelete'])
 const store = useStore()
 
 function getBase64(file: File) {
@@ -106,7 +99,6 @@ const handlePreview = async (file: any) => {
 const uploadFile = async function (options: any) {
   try {
     const { file } = options
-    console.log(options);
 
     const md5 = await UploadFileAPI(file.name, file, (e) => {
       options.onProgress(e.progress)
@@ -124,7 +116,7 @@ const uploadFile = async function (options: any) {
       }
     }
     file['md5'] = md5
-    props.onUploaded(options)
+    emit('onUpload', options)
     options.onSuccess()
   } catch (e) {
     console.error('客户端文件上传错误：', e)
@@ -136,7 +128,7 @@ const uploadFile = async function (options: any) {
  * Remove File.
  */
 const removeFile = function (options: any) {
-  props.onDelect(options)
+  emit('onDelete', options)
 }
 
 /**

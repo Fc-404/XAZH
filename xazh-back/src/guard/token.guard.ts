@@ -32,6 +32,8 @@ export class TokenGuard implements IGuard {
       ctx.user['id'], ctx.user['token']
     )
 
+    console.log('TokenGuard:', timeout, identicalUser, identicalToken, !isDeleted);
+
     return (timeout && identicalUser && identicalToken && !isDeleted)
   }
 }

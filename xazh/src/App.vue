@@ -111,9 +111,16 @@ class Theme {
     Theme.updateThemeToStyle = () => {
       Theme.themeTokenStyleVar = ''
       Theme.themeToken = theme.useToken().token.value
-      for (let key in Theme.themeToken)
+      for (let key in Theme.themeToken) {
+        let value = Theme.themeToken[key as keyof typeof Theme.themeToken]
+        if (key == 'borderRadius') {
+          Theme.themeTokenStyleVar +=
+            '--' + key + ':' + value + 'px;'
+          continue
+        }
         Theme.themeTokenStyleVar +=
-          '--' + key + ':' + Theme.themeToken[key as keyof typeof Theme.themeToken] + ';'
+          '--' + key + ':' + value + ';'
+      }
 
       store.commit('config/themeToken', Theme.themeToken)
       document.body.style.cssText = Theme.themeTokenStyleVar

@@ -41,6 +41,7 @@ const openKeys = ref<Array<string>>([])
 
 const setFooterMargin = inject('setFooterMargin') as Function
 let subitemSections: Array<Element> = []
+let sectionObserver = new Map()
 let observer: IntersectionObserver
 
 const getItem = function (
@@ -99,6 +100,7 @@ const itemClick = async function (e: any) {
   const i = e.key.indexOf('/')
   const parent = i == -1 ? e.key : e.key.slice(0, i)
   if (parent != itemParent || 1) {
+    sectionObserver.clear()
     subitemSections.forEach(element => {
       observer.unobserve(element)
     })
@@ -112,18 +114,18 @@ const itemClick = async function (e: any) {
   itemParent = parent
 }
 
-
-
-  /**
-   * Set the selectedKeys according to URL's parameter.
-   */
-  ; (function () {
-    const key = route.path.slice(route.path.indexOf('/', 1) + 1)
-    const i = key.indexOf('/')
-    itemParent = i == -1 ? key : key.slice(0, key.indexOf('/'))
-    selectedKeys.value = [key]
-    openKeys.value = [itemParent]
-  }())
+/**
+ * Set the selectedKeys according to URL's parameter.
+ */
+const setSelectedKey = function () {
+  const key = route.path.slice(route.path.indexOf('/', 1) + 1)
+  const i = key.indexOf('/')
+  itemParent = i == -1 ? key : key.slice(0, key.indexOf('/'))
+  selectedKeys.value = [key]
+  openKeys.value = [itemParent]
+}
+setSelectedKey()
+watch(() => route.path, setSelectedKey)
 
 /**
  * Subitem follow the Page in RouterView.
@@ -139,7 +141,6 @@ const switchSubitemActive = function () {
     if (name) selectedKeys.value = [itemParent + '/' + name]
   }
 
-  let sectionObserver = new Map()
   observer = new IntersectionObserver((entries) => {
     entries.forEach(i => {
       let name = i.target.getAttribute('name')
@@ -211,7 +212,7 @@ onUnmounted(() => {
     display: inline-block;
     vertical-align: top;
     width: calc(100% - 20rem);
-    padding:0 6rem 6rem 6rem;
+    padding: 0 6rem 6rem 6rem;
   }
 }
 </style>

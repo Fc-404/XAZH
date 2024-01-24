@@ -5,6 +5,7 @@ const name: string = 'WEBPanel'
 const schema = new mongoose.Schema({
   name: String,           // Option's name
   value: Object,          // Option's value
+  updatetime: Date,       // Update time.
   type: String,           // Option's type
   group: String,          // Option's group
 })

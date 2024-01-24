@@ -9,7 +9,12 @@ const webpanel: RouteRecordSingleViewWithChildren = {
   name: 'WEBPanel',
   path: 'webpanel',
   component: WEBPanel,
-  redirect: 'webpanel/performance',
+  redirect: '/webpanel/performance',
+  // beforeEnter(to, from, next) {
+  //   // if ()
+  //   console.log(to, from, next);
+  // },
+  
   children: [
     {
       name: 'WEBPanel/performance',
