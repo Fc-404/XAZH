@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import lottie from 'lottie-web'
+import lottie, { RendererType } from 'lottie-web'
 import { uid } from 'uid/single'
 
 const props = defineProps({
@@ -25,8 +25,7 @@ onMounted(() => {
   animItem = lottie.loadAnimation({
     name: uuid.value,
     container: dom.value as Element,
-    // @ts-ignore
-    renderer: props.render,
+    renderer: props.render as RendererType,
     loop: props.loop,
     autoplay: props.autoplay,
     path: props.path

@@ -79,7 +79,7 @@ export class FileController {
         for (let i of dataArr) {
           // const filemd5 = new Md5().appendByteArray(i.body).end()
           let r = await this.fs.upload({
-            name: filename,
+            name: i.filename,
             type: FILE_TYPE[fileSuffix],
             author: this.ctx.user['id'],
             md5: filemd5,

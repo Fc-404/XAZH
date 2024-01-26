@@ -128,7 +128,9 @@ const uploadFile = async function (options: any) {
  * Remove File.
  */
 const removeFile = function (options: any) {
-  emit('onDelete', options)
+  // The file upload failed is zero of percent in object.
+  if (options.percent !== 0)
+    emit('onDelete', options)
 }
 
 /**
@@ -167,6 +169,7 @@ const setItemCSS = function () {
   })
 }
 const initCSS = function () {
+  const containerWrapperDom = document.querySelector('#uploadPicList .ant-upload-picture-card-wrapper')
   const containerDom = document.querySelector('#uploadPicList .ant-upload-list-picture-card')
   const picuploadDom = document.querySelector('#uploadPicList .ant-upload-select-picture-card')
 
@@ -178,6 +181,8 @@ const initCSS = function () {
       flex-wrap: wrap;
       align-content: start;
     `
+
+    ; (containerWrapperDom as HTMLElement).style.display = 'initial'
 
     ; (picuploadDom as HTMLElement).style.cssText = `
       width: ${props.size} !important;

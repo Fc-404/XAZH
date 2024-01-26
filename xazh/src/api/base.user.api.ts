@@ -78,8 +78,21 @@ export async function UserSigninAPI(param: object) {
  * Get user's information.
  * @returns 
  */
-export async function GetUserInfoAPI() {
-  const result = await xazhAxios.post("/User/GetUserInfo")
+export async function GetUserInfoAPI(withparam?: boolean) {
+  const param: any = {}
+  if (withparam) {
+    const tokenData = base64WithDate(cookie.get('token') || '')
+    param['Custom-ID'] = cookie.get('id') || ''
+    param['Custom-Token'] = tokenData?.data || ''
+    param['Custom-Date'] = tokenData?.date.toISOString() || ''
+  }
+  const result = await xazhAxios.post("/User/GetUserInfo", null, {
+    headers: withparam ? {
+      'Custom-ID': param['Custom-ID'],
+      'Custom-Token': param['Custom-Token'],
+      'Custom-Date': param['Custom-Date']
+    } : {}
+  })
 
   return {
     code: result.data.code,

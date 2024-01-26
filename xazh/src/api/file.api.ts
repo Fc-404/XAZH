@@ -19,7 +19,7 @@ export async function UploadFileAPI(
   formdata.append(name, data)
   const result = await xazhAxios.post('/File/Upload', formdata, {
     headers: {
-      'Custom-Filename': name,
+      'Custom-Filename': name.replace(/[^\x00-\x7F]/g, ''),
       'Custom-MD5': dataMd5,
     },
     onUploadProgress: progress

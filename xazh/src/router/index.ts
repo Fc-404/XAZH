@@ -9,7 +9,9 @@ const Projects = () => import('../pages/main/Projects.vue')
 const Tools = () => import('../pages/main/Tools.vue')
 const Favors = () => import('../pages/main/Favors.vue')
 const XAZH = () => import('../pages/main/XAZH.vue')
+
 // Panel
+import Error from "./error"
 import WEBPanel from './webpanel'
 const AdminPanel = () => import('../pages/panel/AdminPanel.vue')
 
@@ -30,6 +32,7 @@ const routes: RouteRecordRaw[] = [
     component: Main,
     redirect: 'blogs',
     children: [
+      ...Error,
       {
         name: 'MainBlogs',
         path: 'blogs',

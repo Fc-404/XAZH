@@ -1,4 +1,5 @@
 import { RouteRecordSingleViewWithChildren } from 'vue-router'
+import { GetUserInfoAPI } from '../api/base.user.api'
 
 const WEBPanel = () => import('../pages/panel/WEBPanel.vue')
 const test = () => import('../pages/panel/webpanel/test.vue')
@@ -10,11 +11,16 @@ const webpanel: RouteRecordSingleViewWithChildren = {
   path: 'webpanel',
   component: WEBPanel,
   redirect: '/webpanel/performance',
-  // beforeEnter(to, from, next) {
-  //   // if ()
-  //   console.log(to, from, next);
-  // },
-  
+  async beforeEnter(to, from, next) {
+    to; from;
+    const info = (await GetUserInfoAPI(true)).body
+
+    if (info['level'] >= 2)
+      next()
+    else
+      next({ path: '/403' })
+  },
+
   children: [
     {
       name: 'WEBPanel/performance',
