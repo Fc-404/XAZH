@@ -13,12 +13,16 @@ const webpanel: RouteRecordSingleViewWithChildren = {
   redirect: '/webpanel/performance',
   async beforeEnter(to, from, next) {
     to; from;
-    const info = (await GetUserInfoAPI(true)).body
-
-    if (info['level'] >= 2)
-      next()
-    else
-      next({ path: '/403' })
+    await GetUserInfoAPI(true)
+      .then(res => {
+        if (res.body?.level >= 2)
+          next()
+        else
+          next('/403')
+      })
+      .catch(() => {
+        next('/403')
+      })
   },
 
   children: [

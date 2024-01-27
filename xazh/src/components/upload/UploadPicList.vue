@@ -1,5 +1,8 @@
 <template>
-  <div id="uploadPicList">
+  <div
+    id="uploadPicList"
+    :uid="id"
+  >
     <a-upload
       v-model:file-list="fileList"
       list-type="picture-card"
@@ -22,7 +25,7 @@
       @cancel="handleCancel"
     >
       <img
-        alt="example"
+        alt="预览"
         style="width: 100%"
         :src="previewImage"
       />
@@ -34,7 +37,9 @@ import { PlusOutlined } from '@ant-design/icons-vue';
 import { message, type UploadProps } from 'ant-design-vue';
 import { UploadFileAPI, GetFileInfoAPI } from '../../api/file.api';
 import { useStore } from 'vuex';
+import { uid } from 'uid/single';
 
+const id = ref<string>(uid())
 const props = defineProps({
   direction: {
     type: String,
@@ -159,7 +164,7 @@ const getFileName = function () {
  * Initialise css.
  */
 const setItemCSS = function () {
-  const picItemsDom = document.querySelectorAll('#uploadPicList .ant-upload-list-item-container:not([set])')
+  const picItemsDom = document.querySelectorAll(`#uploadPicList[uid="${id.value}"] .ant-upload-list-item-container:not([set])`)
   picItemsDom.forEach(i => {
     ; (i as HTMLElement).style.cssText = `
       width: ${props.size} !important;
@@ -169,9 +174,9 @@ const setItemCSS = function () {
   })
 }
 const initCSS = function () {
-  const containerWrapperDom = document.querySelector('#uploadPicList .ant-upload-picture-card-wrapper')
-  const containerDom = document.querySelector('#uploadPicList .ant-upload-list-picture-card')
-  const picuploadDom = document.querySelector('#uploadPicList .ant-upload-select-picture-card')
+  const containerWrapperDom = document.querySelector(`#uploadPicList[uid="${id.value}"] .ant-upload-picture-card-wrapper`)
+  const containerDom = document.querySelector(`#uploadPicList[uid="${id.value}"] .ant-upload-list-picture-card`)
+  const picuploadDom = document.querySelector(`#uploadPicList[uid="${id.value}"] .ant-upload-select-picture-card`)
 
     ; (containerDom as HTMLElement).style.cssText = `
       display: flex;

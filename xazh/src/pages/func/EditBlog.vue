@@ -89,31 +89,41 @@
             <td>文章封面</td>
             <td>
               <a-space style="align-items: flex-start;">
-                <PicUpload></PicUpload>
-                <a-tabs :tabBarStyle="{
-                  marginTop: '-1rem'
-                } ">
-                  <a-tab-pane
-                    key="1"
-                    tab="推荐"
-                  ></a-tab-pane>
-                  <a-tab-pane
-                    key="2"
-                    tab="语言"
-                  ></a-tab-pane>
-                  <a-tab-pane
-                    key="3"
-                    tab="分区"
-                  ></a-tab-pane>
-                  <a-tab-pane
-                    key="4"
-                    tab="风景"
-                  ></a-tab-pane>
-                  <a-tab-pane
-                    key="5"
-                    tab="其他"
-                  ></a-tab-pane>
-                </a-tabs>
+                <div>
+                  <UploadPic
+                    style="margin-top: 1rem;"
+                    :src="blogInfo.coverImg"
+                  ></UploadPic>
+                  <a-button
+                    type="text"
+                    @click="blogInfo.coverImg = ''"
+                    style="margin-left: 4px;"
+                  >取消设置</a-button>
+                </div>
+                <div style="width: 18rem;">
+                  <a-tabs :tabBarStyle="{
+                    marginTop: '-1rem',
+                  }">
+                    <a-tab-pane
+                      v-for="i in  serverData.coverImg "
+                      :key="i['tag']"
+                      :tab="i['tag']"
+                    >
+                      <div id="editp-publish-cover-container">
+                        <img
+                          v-for="md5 in i['value']"
+                          :class="[
+                            'editp-publish-cover-img',
+                            blogInfo.coverImg == md5.toString() ? 'cover-img-selected' : ''
+                          ]
+                            "
+                          :src="store.getters['config/baseApi'] + 'File/' + md5"
+                          @click="blogInfo.coverImg = md5.toString()"
+                        />
+                      </div>
+                    </a-tab-pane>
+                  </a-tabs>
+                </div>
               </a-space>
             </td>
           </tr>
@@ -122,7 +132,7 @@
             <td>
               <SelectFlex
                 style="width: 25rem;"
-                :options="['1', '2', '3']"
+                :options="serverData.tags"
                 v-model:value="blogInfo.tags"
               ></SelectFlex>
             </td>
@@ -215,6 +225,8 @@ import { message, notification } from 'ant-design-vue';
 import { useStore } from 'vuex';
 import { UploadPConfAPI } from '../../api/config.user.api'
 import { debounceByName } from '../../util/debounce.tool';
+import { GetPanelConfigAPI } from '../../api/panel.api';
+import cookie from 'js-cookie'
 
 const store = useStore()
 
@@ -228,6 +240,7 @@ const autoSaveTimeout = ref<number>(store.getters['pconf/blogsEditorAutoSaveTime
 
 const blogPublishOpen = ref<boolean>(true)
 const blogInfo = reactive({
+  coverImg: '',
   tags: [],
   collection: [],
   abstract: '',
@@ -241,6 +254,11 @@ const blogInfo = reactive({
 })
 const blogInfoValid = reactive({
   timing: true,
+})
+
+const serverData = reactive({
+  coverImg: [],
+  tags: [],
 })
 
 
@@ -351,7 +369,26 @@ const changeAutoSaveTimeout = function (v: any) {
  * Publish
  */
 const publishBtn = function () {
+  getServerData()
   blogPublishOpen.value = true
+}
+
+/**
+ * Get Server Data.
+ */
+const getServerData = async function () {
+  const [cover, tags] = await Promise.all([
+    GetPanelConfigAPI('web', 'cover', 'blogoptions'),
+    GetPanelConfigAPI('web', 'tags', 'blogoptions')
+  ])
+
+  const coverUsed = cookie.get('EditBlog/cover/used')?.split(',')
+  cover.value.push({
+    tag: '常用',
+    value: coverUsed
+  })
+  serverData.coverImg = cover.value
+  serverData.tags = tags.value
 }
 
 /**
@@ -440,7 +477,33 @@ onUnmounted(() => {
         padding-right: 1rem;
       }
     }
+
+    &-cover-container {
+      height: 6rem;
+      display: flex;
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 4px;
+    }
   }
+}
+
+.editp-publish-cover-img {
+  width: 5rem;
+  height: calc(6rem - 8px);
+  object-fit: cover;
+  margin-right: 1rem;
+  border-radius: 5px;
+  transition: all .2s ease-in-out;
+}
+
+.editp-publish-cover-img:hover {
+  filter: brightness(80%);
+}
+
+
+.cover-img-selected {
+  box-shadow: 0 0 0 3px var(--colorPrimary);
 }
 
 .error {

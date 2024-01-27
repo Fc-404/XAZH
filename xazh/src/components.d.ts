@@ -65,6 +65,7 @@ declare module 'vue' {
     SelectFlex: typeof import('./components/common/SelectFlex.vue')['default']
     SelfPanel: typeof import('./components/common/SelfPanel.vue')['default']
     Signup: typeof import('./components/common/Signup.vue')['default']
+    UploadPic: typeof import('./components/upload/UploadPic.vue')['default']
     UploadPicList: typeof import('./components/upload/UploadPicList.vue')['default']
   }
 }

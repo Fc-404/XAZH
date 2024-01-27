@@ -3,7 +3,6 @@
 <script setup lang="ts">
 import cookie from 'js-cookie'
 import { useStore } from 'vuex'
-import { AxiosErrorCatch } from '../axios/error.axios';
 import { Modal } from 'ant-design-vue';
 import { PConfSyncAPI, UploadPConfAPI } from '../api/config.user.api';
 import { xazhAxios } from '../axios/xazh.axios';
@@ -54,14 +53,17 @@ const syncPconf = function () {
     return
   }
 
-  PConfSyncAPI(pconf?.version)
+  PConfSyncAPI(pconf?.version ?? 'noPconf')
     .then((r) => {
       switch (r.code) {
         case 0:
           // The cookie of pconf is consistent.
           break
         case 1:
-          choosePConf(r.body, pconf)
+          if (!pconf)
+            store.commit('pconf/set', r.body)
+          else
+            choosePConf(r.body, pconf)
           break
         case -1:
           // No pconf on the server.
@@ -70,7 +72,6 @@ const syncPconf = function () {
           break
       }
     })
-    .catch(AxiosErrorCatch)
 
   const choosePConf = function (server: any, client: any) {
     const serverDate = new Date(server.date)

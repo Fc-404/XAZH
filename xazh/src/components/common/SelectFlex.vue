@@ -115,11 +115,14 @@ const maxStr: number = 16
 /**
  * Init the items.
  */
-for (let i of props.options ?? []) {
-  items.value.push({
-    name: i, selected: false
-  })
+const initItems = function () {
+  for (let i of props.options ?? []) {
+    items.value.push({
+      name: i, selected: false
+    })
+  }
 }
+watch(() => props.options, initItems)
 
 /**
  * The algorithm for sorting the items.
