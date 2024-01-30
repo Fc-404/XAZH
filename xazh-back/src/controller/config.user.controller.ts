@@ -26,9 +26,7 @@ export class UserConfigController {
    */
   @Post('/PConf/Sync')
   async pconfSync(@Body() body: PConfDTO) {
-    console.log(body.version);
-
-    const configId = await this.userConfigService.getConfigId(this.ctx.user['id'])
+    const configId = this.ctx.user['id']
     const sameVersion = await this.userConfigService.checkPConfVersion(configId, body.version)
 
     if (sameVersion === false) {
@@ -46,14 +44,12 @@ export class UserConfigController {
 
   @Post('/PConf/Upload')
   async pconfUpload(@Body() body: PConfDTO) {
-    const configId = await this.userConfigService.getConfigId(this.ctx.user['id'])
-
     const {
       id, date, token, version,
       ...pconf
     } = body
 
-    const result = await this.userConfigService.setPCong(configId, pconf)
+    const result = await this.userConfigService.setPCong(this.ctx.user['id'], pconf)
 
     if (result) {
       return '上传成功！'

@@ -115,8 +115,7 @@
                           :class="[
                             'editp-publish-cover-img',
                             blogInfo.coverImg == md5.toString() ? 'cover-img-selected' : ''
-                          ]
-                            "
+                          ]"
                           :src="store.getters['config/baseApi'] + 'File/' + md5"
                           @click="blogInfo.coverImg = md5.toString()"
                         />
@@ -143,9 +142,9 @@
               <a-textarea
                 v-model:value="blogInfo.abstract"
                 show-count
-                :maxlength="100"
+                :maxlength="256"
                 style="width: 25rem; height: 8rem; resize: none;"
-                placeholder="请输入文章摘要，最多100字"
+                placeholder="请输入文章摘要"
               ></a-textarea>
             </td>
           </tr>
@@ -187,21 +186,14 @@
             </td>
           </tr>
           <tr>
-            <td :class="[blogInfoValid.timing ? '' : 'error']">定时发送
+            <td :class="[blogInfoValid.timing ? '' : 'error']">定时发布
             </td>
             <td>
               <a-checkbox v-model:checked="blogInfo.timing.open">开启</a-checkbox>
-              <span v-show=blogInfo.timing.open>
-                <a-divider type="vertical"></a-divider> {{
-                  Number.isNaN(blogInfoTimingResult.getTime()) ? '' :
-                  (blogInfoTimingResult.getFullYear() + '-' +
-                    (blogInfoTimingResult.getMonth() + 1) + '-' +
-                    blogInfoTimingResult.getDate() + ' ' +
-                    blogInfoTimingResult.getHours() + ':' +
-                    blogInfoTimingResult.getMinutes() + ':' +
-                    blogInfoTimingResult.getSeconds())
-                }}</span><br>
-              <div v-show="blogInfo.timing.open">
+              <div
+                v-show="blogInfo.timing.open"
+                style="margin-top: .2rem;"
+              >
                 <a-date-picker v-model:value="blogInfo.timing.date"></a-date-picker>
                 <a-divider type="vertical"></a-divider>
                 <a-time-picker v-model:value="blogInfo.timing.time"></a-time-picker>
@@ -227,6 +219,7 @@ import { UploadPConfAPI } from '../../api/config.user.api'
 import { debounceByName } from '../../util/debounce.tool';
 import { GetPanelConfigAPI } from '../../api/panel.api';
 import cookie from 'js-cookie'
+import mdSummary from '../../util/mdSummary.tool'
 
 const store = useStore()
 
@@ -266,7 +259,7 @@ const serverData = reactive({
 /**
  * Compute the timing result.
  */
-const blogInfoTimingResult = computed(() => {
+const getBlogInfoTiming = function () {
   const date = new Date(blogInfo.timing.date)
   const time = new Date(blogInfo.timing.time)
 
@@ -278,8 +271,10 @@ const blogInfoTimingResult = computed(() => {
   blogInfoValid.timing = !blogInfo.timing.open ||
     !!(result.getTime() - new Date().getTime() > 0)
   return result
+}
+watch(() => [blogInfo.timing.date, blogInfo.timing.time], () => {
+  getBlogInfoTiming()
 })
-
 
 /**
  * Save content to cookie.
@@ -403,6 +398,9 @@ const back = function () {
  */
 onBeforeMount(() => {
   loadingDraft()
+  console.time();
+  console.log(mdSummary(draftContent.value ?? ''));
+  console.timeEnd()
 })
 onMounted(() => {
   window.onbeforeunload = function () {
@@ -509,4 +507,4 @@ onUnmounted(() => {
 .error {
   color: var(--red-6);
 }
-</style>
+</style>../../util/mdSummary.tool

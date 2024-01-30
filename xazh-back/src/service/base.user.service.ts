@@ -1,9 +1,13 @@
 import { Context, Inject, Provide, makeHttpRequest } from '@midwayjs/core';
-import UserBase from '../model/base.user.model';
-import UserConfig from '../model/config.user.model'
 import { IAddUser } from '../interface/user.interface';
 import { Md5 } from 'ts-md5';
 import mongoose from 'mongoose';
+
+import UserBase from '../model/base.user.model';
+import UserBlogs from '../model/blog.user.model'
+import UserConfig from '../model/config.user.model'
+import UserMesg from '../model/message.user.model'
+import UserRel from '../model/relation.user.model'
 
 type ObjectId = mongoose.Types.ObjectId
 const ipMaxCount = 20
@@ -44,10 +48,29 @@ export class UserService {
         bind_mail: options.mail
       }], { session })
 
+      // Personal Blog.
+      const blogs = await UserBlogs.model.create([{
+        _id: user[0]._id
+      }], { session })
+      user[0].set('blogs_link', blogs[0]._id)
+
+      // Personal Config.
       const config = await UserConfig.model.create([{
-        user: user[0]._id
+        _id: user[0]._id
       }], { session })
       user[0].set('config_link', config[0]._id)
+
+      // Personal Message.
+      const message = await UserMesg.model.create([{
+        _id: user[0]._id
+      }], { session })
+      user[0].set('message_link', message[0]._id)
+
+      // Personal Relation.
+      const relation = await UserRel.model.create([{
+        _id: user[0]._id
+      }], { session })
+      user[0].set('relation_link', relation[0]._id)
 
       // TODO: Other Documents haven't create.
 

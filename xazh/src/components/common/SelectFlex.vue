@@ -116,6 +116,7 @@ const maxStr: number = 16
  * Init the items.
  */
 const initItems = function () {
+  items.value = []
   for (let i of props.options ?? []) {
     items.value.push({
       name: i, selected: false

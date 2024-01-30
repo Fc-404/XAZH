@@ -8,13 +8,14 @@ import { PanelService, PANEL_TYPE } from "../service/panel.service";
 import { Context } from "@midwayjs/koa";
 import { MidwayValidationError } from "@midwayjs/validate";
 import { TokenGuard } from "../guard/token.guard";
-import { CLevel } from "../decorator/auth/level.decorator";
+import { CLevel, Level } from "../decorator/auth/level.decorator";
 import { USER_LEVEL } from "../types/userLevel.types";
+import { LevelGuard } from "../guard/level.guard";
 
 
 @Controller('/Panel')
 @CLevel(USER_LEVEL.admin)
-@UseGuard(TokenGuard)
+@UseGuard([TokenGuard, LevelGuard])
 export class WEBPanelController {
 
   @Inject()
@@ -30,6 +31,7 @@ export class WEBPanelController {
    * @returns config value or error.
    */
   @Post('/Get/:type')
+  @Level(USER_LEVEL.user)
   async getConfiguration(
     @Body() options: PanelConfigurationDTO,
     @Param('type') type: PANEL_TYPE

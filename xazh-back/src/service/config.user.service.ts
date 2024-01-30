@@ -47,6 +47,8 @@ export class UserConfigService {
    */
   async setPCong(id: ObjectId, pconf: object): Promise<boolean> {
     const result = await UserConfig.model.findById(id)
+    if (!result.pconf)
+      result.set('pconf', {})
     const spconf = result?.pconf as any
     for (let i of Object.keys(pconf))
       spconf[i] = pconf[i]
