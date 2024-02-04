@@ -53,8 +53,9 @@ export class UserConfigService {
     for (let i of Object.keys(pconf))
       spconf[i] = pconf[i]
     const { version, date, ...newpconf } = spconf
+    spconf['date'] = Date.now()
     spconf['version'] = Md5.hashStr(JSON.stringify(newpconf))
-
+    result.markModified('pconf')
     return (await result.save()) ? true : false
   }
 

@@ -1,8 +1,11 @@
-import { Controller, Get } from '@midwayjs/core';
-import { base64WithDate } from '../util/encodeMsg.util';
+import { Controller, Get, Inject } from '@midwayjs/core';
+import { LogService } from '../service/log.service';
 
 @Controller('/')
 export class HomeController {
+  @Inject()
+  ts: LogService
+
   @Get('/')
   async home(): Promise<string> {
     return 'Hello XAZH!';
@@ -10,6 +13,6 @@ export class HomeController {
 
   @Get('/test')
   async test(): Promise<any> {
-    return base64WithDate('111111', new Date('2023-09-19T01:03:54.441Z'))
+    return await this.ts.find()
   }
 }

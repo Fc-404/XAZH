@@ -17,7 +17,9 @@ export interface StylePageI {
 /**
  * Page Header. For display the correlative information in the header component.
  */
-export enum ModeTitlePageI {
-  SCROLL,       // Show the title while down scroll otherwise show the menu.
+export enum ModeHeaderPageI {
+  SCROLL,       // Show the title while scroll down otherwise show the menu.
   CONSTANT,     // Always show the title.
+  AUTO_SHOW,    // Show if scroll up, hide if scroll down.
+  AUTO_HIDDEN,  // Show when mouse enter top.
 }

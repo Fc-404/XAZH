@@ -3,7 +3,7 @@
  */
 
 import { Module } from "vuex";
-import { ModeTitlePageI } from "../interface/page.i";
+import { ModeHeaderPageI } from "../interface/page.i";
 
 var progressDebounceHandle: any
 
@@ -13,7 +13,7 @@ const header: Module<any, any> = {
     onProgress: true,
     progress: 0,
     title: null,
-    titleMode: ModeTitlePageI.SCROLL,
+    headerMode: ModeHeaderPageI.SCROLL,
     changeTitleHandle: () => { },
     closeTitleHandle: () => { },
     // Footer
@@ -28,8 +28,8 @@ const header: Module<any, any> = {
     title(state): string | null {
       return state.title
     },
-    titleMode(state): ModeTitlePageI {
-      return state.titleMode
+    headerMode(state): ModeHeaderPageI {
+      return state.headerMode
     },
   },
   mutations: {
@@ -50,8 +50,8 @@ const header: Module<any, any> = {
       }
       state.changeTitleHandle(v)
     },
-    titleMode(state, v: ModeTitlePageI) {
-      state.titleMode = v
+    headerMode(state, v: ModeHeaderPageI) {
+      state.headerMode = v
     },
     closeTitle(state) {
       state.title = null

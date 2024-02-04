@@ -89,6 +89,7 @@
 
 <script setup lang="ts">
 import { useStore } from 'vuex';
+import { ModeHeaderPageI } from '../../interface/page.i';
 
 const store = useStore()
 
@@ -97,6 +98,7 @@ const blockContent = `AntV 是蚂蚁金服全新一代数据可视化解决方�
 
 onMounted(() => {
   store.commit('header/title', 'Introduction 介绍')
+  store.commit('header/headerMode', ModeHeaderPageI.AUTO_HIDDEN)
 })
 onUnmounted(()=>{
   store.commit('header/closeTitle')

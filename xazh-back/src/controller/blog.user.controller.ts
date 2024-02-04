@@ -5,7 +5,7 @@ import {
 import { TokenGuard } from "../guard/token.guard";
 import { Context } from "koa";
 
-@Controller('/Blog')
+@Controller('/User/Blog')
 @UseGuard(TokenGuard)
 export class BlogController {
 
@@ -31,4 +31,21 @@ export class BlogController {
   async getCollections() {
 
   }
+
+  @Post('/AppendRead')
+  async appendRead() {
+
+  }
+
+  @Post('/AppendLike')
+  async appendLike() {
+
+  }
+
+  @Post('/AppendStar')
+  async appendStar() {
+
+  }
+
+  // @Post('')
 }

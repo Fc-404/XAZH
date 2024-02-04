@@ -1,11 +1,9 @@
 <template>
   <div id="main">
     <a-layout>
-      <a-affix>
-        <a-layout-header id="main-header">
-          <Header></Header>
-        </a-layout-header>
-      </a-affix>
+      <a-layout-header id="main-header">
+        <Header></Header>
+      </a-layout-header>
       <a-layout-content id="main-">
         <RouterView
           style="min-height: 1024px;"
@@ -53,7 +51,7 @@ provide('setFooterMargin', (x: string = '') => {
 #main {
   #main-header {
     padding: 0;
-    background-color: var(--colorBgLayout);
+    background-color: transparent;
   }
 }
 </style>
