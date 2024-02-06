@@ -111,13 +111,13 @@
                     >
                       <div id="editp-publish-cover-container">
                         <img
-                          v-for="md5 in i['value']"
+                          v-for="uid in i['value']"
                           :class="[
                             'editp-publish-cover-img',
-                            blogInfo.coverImg == md5.toString() ? 'cover-img-selected' : ''
+                            blogInfo.coverImg == uid.toString() ? 'cover-img-selected' : ''
                           ]"
-                          :src="store.getters['config/baseApi'] + 'File/' + md5"
-                          @click="blogInfo.coverImg = md5.toString()"
+                          :src="store.getters['config/baseApi'] + 'File/' + uid"
+                          @click="blogInfo.coverImg = uid.toString()"
                         />
                       </div>
                     </a-tab-pane>

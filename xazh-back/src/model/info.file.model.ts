@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const name: string = 'File.Info'
 
 const schema = new mongoose.Schema({
-  fileMd5: {
+  fileUid: {
     type: String,
     unique: true,
   },

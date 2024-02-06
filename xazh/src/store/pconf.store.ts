@@ -2,9 +2,9 @@
  * Personal config.
  */
 
-import { Md5 } from "ts-md5";
 import { Module } from "vuex";
 import cookie from 'js-cookie'
+import { Md5 } from 'ts-md5'
 
 const pconfStore: Module<any, any> = {
   namespaced: true,

@@ -1,6 +1,5 @@
 import { Context, Inject, Provide, makeHttpRequest } from '@midwayjs/core';
 import { IAddUser } from '../interface/user.interface';
-import { Md5 } from 'ts-md5';
 import mongoose from 'mongoose';
 
 import UserBase from '../model/base.user.model';
@@ -8,6 +7,7 @@ import UserBlogs from '../model/blog.user.model'
 import UserConfig from '../model/config.user.model'
 import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
+import { sha1 } from '../util/crypto.util';
 
 type ObjectId = mongoose.Types.ObjectId
 const ipMaxCount = 20
@@ -126,7 +126,7 @@ export class UserService {
       return 1
 
     // Confusion password verification.
-    if (Md5.hashStr(account + result.pswd + account) == pswd) {
+    if (sha1(account + result.pswd + account) == pswd) {
       for (let i of filter)
         userInfo[i] = result[i]
       return 0

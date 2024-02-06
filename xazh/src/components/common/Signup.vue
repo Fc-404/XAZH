@@ -243,11 +243,10 @@ import {
   CloseOutlined, LockOutlined, MailOutlined,
   QqOutlined, WechatOutlined, GithubOutlined
 } from "@ant-design/icons-vue";
-
+import { Md5 } from 'ts-md5'
 import { checkMail, checkPswdLen, formatPswd, formatUser } from "../../util/formCheck.tool";
 import { message } from "ant-design-vue";
 import { debounceByName } from "../../util/debounce.tool";
-import { Md5 } from "ts-md5";
 import { base64WithDate, debase64WithDate } from "../../util/encodeMsg.tool";
 import {
   SendMailValidCodeAPI, UserExistAPI,

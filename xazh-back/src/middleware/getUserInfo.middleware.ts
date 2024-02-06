@@ -1,11 +1,10 @@
 import { IMiddleware, Middleware } from "@midwayjs/core";
-import { NextFunction } from "@midwayjs/koa";
-import { Context } from "koa";
+import { NextFunction, Context } from "@midwayjs/koa";
 import { debase64WithDate } from "../util/encodeMsg.util";
-import { Base64 } from "js-base64";
 import { UserIdentityService } from "../service/identity.user.service";
 import { UserService } from "../service/base.user.service";
 import mongoose from "mongoose";
+import { base64 } from "../util/crypto.util";
 
 /**
  * Get user information.
@@ -46,7 +45,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
             const differDate = (dateNow - new Date(date).getTime()) ?? -1
 
             // Get user name, level and ranks.
-            rawToken = Base64.decode(rawToken as string)
+            rawToken = base64.decode(rawToken as string)
             const tokename = (rawToken as string)
               .slice(0, parseInt(
                 (rawToken as string).slice(-1), 36
@@ -56,13 +55,13 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
 
             // Set user's name, level, and ranks
             ctx.user['id'] = new mongoose.Types.ObjectId(id)
-            ctx.user['name'] = username?.user
-            ctx.user['deleted'] = username?.deleted
+            ctx.user['name'] = username['user']
+            ctx.user['deleted'] = username['deleted']
             ctx.user['tokename'] = tokename
             ctx.user['overtime'] = differDate
             ctx.user['level'] = result.level
             ctx.user['ranks'] = result.ranks
-          } catch(e) {
+          } catch (e) {
             console.log(e);
             break
           } finally {

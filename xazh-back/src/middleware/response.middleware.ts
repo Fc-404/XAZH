@@ -17,7 +17,6 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
 
       try {
         const body = await next()
-
         let result = {
           code: ctx.code,
           status: ctx.status,

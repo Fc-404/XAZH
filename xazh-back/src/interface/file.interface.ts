@@ -12,16 +12,16 @@ export interface IUploadFile {
   type?: string,      // File type
   level?: USER_LEVEL, // User level
   data: Buffer,       // File Data
-  md5: string,        // File Md5
+  uid: string,        // File Uid
 }
 
 export interface IDeleteFile {
   author: ObjectId,
   level?: USER_LEVEL,
-  md5: string,
+  uid: string,
 }
 
 export interface IGetFile {
   level?: USER_LEVEL,
-  md5: string,
+  uid: string,
 }

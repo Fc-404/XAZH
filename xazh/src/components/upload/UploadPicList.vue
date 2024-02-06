@@ -105,22 +105,22 @@ const uploadFile = async function (options: any) {
   try {
     const { file } = options
 
-    const md5 = await UploadFileAPI(file.name, file, (e) => {
+    const uid = await UploadFileAPI(file.name, file, (e) => {
       options.onProgress(e.progress)
     })
-    if (!md5) {
+    if (!uid) {
       options.onError()
       return
     }
     // Deduplication
     for (let element of fileList.value ?? []) {
-      if (element.uid == md5) {
+      if (element.uid == uid) {
         options.onError()
         message.error('图片重复！')
         return
       }
     }
-    file['md5'] = md5
+    file['uuid'] = uid
     emit('onUpload', options)
     options.onSuccess()
   } catch (e) {

@@ -1,9 +1,6 @@
 /**
  * Encode message.
  */
-
-import { Base64 } from "js-base64";
-
 type resultType = {
   date: Date,
   data: string,
@@ -20,7 +17,7 @@ export function base64WithDate(
     || 9
   var msgN = msg
   for (let i = 0; i < base64Count; ++i) {
-    msgN = Base64.encode(msgN)
+    msgN = btoa(msgN)
     let index =
       parseInt(dateSeed.slice(-(i + 1), i ? -i : undefined))
       % msgN.length
@@ -57,7 +54,7 @@ export function debase64WithDate(
       result =
         result.slice(result.length - index)
         + result.slice(0, result.length - index)
-      result = Base64.decode(result)
+      result = atob(result)
     }
 
     return result

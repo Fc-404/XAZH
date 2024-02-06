@@ -155,16 +155,16 @@ const coverTagUpdate = async function () {
  */
 const uploadedPic = async function (options: any, value: Array<string>) {
   const { file } = options
-  const md5 = file.md5
-  if (md5) {
-    value.push(md5)
+  const uid = file.uuid
+  if (uid) {
+    value.push(uid)
     await coverTagUpdate()
   }
 }
 const deletedPic = async function (options: any, value: Array<string>) {
-  const md5 = options.uid
-  if (md5) {
-    value.splice(value.indexOf(md5), 1)
+  const uid = options.uid
+  if (uid) {
+    value.splice(value.indexOf(uid), 1)
     await coverTagUpdate()
   }
 }

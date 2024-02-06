@@ -3,14 +3,14 @@ import { MidwayDecoratorService, createCustomParamDecorator } from "@midwayjs/co
 /**
  * Resolve Content Type with in multipart/form-data
  */
-export const USER_KEY = 'decorator:FormData'
+export const FORMD_KEY = 'decorator:FormData'
 
 export function GetBoundary(): ParameterDecorator {
-  return createCustomParamDecorator(USER_KEY, {})
+  return createCustomParamDecorator(FORMD_KEY, {})
 }
 
 export function GetBoundaryM(mds: MidwayDecoratorService) {
-  mds.registerParameterHandler(USER_KEY, (options) => {
+  mds.registerParameterHandler(FORMD_KEY, (options) => {
     let ctx = options.originArgs[0]
     let ct = ctx.get('Content-Type')
     let params: Array<string> = ct.split('; ')

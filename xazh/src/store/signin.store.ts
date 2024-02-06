@@ -4,7 +4,6 @@
 
 import { Module } from "vuex";
 import cookie from 'js-cookie'
-import { Base64 } from "js-base64";
 import { base64WithDate } from "../util/encodeMsg.tool";
 
 const signinStore: Module<any, any> = {
@@ -20,7 +19,7 @@ const signinStore: Module<any, any> = {
   }),
   mutations: {
     async signin(state, value: { id: string, token: string }) {
-      let rawToken = Base64.decode(value.token)
+      let rawToken = atob(value.token)
       let user = rawToken.slice(0, parseInt(rawToken.slice(-1), 36))
       cookie.set('id', value.id)
       cookie.set('user', user)

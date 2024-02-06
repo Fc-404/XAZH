@@ -11,6 +11,7 @@ import parseFormData from "../util/parseFormData.util";
 import { TokenGuard } from "../guard/token.guard";
 import { MidwayValidationError } from "@midwayjs/validate";
 import { FILE_TYPE } from "../types/file.types";
+import { md5, sha1 } from "../util/crypto.util";
 
 @Controller('/File')
 export class FileController {
@@ -35,10 +36,10 @@ export class FileController {
     @GetBoundary() boundary: string,
     @Headers('Content-Length') filesize: number,
     @Headers('Custom-Filename') filename: string,
-    @Headers('Custom-MD5') filemd5: string,
+    @Headers('Custom-Fileuid') fileuid: string,
   ): Promise<any> {
     //- Require param.
-    if (!filename || !filemd5)
+    if (!filename || !fileuid)
       throw new MidwayValidationError('No filename.', 422, null)
 
     //- Judge file type.
@@ -52,14 +53,14 @@ export class FileController {
       throw new httpError.BadRequestError('Not Body.')
     }
 
-    //- Limit file size. 16M
-    if (filesize > 16000000) {
-      throw new httpError.ForbiddenError('File too large.')
-    }
+    // //- Limit file size. 16M
+    // if (filesize > 16000000) {
+    //   throw new httpError.ForbiddenError('File too large.')
+    // }
 
     //- Whether exist file.
-    if (await this.fs.getInfo(filemd5)) {
-      return filemd5
+    if (await this.fs.getInfo(fileuid)) {
+      return fileuid
     }
 
     //- Receive file.
@@ -77,16 +78,23 @@ export class FileController {
         const dataArr = parseFormData(data, boundary, true)
         const result = []
         for (let i of dataArr) {
-          // const filemd5 = new Md5().appendByteArray(i.body).end()
+          console.time('1')
+          const fileuid = md5(i.body)
+          console.timeEnd('1')
+          console.time('2')
+          const fileuid2 = sha1(i.body)
+          console.timeEnd('2')
+          console.log(fileuid, fileuid2);
+
           let r = await this.fs.upload({
             name: i.filename,
             type: FILE_TYPE[fileSuffix],
             author: this.ctx.user['id'],
-            md5: filemd5,
+            uid: fileuid,
             data: i.body
           })
-          if (r == 0)
-            result.push(filemd5)
+          if (r <= 0)
+            result.push(fileuid)
           else {
             this.ctx.code = 1
             this.ctx.message = '上传失败'
@@ -101,16 +109,16 @@ export class FileController {
 
   /**
    * Delete the file.
-   * @param md5 
+   * @param uid 
    * @returns 
    */
   @Post('/Delete')
   @UseGuard(TokenGuard)
-  async deleteFile(@Body('md5') md5: string) {
+  async deleteFile(@Body('uid') uid: string) {
     const result = await this.fs.delete({
       author: this.ctx.user['id'],
       level: this.ctx.user['level'],
-      md5: md5
+      uid: uid
     })
 
     return result
@@ -119,10 +127,10 @@ export class FileController {
   /**
    * Get information of file.
    */
-  @Get('/GetInfo/:md5')
-  async getInfoByMD5(@Param('md5') md5: string) {
-    const filter = ['fileMd5', 'fileName', 'fileSize', 'fileType']
-    const result = await this.fs.getInfo(md5, filter)
+  @Get('/GetInfo/:uid')
+  async getInfoByUID(@Param('uid') uid: string) {
+    const filter = ['fileUid', 'fileName', 'fileSize', 'fileType']
+    const result = await this.fs.getInfo(uid, filter)
     if (!result) {
       this.ctx.code = 1
       return 'No information.'
@@ -132,18 +140,18 @@ export class FileController {
 
   /**
    * Get the file.
-   * @param md5 
+   * @param uid 
    * @param save 
    * @returns 
    */
-  @Get('/:md5')
-  async getFile(@Param('md5') md5: string, @Query('save') save: boolean) {
+  @Get('/:uid')
+  async getFile(@Param('uid') uid: string, @Query('save') save: boolean) {
     this.ctx.set('Transfer-Encoding', 'chunked')
     this.ctx.set('Access-Control-Allow-Origin', '*')
 
     const result = await this.fs.get({
       level: this.ctx.user['level'],
-      md5
+      uid
     })
 
     if (result == -1) {
@@ -175,19 +183,19 @@ export class FileController {
   /**
    * TODO
    * Get list of file.
-   * @param md5 
+   * @param uid 
    * @param save 
    * @returns 
    */
   @Post('/Get')
   @UseGuard(TokenGuard)
-  async getFiles(@Body('md5') md5: string, @Body('save') save: boolean) {
+  async getFiles(@Body('uid') uid: string, @Body('save') save: boolean) {
     this.ctx.set('Transfer-Encoding', 'chunked')
     this.ctx.set('Access-Control-Allow-Origin', '*')
 
     const result = await this.fs.get({
       level: this.ctx.user['level'],
-      md5
+      uid
     })
 
     if (result == -1) {

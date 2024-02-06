@@ -14,6 +14,7 @@ const header: Module<any, any> = {
     progress: 0,
     title: null,
     headerMode: ModeHeaderPageI.SCROLL,
+    changeHeaderModeHandle: () => { },
     changeTitleHandle: () => { },
     closeTitleHandle: () => { },
     // Footer
@@ -52,10 +53,14 @@ const header: Module<any, any> = {
     },
     headerMode(state, v: ModeHeaderPageI) {
       state.headerMode = v
+      state.changeHeaderModeHandle()
     },
     closeTitle(state) {
       state.title = null
       state.closeTitleHandle()
+    },
+    changeHeaderModeHandle(state, v: Function) {
+      state.changeHeaderModeHandle = v
     },
     changeTitleHandle(state, v: Function) {
       state.changeTitleHandle = v

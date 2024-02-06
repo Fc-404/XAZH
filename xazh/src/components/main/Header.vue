@@ -255,23 +255,30 @@ const headerDeal = function () {
   const headerHover: HTMLElement = document.getElementById('header-hover') as HTMLElement
   const headerRoot: HTMLElement = document.getElementById('header') as HTMLElement
   var scrollTopForTitle: number = 0
-  var changeTitleDebounceHandle: any
+  var changeTitleDebounceHandle: NodeJS.Timeout
+  var headerLeaveHandle: NodeJS.Timeout
 
   headerHover.onmouseenter = () => {
     headerRoot.style.top = '0'
   }
   headerRoot.onmouseleave = () => {
-    if (store.getters['header/headerMode'] === ModeHeaderPageI.AUTO_HIDDEN)
-      headerRoot.style.top = 'calc(var(--headerHeight) * -1)'
+    clearTimeout(headerLeaveHandle)
+    if (store.getters['header/headerMode'] === ModeHeaderPageI.AUTO_HIDDEN) {
+      headerLeaveHandle = setTimeout(() => {
+        headerRoot.style.top = 'calc(var(--headerHeight) * -1)'
+      }, 3000)
+    }
   }
 
   const dealCore = () => {
     clearTimeout(changeTitleDebounceHandle)
+    clearTimeout(headerLeaveHandle)
     changeTitleDebounceHandle = setTimeout(() => {
       const headerMode = store.getters['header/headerMode']
       const scrollTopForTitleT = document.documentElement.scrollTop
       switch (headerMode) {
         case ModeHeaderPageI.SCROLL:
+          headerRoot.style.top = '0'
           if (store.getters['header/title'] === null) {
             return;
           }
@@ -284,10 +291,12 @@ const headerDeal = function () {
           break;
 
         case ModeHeaderPageI.CONSTANT:
+          headerRoot.style.top = '0'
           headerContainer.style.top = 'calc(var(--headerHeight) * -1)'
           break;
 
         case ModeHeaderPageI.AUTO_SHOW:
+          headerRoot.style.top = '0'
           if (scrollTopForTitleT > scrollTopForTitle) {
             headerRoot.style.top = 'calc(var(--headerHeight) * -1)'
           } else {
@@ -306,6 +315,10 @@ const headerDeal = function () {
     }, 44)
   }
   dealCore()
+
+  store.commit('header/changeHeaderModeHandle', () => {
+    dealCore()
+  })
 
   const preBarTitle = document.title
 

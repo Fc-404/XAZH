@@ -6,13 +6,13 @@ import {
   SigninUserDTO, SignupUserDTO,
   TokenRDTO
 } from '../dto/signup.user.dto';
-import { Base64 } from 'js-base64';
 import { Context } from '@midwayjs/koa';
 import { UserService } from '../service/base.user.service';
 import { UserTokenService } from '../service/token.user.service';
 import { MailService } from '../service/mail.service';
 import { base64WithDate, debase64WithDate } from '../util/encodeMsg.util';
 import { TokenGuard } from '../guard/token.guard';
+import { base64 } from '../util/crypto.util';
 
 @Controller('/User')
 export class UserController {
@@ -101,7 +101,7 @@ export class UserController {
       case 0:
         // Token generate algorithm.
         // ! Don't modify it easily.
-        const token = Base64.encode(useri.user + userinfo.pswd + useri.user.length.toString(36))
+        const token = base64.encode(useri.user + userinfo.pswd + useri.user.length.toString(36))
         const tokenN = base64WithDate(token)
 
         const result = {

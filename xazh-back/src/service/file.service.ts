@@ -19,6 +19,7 @@ export class FileService {
    * @returns Number
    * code:
    * 1: The file size is too large.
+   * 0: Success.
    * -1: The file is alread exist.
    * 2: Save file had been Exception.
    */
@@ -28,7 +29,7 @@ export class FileService {
       return 1
     }
 
-    let result: any = await FileInfo.model.findOne({ fileMd5: options.md5 })
+    let result: any = await FileInfo.model.findOne({ fileUid: options.uid })
     if (result) {
       let authorL = result.author.length
       // ! The number 100 is the threshold to set the field of persitend.
@@ -60,7 +61,7 @@ export class FileService {
       }
 
       await FileInfo.model.create([{
-        fileMd5: options.md5,
+        fileUid: options.uid,
         fileName: options.name,
         fileSize: filel,
         fileType: options.type,
@@ -89,7 +90,7 @@ export class FileService {
    * 2: Delete the file.
    */
   async delete(options: IDeleteFile) {
-    const file = await FileInfo.model.findOne({ fileMd5: options.md5 })
+    const file = await FileInfo.model.findOne({ fileUid: options.uid })
 
     // Not file
     if (!file)
@@ -136,11 +137,11 @@ export class FileService {
 
   /**
    * Get infomation about the file.
-   * @param md5 
+   * @param uid 
    * @returns FileInfo
    */
-  async getInfo(md5: string, filter: Array<string> = []) {
-    return await FileInfo.model.findOne({ fileMd5: md5 }, filter) ?? null
+  async getInfo(uid: string, filter: Array<string> = []) {
+    return await FileInfo.model.findOne({ fileUid: uid }, filter) ?? null
   }
 
   /**
@@ -152,7 +153,7 @@ export class FileService {
    * @returns Object | number
    */
   async getAll(options: IGetFile) {
-    const filei = await this.getInfo(options.md5)
+    const filei = await this.getInfo(options.uid)
     if (!filei)
       return -1
     if (filei?.level > (options.level ?? 0))
@@ -177,7 +178,7 @@ export class FileService {
    * 1: There is no permission to access the file.
    */
   async get(options: IGetFile) {
-    const filei = await this.getInfo(options.md5)
+    const filei = await this.getInfo(options.uid)
     if (!filei)
       return -1
     if (filei?.level > (options.level ?? 0))
@@ -204,7 +205,7 @@ export class FileService {
    * ! This way is to get file by the Readable Function.
 
   async getI(options: IGetFile) {
-    const filei = await this.getInfo(options.md5)
+    const filei = await this.getInfo(options.uid)
     if (filei?.level > options.level)
       return null
 
