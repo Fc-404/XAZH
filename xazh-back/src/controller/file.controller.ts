@@ -11,7 +11,6 @@ import parseFormData from "../util/parseFormData.util";
 import { TokenGuard } from "../guard/token.guard";
 import { MidwayValidationError } from "@midwayjs/validate";
 import { FILE_TYPE } from "../types/file.types";
-import { md5, sha1 } from "../util/crypto.util";
 
 @Controller('/File')
 export class FileController {
@@ -78,17 +77,11 @@ export class FileController {
         const dataArr = parseFormData(data, boundary, true)
         const result = []
         for (let i of dataArr) {
-          console.time('1')
-          const fileuid = md5(i.body)
-          console.timeEnd('1')
-          console.time('2')
-          const fileuid2 = sha1(i.body)
-          console.timeEnd('2')
-          console.log(fileuid, fileuid2);
+          // const fileuid = md5(i.body)
 
           let r = await this.fs.upload({
             name: i.filename,
-            type: FILE_TYPE[fileSuffix],
+            type: FILE_TYPE[fileSuffix],  
             author: this.ctx.user['id'],
             uid: fileuid,
             data: i.body

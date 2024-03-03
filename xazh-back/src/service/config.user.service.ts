@@ -1,5 +1,5 @@
 import { Provide } from "@midwayjs/core";
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
 import UserConfig from '../model/config.user.model'
 import UserBase from '../model/base.user.model'
 import { sha1 } from "../util/crypto.util";
@@ -13,7 +13,7 @@ export class UserConfigService {
    * @param version 
    * @returns true | false | undefined
    */
-  async checkPConfVersion(id: ObjectId, version: string): Promise<boolean | undefined> {
+  async checkPConfVersion(id: Types.ObjectId, version: string): Promise<boolean | undefined> {
     const config = await UserConfig.model.findById(id)
     if (!config?.pconf) {
       return undefined
@@ -33,7 +33,7 @@ export class UserConfigService {
    * @param id 
    * @returns object
    */
-  async getPConf(id: ObjectId): Promise<object> {
+  async getPConf(id: Types.ObjectId): Promise<object> {
     const config = await UserConfig.model.findById(id)
 
     return config?.pconf || null
@@ -45,7 +45,7 @@ export class UserConfigService {
    * @param pconf 
    * @returns boolean
    */
-  async setPCong(id: ObjectId, pconf: object): Promise<boolean> {
+  async setPCong(id: Types.ObjectId, pconf: object): Promise<boolean> {
     const result = await UserConfig.model.findById(id)
     if (!result.pconf)
       result.set('pconf', {})
@@ -64,9 +64,9 @@ export class UserConfigService {
    * @param user 
    * @returns ObjectId
    */
-  async getConfigId(userid: ObjectId): Promise<ObjectId> {
+  async getConfigId(userid: Types.ObjectId): Promise<Types.ObjectId> {
     const result = await UserBase.model.findOne({ _id: userid }, ['config_link'])
 
-    return result?.config_link as ObjectId
+    return result?.config_link
   }
 }

@@ -1,5 +1,6 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
+const ObjectId = Schema.Types.ObjectId
 const name: string = 'File.Info'
 
 const schema = new mongoose.Schema({
@@ -16,9 +17,9 @@ const schema = new mongoose.Schema({
   },
   level: Number,            // User level
   // The list of the Data.File Document.
-  data: [mongoose.Types.ObjectId],
+  data: [ObjectId],
   // who uploaded. Type is userid.
-  author: [mongoose.Types.ObjectId],
+  author: [ObjectId],
   // whether delete. If true, never delete.
   persitent: {
     type: Boolean,

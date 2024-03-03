@@ -1,9 +1,10 @@
-import mongoose from "mongoose"
+import mongoose, { Schema } from "mongoose"
 
+const ObjectId = Schema.Types.ObjectId
 const name: string = 'User.Token'
 
 const schema = new mongoose.Schema({
-  _id: mongoose.Types.ObjectId,      // User's ID
+  _id: ObjectId,      // User's ID
   token: String,    // User's Token
   date: {
     type: Date,

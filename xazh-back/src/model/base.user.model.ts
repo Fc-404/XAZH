@@ -1,15 +1,19 @@
-import mongoose from "mongoose"
+import mongoose, { Schema } from "mongoose"
 import { USER_LEVEL } from "../types/userLevel.types"
+import { PRIVACY_TYPE } from "../types/privacy.types"
 
 
-const ObjectId = mongoose.Types.ObjectId
+const ObjectId = Schema.Types.ObjectId
 
 
 const name: string = 'User.Base'
 
 const schema = new mongoose.Schema({
     info: {                             // User Base Info
-        privacy: String,                // About who can or not see the info. ['public', 'onlyself', 'onlyfriend']
+        privacy: {                      // About who can or not see the info. ['public', 'onlyself', 'onlyfriend']
+            type: Number,
+            default: PRIVACY_TYPE.public
+        },
         name: String,                   // User name
         age: Number,                    // User Age
         sex: Boolean,                   // User sex

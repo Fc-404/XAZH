@@ -1,11 +1,11 @@
 import { Provide } from "@midwayjs/core"
 import UserBase from '../model/base.user.model'
 import { USER_LEVEL } from "../types/userLevel.types"
-import { ObjectId } from "mongoose"
+import { Types } from "mongoose"
 
 @Provide()
 export class UserIdentityService {
-  async getUserLevel(userid: ObjectId): Promise<number> {
+  async getUserLevel(userid: Types.ObjectId): Promise<number> {
     const result = await UserBase.model.findOne(
       { _id: userid },
       ['level']
@@ -13,7 +13,7 @@ export class UserIdentityService {
     return result.level ?? 0
   }
 
-  async getUserRanks(userid: ObjectId): Promise<Array<string>> {
+  async getUserRanks(userid: Types.ObjectId): Promise<Array<string>> {
     const result = await UserBase.model.findOne(
       { _id: userid },
       ['ranks']
@@ -21,7 +21,7 @@ export class UserIdentityService {
     return result.ranks
   }
 
-  async get(userid: ObjectId): Promise<
+  async get(userid: Types.ObjectId): Promise<
     {
       level: USER_LEVEL,
       ranks: Array<string>

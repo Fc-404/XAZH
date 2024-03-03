@@ -6,7 +6,7 @@ import FileInfo from '../model/info.file.model'
 
 import fileConfig from "../config/file.config";
 import { DefaultErrorFilter } from "../filter/default.filter";
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
 
 @Provide()
 export class FileService {
@@ -102,8 +102,9 @@ export class FileService {
       if (file.persitent)
         return 1
 
+      // TODO: no atomicity
       // Delete user
-      const userIndex = (file.author as [ObjectId]).indexOf(options.author)
+      const userIndex = file.author.indexOf(options.author)
       if (userIndex > -1) {
         file.author.splice(userIndex, 1)
       }

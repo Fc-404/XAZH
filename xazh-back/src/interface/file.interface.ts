@@ -2,13 +2,13 @@
  * About File Services.
  */
 
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
 import { USER_LEVEL } from "../types/userLevel.types";
 
 export interface IUploadFile {
   // Post form
   name?: string,      // File name
-  author: ObjectId,     // User ID
+  author: Types.ObjectId,     // User ID
   type?: string,      // File type
   level?: USER_LEVEL, // User level
   data: Buffer,       // File Data
@@ -16,7 +16,7 @@ export interface IUploadFile {
 }
 
 export interface IDeleteFile {
-  author: ObjectId,
+  author: Types.ObjectId,
   level?: USER_LEVEL,
   uid: string,
 }

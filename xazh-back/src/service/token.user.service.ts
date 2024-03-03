@@ -1,6 +1,6 @@
 import { Provide } from "@midwayjs/core";
 import UToken from '../model/token.user.model'
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
 
 @Provide()
 export class UserTokenService {
@@ -11,7 +11,7 @@ export class UserTokenService {
    * @param token 
    * @returns true | false
    */
-  async setToken(userid: ObjectId, token: string): Promise<boolean> {
+  async setToken(userid: Types.ObjectId, token: string): Promise<boolean> {
     const result = await UToken.model.findOneAndUpdate({
       _id: userid
     }, {
@@ -30,7 +30,7 @@ export class UserTokenService {
    * @param token 
    * @returns true | false
    */
-  async verifyToken(userid: ObjectId, token: string): Promise<boolean> {
+  async verifyToken(userid: Types.ObjectId, token: string): Promise<boolean> {
     const result = await UToken.model.findOne({
       _id: userid,
       token: token,
@@ -44,7 +44,7 @@ export class UserTokenService {
    * @param userid
    * @returns true | false
    */
-  async deleteToken(userid: ObjectId): Promise<boolean> {
+  async deleteToken(userid: Types.ObjectId): Promise<boolean> {
     const result = await UToken.model.deleteOne({
       _id: userid
     })

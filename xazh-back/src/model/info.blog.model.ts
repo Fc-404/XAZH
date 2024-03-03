@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { PRIVACY_TYPE } from "../types/privacy.types";
 
-const ObjectId = mongoose.Types.ObjectId
+const ObjectId = Schema.Types.ObjectId
 const name: string = 'Blog.Info'
 
 const schema = new mongoose.Schema({
@@ -9,7 +9,7 @@ const schema = new mongoose.Schema({
   author: ObjectId,
   privacy: {
     type: Number,
-    default: PRIVACY_TYPE.all
+    default: PRIVACY_TYPE.public
   },
   body: ObjectId,
   comment_like: ObjectId,

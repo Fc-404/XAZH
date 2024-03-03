@@ -3,7 +3,7 @@
  */
 
 export enum PRIVACY_TYPE {
-  onlyself = 0,
+  public = 0,
   onlyfriend,
-  all,
+  onlyself,
 }

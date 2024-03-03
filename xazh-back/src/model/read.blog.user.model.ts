@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const ObjectId = mongoose.Types.ObjectId
+const ObjectId = Schema.Types.ObjectId
 const name: string = 'User.Blog.Read'
 
 const schema = new mongoose.Schema({

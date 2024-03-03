@@ -1,6 +1,6 @@
 import { Context, Inject, Provide, makeHttpRequest } from '@midwayjs/core';
 import { IAddUser } from '../interface/user.interface';
-import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 
 import UserBase from '../model/base.user.model';
 import UserBlogs from '../model/blog.user.model'
@@ -9,7 +9,6 @@ import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
 import { sha1 } from '../util/crypto.util';
 
-type ObjectId = mongoose.Types.ObjectId
 const ipMaxCount = 20
 
 @Provide()
@@ -92,7 +91,7 @@ export class UserService {
   async deleteUser(id: string, user: string): Promise<boolean> {
     const result = await UserBase.model.findOneAndUpdate(
       {
-        _id: new mongoose.Types.ObjectId(id)
+        _id: new Types.ObjectId(id)
       },
       {
         $set: {
@@ -150,7 +149,7 @@ export class UserService {
    * @param user 
    * @param ip 
    */
-  async pushIp(userid: ObjectId, ip: string) {
+  async pushIp(userid: Types.ObjectId, ip: string) {
     if (!ip) {
       this.ctx.logger.warn(`The user ${userid} has no ip when signin.`)
       return false
@@ -224,7 +223,7 @@ export class UserService {
    * @param user 
    * @returns UserInfo
    */
-  async getUserInfo(userid: ObjectId, options = null): Promise<object> {
+  async getUserInfo(userid: Types.ObjectId, options = null): Promise<object> {
     return await UserBase.model.findOne(
       { _id: userid },
       options ?? { pswd: 0 }
