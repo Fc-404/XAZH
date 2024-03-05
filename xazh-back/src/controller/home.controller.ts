@@ -1,11 +1,14 @@
 import { Controller, Get, Inject } from '@midwayjs/core';
+import { ListUtilService } from '../service/list.util.service';
+import { Types } from 'mongoose';
 import { LogService } from '../service/log.service';
-import { md5, sha1 } from '../util/crypto.util';
 
 @Controller('/')
 export class HomeController {
   @Inject()
-  ts: LogService
+  l: ListUtilService
+  @Inject()
+  log: LogService
 
   @Get('/')
   async home(): Promise<string> {
@@ -14,16 +17,31 @@ export class HomeController {
 
   @Get('/test')
   async test(): Promise<any> {
-    // const str = (~~(Math.random() * 70000)).toString()
-    // return await this.ts.add()
+    let result
+    // for (let i = 0; i < 10; i++)
+    //   await this.log.red('error, user is bad.')
 
-    console.time('md5')
-    const a = md5('12asdf34567890123456agrw7890123sdagf4567890')
-    console.timeEnd('md5')
-    console.time('sha')
-    const b = sha1('12asdf34567890123456agrw7890123sdagf4567890')
-    console.timeEnd('sha')
+    result = await this.log.get('20240305')
 
-    return [a, b]
+    // result = await this.l.createList()
+    // console.log(result);
+
+    // const headid = new Types.ObjectId('65e5798d5d8cf1a04749c7e4')
+
+    // for (let i = 0; i < 1000; i++) {
+    //   await this.l.appendOne(headid, i.toString())
+    // }
+
+    // for (let i = 0; i < 48; i++)
+    //   await this.l.insertOne(headid, '12345', 150)
+
+    // result = await this.l.findMany(headid, 0, 500)
+
+    // for (let i = 0; i < 50; i++)
+    //   result = await this.l.deleteOne(headid, 651 + i)
+
+    // result = await this.l.deleteList(headid)
+
+    return result
   }
 }

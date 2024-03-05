@@ -14,7 +14,7 @@ export class ListUtilService {
   /**
    * Create a new list.
    * @param chunkLen 
-   * @returns 
+   * @returns ObjectId
    */
   async createList(chunkLen: number = 100): Promise<Types.ObjectId> {
     const result = await list.create({
@@ -65,14 +65,15 @@ export class ListUtilService {
       node.length++
       root.totalLen++
 
+      await last.save({ session })
       await node.save({ session })
       await root.save({ session })
-      session.commitTransaction()
+      await session.commitTransaction()
     } catch {
       await session.abortTransaction()
       result = false
     } finally {
-      session.endSession()
+      await session.endSession()
     }
 
     return result
@@ -129,7 +130,7 @@ export class ListUtilService {
         }], { session }))[0]
         next.next = node.next
         node.next = next._id
-        next.body = node.body.splice(root.chunkLen + 1)
+        next.body = node.body.splice(root.chunkLen)
         node.markModified('body')
         next.length = node.length - root.chunkLen
         node.length = root.chunkLen
@@ -137,12 +138,12 @@ export class ListUtilService {
       }
       await node.save({ session })
       await root.save({ session })
-      session.commitTransaction()
+      await session.commitTransaction()
     } catch {
       // TODO: Log system.
       await session.abortTransaction()
     } finally {
-      session.endSession()
+      await session.endSession()
     }
 
     return result
@@ -154,47 +155,93 @@ export class ListUtilService {
    * @param value 
    * @returns 
    */
-  async deleteOne(head: Types.ObjectId, value: any) {
+  async deleteOne(head: Types.ObjectId, value: any, chunkid?: Types.ObjectId): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
+    const chunk = await list.findOne({ _id: chunkid })
 
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
       let node = root
-      let prev = root
-      while (node) {
-        let index = node.body.indexOf(value)
-        if (index != -1) {
-          node.body.splice(index, 1)
-          node.markModified('body')
-          node.length--
-          root.totalLen--
-          if (node.length === 0) {
-            if (node.next) {
-              prev.next = node.next
-            }
-            else {
-              prev.next = null
-              root.last = prev._id
-            }
-            await node.deleteOne({ session })
-          } else {
-            await node.save({ session })
-          }
-          await root.save({ session })
-          break
-        } else {
-          prev = node
+      let index
+
+      // Search the node.
+      if (chunk) {
+        node = chunk
+        index = chunk.body.indexOf(value)
+      } else {
+        while (node) {
+          index = node.body.indexOf(value)
+          if (index != -1)
+            break
           node = await list.findOne({ _id: node.next })
         }
       }
-      session.commitTransaction()
-    } catch {
+      if (!node || index == -1) {
+        result = false
+        throw new Error('Not found.')
+      }
+
+      // Delete logic.
+      node.body.splice(index, 1)
+      node.markModified('body')
+      node.length--
+      root.totalLen--
+      let next = await list.findOne({ _id: node.next })
+      let prev = await list.findOne({ _id: node.prev })
+      if (node.length <= 0) {
+        if (node == root) {
+          node.body = next.body
+          node.next = next.next
+          node.length = next.length
+          await next.deleteOne({ session })
+          next = await list.findOne({ _id: node.next })
+          next.prev = node._id
+          next.save({ session })
+        } else {
+          prev.next = node.next
+          next.prev = prev._id
+          await prev.save({ session })
+          await next.save({ session })
+          await node.deleteOne({ session })
+        }
+      } else {
+        let prevL = prev?.length
+        let nextL = next?.length
+        let nodeL = node.length
+        if (prevL && prevL + nodeL <= root.chunkLen * 1.5) {
+          prev.body.push(...node.body)
+          prev.markModified('body')
+          prev.length += nodeL
+          prev.next = next._id
+          next.prev = prev._id
+          node.deleteOne({ session })
+          await prev.save({ session })
+          await next.save({ session })
+        } else if (nextL && nextL + nodeL <= root.chunkLen * 1.5) {
+          next.body.unshift(...node.body)
+          next.markModified('body')
+          next.length += nodeL
+          next.prev = prev._id
+          prev.next = next._id
+          node.deleteOne({ session })
+          await next.save({ session })
+          await prev.save({ session })
+        } else {
+          await node.save({ session })
+        }
+      }
+
+      await root.save({ session })
+      await session.commitTransaction()
+    } catch (e) {
+      console.log(e);
       // TODO: Log system.
+      result = false
       await session.abortTransaction()
     } finally {
-      session.endSession()
+      await session.endSession()
     }
 
     return result
@@ -231,6 +278,34 @@ export class ListUtilService {
   }
 
   /**
+   * Fine one by index from list.
+   * @param head 
+   * @param index 
+   * @returns 
+   */
+  async findByIndex(head: Types.ObjectId, index: number) {
+    let result = null
+    const root = await list.findOne({ _id: head })
+
+    let node = root
+    let count = 0
+    while (node) {
+      let recount = count
+      if (index < count) {
+        result = {
+          value: node.body[index - recount],
+          node: node._id,
+        }
+        break
+      }
+      count += node.length
+      node = await list.findOne({ _id: node.next })
+    }
+
+    return result
+  }
+
+  /**
    * Find a chunk from list.
    * @param head 
    * @param nodeindex 
@@ -247,11 +322,30 @@ export class ListUtilService {
         result = {
           value: node.body,
           node: node._id,
+          prev: node.prev,
+          next: node.next
         }
         break
       }
       node = await list.findOne({ _id: node.next })
       index++
+    }
+
+    return result
+  }
+
+  /**
+   * Find a chunk by id.
+   * @param chunk 
+   * @returns 
+   */
+  async findByChunk(chunk: Types.ObjectId) {
+    const node = await list.findOne({ _id: chunk })
+    let result = {
+      value: node.body,
+      node: node._id,
+      prev: node.prev,
+      next: node.next
     }
 
     return result
@@ -264,8 +358,8 @@ export class ListUtilService {
    * @param end 
    * @returns 
    */
-  async findMany(head: Types.ObjectId, start: number, end: number) {
-    if (start < 0 || start > end) {
+  async findMany(head: Types.ObjectId, start: number, length: number) {
+    if (start < 0 || length <= 0) {
       return null
     }
 
@@ -279,40 +373,38 @@ export class ListUtilService {
     let node = root
     let count = 0
     while (node) {
+      let recount = count
       count += node.length
-      let recount = count - node.length
-      // Start.
-      if (start != -1 && count >= start) {
-        // If range include in a node,
-        if (count >= end) {
-          result.value.push(
-            ...node.body.slice(start - recount, end - recount)
-          )
-          result.length = end - start
+      if (result.length >= length) break
+      // Push.
+      if (start == -1) {
+        let nlen = node.length
+        let remainder = length - result.length
+        // Done.
+        if (remainder <= nlen) {
+          result.value.push(...node.body.slice(0, remainder))
+          result.length += remainder
           break
         }
-        // else.
-        result.value.push(
-          ...node.body.slice(start - recount)
-        )
-        result.length = start - recount
-        result.node.push(node._id)
-        start = -1
+        // Continue.
+        else {
+          result.value.push(...node.body)
+          result.length += nlen
+        }
       }
-      // Middle.
-      if (start == -1 && end > count) {
-        result.value.push(...node.body)
-        result.node.push(node._id)
-        result.length += node.length
-      }
-      // End.
-      if (count >= end) {
-        result.value.push(
-          ...node.body.slice(0, end - recount)
-        )
-        result.length = end - recount
-        result.node.push(node._id)
-        break
+      // Start.
+      if (start != -1 && count >= start) {
+        let index = start - recount
+        let remainder = node.length - index
+        if (remainder < length) {
+          result.value.push(...node.body.slice(index))
+          result.length = remainder
+          start = -1
+        } else {
+          result.value.push(...node.body.slice(index, index + length))
+          result.length = length
+          break
+        }
       }
 
       node = await list.findOne({ _id: node.next })
@@ -321,8 +413,38 @@ export class ListUtilService {
     return result
   }
 
-  async updateOne() { }
-  async appendMany() { }
-  async deleteMany() { }
-  async query() { }
+  /**
+   * Delete a list.
+   * @param head 
+   * @returns true | false
+   */
+  async deleteList(head: Types.ObjectId): Promise<boolean> {
+    let result = true
+    const root = await list.findOne({ _id: head })
+
+    const session = await mongoose.startSession()
+    session.startTransaction()
+    try {
+      let node = root
+      while (node) {
+        let nextid = node.next
+        await node.deleteOne({ session })
+        node = await list.findOne({ _id: nextid })
+      }
+      await session.commitTransaction()
+    } catch {
+      // TODO: Log system.
+      await session.abortTransaction()
+      result = false
+    } finally {
+      await session.endSession()
+    }
+
+    return result
+  }
+
+  // async updateOne() { }
+  // async appendMany() { }
+  // async deleteMany() { }
+  // async query() { }
 }

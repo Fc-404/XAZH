@@ -5,7 +5,7 @@
 import { formatDate } from "../util/formatDate.util"
 
 export default function (code: string) {
-  const date = formatDate(true, true)
+  const date = formatDate('YYYY年MM月DD日 hh时mm分ss秒')
   return `
   <div style="
   font-size: 16px;
