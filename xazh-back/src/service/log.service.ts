@@ -1,4 +1,4 @@
-import { Inject, Provide } from "@midwayjs/core";
+import { Inject, Provide, ILogger } from "@midwayjs/core";
 import Log from '../model/log.model'
 import { Types } from "mongoose";
 import { formatDate } from "../util/formatDate.util";
@@ -8,6 +8,9 @@ import { ListUtilService } from "./list.util.service";
 export class LogService {
   @Inject()
   list: ListUtilService
+
+  @Inject()
+  logger: ILogger
 
   /**
    * Append msg to DB.
@@ -35,9 +38,10 @@ export class LogService {
    */
   async red(msg, callerinfo: boolean = true) {
     const caller = callerinfo
-      ? '\n\t' + new Error().stack?.split('\n')[2]?.trim() : null
+      ? '\n' + new Error().stack.slice(6) : null
     let str = `[red][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
                 ${caller}`
+    this.error(str)
     await this.append(str)
   }
 
@@ -49,9 +53,10 @@ export class LogService {
    */
   async yellow(msg, callerinfo: boolean = true) {
     const caller = callerinfo
-      ? '\n\t' + new Error().stack?.split('\n')[2]?.trim() : null
+      ? '\n' + new Error().stack.slice(6) : null
     let str = `[yellow][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
               ${caller}`
+    this.warn(str)
     await this.append(str)
   }
 
@@ -63,9 +68,10 @@ export class LogService {
    */
   async green(msg, callerinfo: boolean = false) {
     const caller = callerinfo
-      ? '\n\t' + new Error().stack?.split('\n')[2]?.trim() : null
+      ? '\n' + new Error().stack.slice(6) : null
     let str = `[green][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
               ${caller}`
+    this.info(str)
     await this.append(str)
   }
 
@@ -85,4 +91,9 @@ export class LogService {
     }
     return result
   }
+
+  info(msg, ...args) { this.logger.info(msg, ...args) }
+  warn(msg, ...args) { this.logger.warn(msg, ...args) }
+  error(msg, ...args) { this.logger.error(msg, ...args) }
+  debug(msg, ...args) { this.logger.debug(msg, ...args) }
 }

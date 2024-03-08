@@ -131,7 +131,7 @@ export class FileService {
     } catch {
       await session.abortTransaction()
     } finally {
-      session.endSession()
+      await session.endSession()
     }
     return 2
   }

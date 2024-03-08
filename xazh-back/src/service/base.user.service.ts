@@ -79,7 +79,7 @@ export class UserService {
       await session.abortTransaction()
       result = false
     } finally {
-      session.endSession()
+      await session.endSession()
     }
 
     return result

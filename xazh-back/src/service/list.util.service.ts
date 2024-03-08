@@ -41,7 +41,6 @@ export class ListUtilService {
     const root = await list.findOne({ _id: head }, ['chunkLen', 'totalLen', 'last'])
     const last = await list.findOne({ _id: root.last })
     if (!last) {
-      // TODO: Log system.
       return false
     }
     let result = true
@@ -61,10 +60,10 @@ export class ListUtilService {
         root.last = last.next = node._id
       }
       node.body.push(value)
-      node.markModified('body')
       node.length++
       root.totalLen++
 
+      node.markModified('body')
       await last.save({ session })
       await node.save({ session })
       await root.save({ session })
@@ -111,7 +110,6 @@ export class ListUtilService {
       }
       index -= count
       if (!node) {
-        // TODO: Log system.
         return false
       }
       // Insert.
@@ -140,7 +138,6 @@ export class ListUtilService {
       await root.save({ session })
       await session.commitTransaction()
     } catch {
-      // TODO: Log system.
       await session.abortTransaction()
     } finally {
       await session.endSession()
@@ -158,18 +155,29 @@ export class ListUtilService {
   async deleteOne(head: Types.ObjectId, value: any, chunkid?: Types.ObjectId): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
-    const chunk = await list.findOne({ _id: chunkid })
+    let chunk = await list.findOne({ _id: chunkid })
 
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
       let node = root
-      let index
+      let index = -1
 
       // Search the node.
       if (chunk) {
-        node = chunk
         index = chunk.body.indexOf(value)
+        if (index == -1) {
+          // Search the prev chunk.
+          let nextid = chunk.next
+          chunk = await list.findOne({ _id: chunk.prev })
+          index = chunk.body.indexOf(value)
+          if (index == -1) {
+            // Search the next chunk.
+            chunk = await list.findOne({ _id: nextid })
+            index = chunk.body.indexOf(value)
+          }
+        }
+        node = chunk
       } else {
         while (node) {
           index = node.body.indexOf(value)
@@ -235,9 +243,7 @@ export class ListUtilService {
 
       await root.save({ session })
       await session.commitTransaction()
-    } catch (e) {
-      console.log(e);
-      // TODO: Log system.
+    } catch {
       result = false
       await session.abortTransaction()
     } finally {
@@ -433,7 +439,6 @@ export class ListUtilService {
       }
       await session.commitTransaction()
     } catch {
-      // TODO: Log system.
       await session.abortTransaction()
       result = false
     } finally {

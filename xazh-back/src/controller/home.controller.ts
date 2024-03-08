@@ -18,10 +18,10 @@ export class HomeController {
   @Get('/test')
   async test(): Promise<any> {
     let result
-    // for (let i = 0; i < 10; i++)
-    //   await this.log.red('error, user is bad.')
+    // for (let i = 0; i < 200; i++)
+    //   await this.log.red('error, user is bad.' + i)
 
-    result = await this.log.get('20240305')
+    // result = await this.log.get('20240308')
 
     // result = await this.l.createList()
     // console.log(result);
@@ -40,7 +40,7 @@ export class HomeController {
     // for (let i = 0; i < 50; i++)
     //   result = await this.l.deleteOne(headid, 651 + i)
 
-    // result = await this.l.deleteList(headid)
+    // result = await this.l.deleteOne(headid, 901, new Types.ObjectId('65e579955d8cf1a04749d5a1'))
 
     return result
   }
