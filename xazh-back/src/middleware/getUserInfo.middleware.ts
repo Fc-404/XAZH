@@ -5,6 +5,7 @@ import { UserIdentityService } from "../service/identity.user.service";
 import { UserService } from "../service/base.user.service";
 import mongoose from "mongoose";
 import { base64 } from "../util/crypto.util";
+import { LogService } from "../service/log.service";
 
 /**
  * Get user information.
@@ -62,7 +63,8 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
             ctx.user['level'] = result.level
             ctx.user['ranks'] = result.ranks
           } catch (e) {
-            console.log(e);
+            await (await ctx.requestContext.getAsync(LogService)).red(
+              'getUserInfo() execution error. This is middlware.', e)
             break
           } finally {
             break

@@ -1,4 +1,4 @@
-import { Provide } from "@midwayjs/core";
+import { Provide, Inject } from "@midwayjs/core";
 import { IDeleteFile, IGetFile, IUploadFile } from "../interface/file.interface";
 
 import FileData from '../model/data.file.model'
@@ -6,10 +6,13 @@ import FileInfo from '../model/info.file.model'
 
 import fileConfig from "../config/file.config";
 import { DefaultErrorFilter } from "../filter/default.filter";
-import { Types } from "mongoose";
+import { LogService } from "./log.service";
 
 @Provide()
 export class FileService {
+
+  @Inject()
+  log: LogService
 
   /**
    * Upload File.
@@ -71,7 +74,8 @@ export class FileService {
       }], { session })
 
       await session.commitTransaction()
-    } catch {
+    } catch (e) {
+      await this.log.red('Upload file failed.', e)
       await session.abortTransaction()
     } finally {
       session.endSession()
@@ -128,7 +132,8 @@ export class FileService {
       await file.deleteOne({ session })
 
       await session.commitTransaction()
-    } catch {
+    } catch (e) {
+      await this.log.red('Delete file failed.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
@@ -165,6 +170,9 @@ export class FileService {
       filed.push((await FileData.model.findById(i)).data)
     }
 
+    this.log.yellow('Get the file at once. Name is '
+      + filei.fileName + ', size is ' + filei.fileSize)
+
     return {
       info: filei,
       data: Buffer.concat(filed)
@@ -191,6 +199,7 @@ export class FileService {
         try {
           return (await FileData.model.findById(i)).data
         } catch (e) {
+          await this.log.red(i + ' of FileData get failed.')
           throw DefaultErrorFilter
         }
       })

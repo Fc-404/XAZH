@@ -4,6 +4,7 @@
 
 import { Middleware, IMiddleware } from "@midwayjs/core"
 import { NextFunction, Context } from "@midwayjs/koa"
+import { LogService } from "../service/log.service"
 
 @Middleware()
 export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
@@ -29,6 +30,8 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
 
         return result
       } catch (error) {
+        await (await ctx.requestContext.getAsync(LogService)).red(
+          'getUserInfo() execution error. This is middlware.', error)
         ctx.logger.warn(error)
         throw error
       }

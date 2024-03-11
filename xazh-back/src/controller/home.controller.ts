@@ -18,6 +18,7 @@ export class HomeController {
   @Get('/test')
   async test(): Promise<any> {
     let result
+    this.log.red('test', new Error('error'))
     // for (let i = 0; i < 200; i++)
     //   await this.log.red('error, user is bad.' + i)
 

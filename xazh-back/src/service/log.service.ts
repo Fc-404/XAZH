@@ -23,10 +23,10 @@ export class LogService {
       const list = await this.list.createList()
       log = await Log.model.create({
         _id: logid,
-        msgs_LIST: list,
+        msgs: list,
       })
     }
-    const listid = new Types.ObjectId(log.msgs_LIST)
+    const listid = new Types.ObjectId(log.msgs)
     await this.list.appendOne(listid, msg)
   }
 
@@ -36,11 +36,11 @@ export class LogService {
    * @param msg 
    * @param callerinfo 
    */
-  async red(msg, callerinfo: boolean = true) {
-    const caller = callerinfo
-      ? '\n' + new Error().stack.slice(6) : null
+  async red(msg, info: any = true) {
+    info = info === true
+      ? new Error().stack.slice(6) : info
     let str = `[red][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
-                ${caller}`
+              \n${info}`
     this.error(str)
     await this.append(str)
   }
@@ -51,11 +51,11 @@ export class LogService {
    * @param msg 
    * @param callerinfo 
    */
-  async yellow(msg, callerinfo: boolean = true) {
-    const caller = callerinfo
-      ? '\n' + new Error().stack.slice(6) : null
+  async yellow(msg, info: any = true) {
+    info = info === true
+      ? new Error().stack.slice(6) : info
     let str = `[yellow][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
-              ${caller}`
+              \n${info}`
     this.warn(str)
     await this.append(str)
   }
@@ -66,11 +66,11 @@ export class LogService {
    * @param msg 
    * @param callerinfo 
    */
-  async green(msg, callerinfo: boolean = false) {
-    const caller = callerinfo
-      ? '\n' + new Error().stack.slice(6) : null
+  async green(msg, info: any = false) {
+    info = info === info
+      ? new Error().stack.slice(6) : null
     let str = `[green][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
-              ${caller}`
+              \n${info}`
     this.info(str)
     await this.append(str)
   }
@@ -83,17 +83,17 @@ export class LogService {
    */
   async get(date, chunk?: Types.ObjectId) {
     let result
+    let log = await Log.model.findById(date, { msgs: 1 })
     if (chunk) {
-      result = await this.list.findByChunk(chunk)
+      result = await this.list.findByChunk(log.msgs, chunk)
     } else {
-      let log = await Log.model.findById(date, { msgs_LIST: 1 })
-      result = await this.list.findByNode(log.msgs_LIST, 0)
+      result = await this.list.findByNode(log.msgs, 0)
     }
     return result
   }
 
-  info(msg, ...args) { this.logger.info(msg, ...args) }
-  warn(msg, ...args) { this.logger.warn(msg, ...args) }
-  error(msg, ...args) { this.logger.error(msg, ...args) }
-  debug(msg, ...args) { this.logger.debug(msg, ...args) }
+  info(msg, ...args) { this.logger.info('\n' + msg, ...args) }
+  warn(msg, ...args) { this.logger.warn('\n' + msg, ...args) }
+  error(msg, ...args) { this.logger.error('\n' + msg, ...args) }
+  debug(msg, ...args) { this.logger.debug('\n' + msg, ...args) }
 }

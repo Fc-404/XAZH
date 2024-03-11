@@ -8,6 +8,7 @@ import UserConfig from '../model/config.user.model'
 import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
 import { sha1 } from '../util/crypto.util';
+import { LogService } from './log.service';
 
 const ipMaxCount = 20
 
@@ -16,6 +17,9 @@ export class UserService {
 
   @Inject()
   ctx: Context
+
+  @Inject()
+  log: LogService
 
   /**
    * Determine if the user exists.
@@ -75,7 +79,8 @@ export class UserService {
 
       await user[0].save({ session })
       await session.commitTransaction()
-    } catch {
+    } catch (e) {
+      this.log.red('addUser() error.', e)
       await session.abortTransaction()
       result = false
     } finally {
@@ -177,7 +182,7 @@ export class UserService {
       else
         throw 'Status error.'
     }).catch((e) => {
-      this.ctx.logger.error('Failed to require information of ip.\n' + e)
+      this.log.red('Failed to require information of ip.', e)
     })
 
     if (ipInfo?.rs != 1) {

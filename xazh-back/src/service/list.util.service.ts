@@ -5,9 +5,12 @@
 
 import { Provide } from "@midwayjs/core";
 import UtilList from "../model/list.util.model";
-import mongoose, { Types } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 const list = UtilList.model
+
+export type List = Types.ObjectId
+export const List = Schema.Types.ObjectId
 
 @Provide()
 export class ListUtilService {
@@ -16,19 +19,20 @@ export class ListUtilService {
    * @param chunkLen 
    * @returns ObjectId
    */
-  async createList(chunkLen: number = 100): Promise<Types.ObjectId> {
-    const result = await list.create({
+  async createList(chunkLen: number = 100, session?: mongoose.ClientSession): Promise<List> {
+    if (!chunkLen) chunkLen = 100
+    const result = await list.create([{
       chunkLen: chunkLen,
       totalLen: 0,
       length: 0,
       body: [],
       prev: null,
       next: null,
-    })
-    result.head = result.last = result._id
-    await result.save()
+    }], { session })
+    result[0].head = result[0].last = result[0]._id
+    await result[0].save({ session })
 
-    return result._id
+    return result[0]._id
   }
 
   /**
@@ -37,7 +41,7 @@ export class ListUtilService {
    * @param value 
    * @returns true | false
    */
-  async appendOne(head: Types.ObjectId, value: any): Promise<boolean> {
+  async appendOne(head: List, value: any): Promise<boolean> {
     const root = await list.findOne({ _id: head }, ['chunkLen', 'totalLen', 'last'])
     const last = await list.findOne({ _id: root.last })
     if (!last) {
@@ -79,13 +83,14 @@ export class ListUtilService {
   }
 
   /**
+   * TODO: Add chunk option.
    * Insert one value to the list.
    * @param head 
    * @param value 
    * @param index 
    * @returns true | false
    */
-  async insertOne(head: Types.ObjectId, value: any, index: number): Promise<boolean> {
+  async insertOne(head: List, value: any, index: number): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
 
@@ -152,10 +157,12 @@ export class ListUtilService {
    * @param value 
    * @returns 
    */
-  async deleteOne(head: Types.ObjectId, value: any, chunkid?: Types.ObjectId): Promise<boolean> {
+  async deleteOne(head: List, value: any, chunkid?: Types.ObjectId): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
-    let chunk = await list.findOne({ _id: chunkid })
+    let chunk
+    if (chunkid)
+      chunk = await list.findOne({ _id: chunkid })
 
     const session = await mongoose.startSession()
     session.startTransaction()
@@ -165,6 +172,8 @@ export class ListUtilService {
 
       // Search the node.
       if (chunk) {
+        if (chunk.head != head)
+          throw new Error('Illegal chunk.')
         index = chunk.body.indexOf(value)
         if (index == -1) {
           // Search the prev chunk.
@@ -259,7 +268,7 @@ export class ListUtilService {
    * @param value 
    * @returns 
    */
-  async findOne(head: Types.ObjectId, value: any) {
+  async findOne(head: List, value: any) {
     let result = null
     const root = await list.findOne({ _id: head })
 
@@ -289,7 +298,7 @@ export class ListUtilService {
    * @param index 
    * @returns 
    */
-  async findByIndex(head: Types.ObjectId, index: number) {
+  async findByIndex(head: List, index: number) {
     let result = null
     const root = await list.findOne({ _id: head })
 
@@ -317,7 +326,7 @@ export class ListUtilService {
    * @param nodeindex 
    * @returns 
    */
-  async findByNode(head: Types.ObjectId, nodeindex: number) {
+  async findByNode(head: List, nodeindex: number) {
     let result = null
     const root = await list.findOne({ _id: head })
 
@@ -345,8 +354,11 @@ export class ListUtilService {
    * @param chunk 
    * @returns 
    */
-  async findByChunk(chunk: Types.ObjectId) {
+  async findByChunk(head: List, chunk: Types.ObjectId) {
     const node = await list.findOne({ _id: chunk })
+    if (node.head != head)
+      return null
+
     let result = {
       value: node.body,
       node: node._id,
@@ -364,7 +376,7 @@ export class ListUtilService {
    * @param end 
    * @returns 
    */
-  async findMany(head: Types.ObjectId, start: number, length: number) {
+  async findMany(head: List, start: number, length: number) {
     if (start < 0 || length <= 0) {
       return null
     }
@@ -424,7 +436,7 @@ export class ListUtilService {
    * @param head 
    * @returns true | false
    */
-  async deleteList(head: Types.ObjectId): Promise<boolean> {
+  async deleteList(head: List): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
 
