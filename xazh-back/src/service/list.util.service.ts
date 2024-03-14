@@ -41,14 +41,14 @@ export class ListUtilService {
    * @param value 
    * @returns true | false
    */
-  async appendOne(head: List, value: any): Promise<boolean> {
+  async appendOne(head: List, value: any, session?: mongoose.ClientSession): Promise<boolean> {
     const root = await list.findOne({ _id: head }, ['chunkLen', 'totalLen', 'last'])
     const last = await list.findOne({ _id: root.last })
     if (!last) {
       return false
     }
     let result = true
-    const session = await mongoose.startSession()
+    session = session || (await mongoose.startSession())
     session.startTransaction()
 
     try {
@@ -90,7 +90,7 @@ export class ListUtilService {
    * @param index 
    * @returns true | false
    */
-  async insertOne(head: List, value: any, index: number): Promise<boolean> {
+  async insertOne(head: List, value: any, index: number, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
 
@@ -101,7 +101,7 @@ export class ListUtilService {
       index = 0
     }
 
-    const session = await mongoose.startSession()
+    session = session || (await mongoose.startSession())
     session.startTransaction()
     try {
       // Search the node.
@@ -157,14 +157,14 @@ export class ListUtilService {
    * @param value 
    * @returns 
    */
-  async deleteOne(head: List, value: any, chunkid?: Types.ObjectId): Promise<boolean> {
+  async deleteOne(head: List, value: any, chunkid?: Types.ObjectId, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
     let chunk
     if (chunkid)
       chunk = await list.findOne({ _id: chunkid })
 
-    const session = await mongoose.startSession()
+    session = session || await mongoose.startSession()
     session.startTransaction()
     try {
       let node = root

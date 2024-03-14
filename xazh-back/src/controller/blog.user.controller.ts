@@ -1,6 +1,6 @@
 import {
   Controller, Inject, Post,
-  UseGuard
+  UseGuard, Get
 } from "@midwayjs/core";
 import { TokenGuard } from "../guard/token.guard";
 import { Context } from "koa";
@@ -12,23 +12,28 @@ export class BlogController {
   @Inject()
   ctx: Context
 
-  @Post('/CreateBlog')
+  @Post('/Create')
   async createBlog() {
 
   }
 
-  @Post('/CreateCollection')
-  async createCollection() {
+  @Get('/Info/:id')
+  async getBlogInfo() {
 
   }
 
-  @Post('/GetBlogs')
+  @Get('/:id')
+  async getBlogFull() {
+
+  }
+
+  @Post('/Get')
   async getBlogs() {
 
   }
 
-  @Post('/GetCollections')
-  async getCollections() {
+  @Post('/Edit')
+  async editBlog() { 
 
   }
 
@@ -46,6 +51,4 @@ export class BlogController {
   async appendStar() {
 
   }
-
-  // @Post('')
 }
