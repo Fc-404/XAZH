@@ -27,13 +27,13 @@ export class BlogController {
 
   }
 
-  @Post('/Get')
+  @Post('/Gets')
   async getBlogs() {
 
   }
 
   @Post('/Edit')
-  async editBlog() { 
+  async editBlog() {
 
   }
 

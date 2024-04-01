@@ -1,8 +1,6 @@
 import {
   Controller, Inject, Post,
-  UseGuard, Get
 } from "@midwayjs/core";
-import { TokenGuard } from "../guard/token.guard";
 import { Context } from "koa";
 
 @Controller('/User/Collection')

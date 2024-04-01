@@ -1,14 +1,14 @@
-import { Context, Inject, Provide, makeHttpRequest } from '@midwayjs/core';
-import { IAddUser } from '../interface/user.interface';
-import { Types } from 'mongoose';
+import {Context, Inject, Provide, makeHttpRequest} from '@midwayjs/core';
+import {IAddUser} from '../interface/user.interface';
+import {Types} from 'mongoose';
 
 import UserBase from '../model/base.user.model';
 import UserBlogs from '../model/blog.user.model'
 import UserConfig from '../model/config.user.model'
 import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
-import { sha1 } from '../util/crypto.util';
-import { LogService } from './log.service';
+import {sha1} from '../util/crypto.util';
+import {LogService} from './log.service';
 
 const ipMaxCount = 20
 
@@ -27,13 +27,12 @@ export class UserService {
    * @returns true | false
    */
   async haveUser(user: string): Promise<boolean> {
-    return (await UserBase.model.findOne({ user: user }))
-      ? true : false
+    return !!(await UserBase.model.findOne({user: user}))
   }
 
   /**
    * Add User
-   * @param options 
+   * @param options
    * @returns true | false
    */
   async addUser(options: IAddUser): Promise<boolean> {
@@ -49,38 +48,38 @@ export class UserService {
         user: options.user,
         pswd: options.pswd,
         bind_mail: options.mail
-      }], { session })
+      }], {session})
 
       // Personal Blog.
       const blogs = await UserBlogs.model.create([{
         _id: user[0]._id
-      }], { session })
+      }], {session})
       user[0].set('blogs_link', blogs[0]._id)
 
       // Personal Config.
       const config = await UserConfig.model.create([{
         _id: user[0]._id
-      }], { session })
+      }], {session})
       user[0].set('config_link', config[0]._id)
 
       // Personal Message.
       const message = await UserMesg.model.create([{
         _id: user[0]._id
-      }], { session })
+      }], {session})
       user[0].set('message_link', message[0]._id)
 
       // Personal Relation.
       const relation = await UserRel.model.create([{
         _id: user[0]._id
-      }], { session })
+      }], {session})
       user[0].set('relation_link', relation[0]._id)
 
       // TODO: Other Documents haven't create.
 
-      await user[0].save({ session })
+      await user[0].save({session})
       await session.commitTransaction()
     } catch (e) {
-      this.log.red('addUser() error.', e)
+      await this.log.red('addUser() error.', e)
       await session.abortTransaction()
       result = false
     } finally {
@@ -106,7 +105,7 @@ export class UserService {
       }
     )
 
-    return result ? true : false
+    return !!result
   }
 
   /**
@@ -114,16 +113,17 @@ export class UserService {
    * 0 means validation success
    * 1 means account not exist
    * 2 means validation failed
-   * @param account 
-   * @param pswd 
+   * @param account
+   * @param pswd
+   * @param userInfo
    * @returns number
    */
   async verifyPswd(account: string, pswd: string, userInfo?: Object): Promise<number> {
     const filter = ['_id', 'user', 'pswd']
 
-    var result = await UserBase.model.findOne({ user: account }, filter)
+    var result = await UserBase.model.findOne({user: account}, filter)
     if (!result)
-      result = await UserBase.model.findOne({ bind_mail: account }, filter)
+      result = await UserBase.model.findOne({bind_mail: account}, filter)
 
     // Whether exist account.
     if (!result)
@@ -140,19 +140,18 @@ export class UserService {
 
   /**
    * Whether the mail is registered.
-   * @param mail 
+   * @param mail
    * @returns true | false
    */
   async existMail(mail: string): Promise<boolean> {
-    return (await UserBase.model.findOne({ bind_mail: mail, deleted: { $ne: true } }))
-      ? true : false
+    return !!(await UserBase.model.findOne({bind_mail: mail, deleted: {$ne: true}}))
   }
 
   /**
    * Add the signin or verify ip address.
    * And calclate the belong_place.
-   * @param user 
-   * @param ip 
+   * @param userid
+   * @param ip
    */
   async pushIp(userid: Types.ObjectId, ip: string) {
     if (!ip) {
@@ -163,9 +162,9 @@ export class UserService {
     /**
      const url = `http://ip-api.com/json/${ip}?fields=16409&lang=zh-CN`
      ipInfo?.data['status'] != 'success' ? 'unknow'
-        : (ipInfo?.data['country'] ?? 'unknow')
-        + ',' + (ipInfo?.data['regionName'] ?? 'unknow')
-        + ',' + (ipInfo?.data['city'] ?? 'unknow')
+     : (ipInfo?.data['country'] ?? 'unknow')
+     + ',' + (ipInfo?.data['regionName'] ?? 'unknow')
+     + ',' + (ipInfo?.data['city'] ?? 'unknow')
      */
     const url = `https://www.ip.cn/api/index?ip=${ip}&type=1`
     let ipInfo
@@ -190,7 +189,7 @@ export class UserService {
       return false
     }
 
-    const result = await UserBase.model.findOne({ _id: userid }, ['recent_ip', 'belong_place'])
+    const result = await UserBase.model.findOne({_id: userid}, ['recent_ip', 'belong_place'])
 
     result?.recent_ip?.unshift({
       ip: ip,
@@ -203,7 +202,7 @@ export class UserService {
 
     // Calclate the belong_place by the recent_ip.
     const places = {}
-    const mostPlace = { key: '', count: 0 }
+    const mostPlace = {key: '', count: 0}
     for (let i of result.recent_ip) {
       if (i.place != 'unknow') {
         let placeCount = places[i.place] ?? 0
@@ -225,13 +224,14 @@ export class UserService {
 
   /**
    * Get User Info.
-   * @param user 
+   * @param userid
+   * @param options
    * @returns UserInfo
    */
   async getUserInfo(userid: Types.ObjectId, options = null): Promise<object> {
-    return await UserBase.model.findOne(
-      { _id: userid },
-      options ?? { pswd: 0 }
-    )
+    return UserBase.model.findOne(
+      {_id: userid},
+      options ?? {pswd: 0}
+    );
   }
 }
