@@ -1,13 +1,13 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
+import {List} from "../service/list.util.service";
 
-const ObjectId = Schema.Types.ObjectId
 const name: string = 'Blog.Countlist'
 
 const schema = new mongoose.Schema({
-  wholike: [ObjectId],
-  whostar: [ObjectId],
+  wholike: List,
+  whostar: List,
 })
 
 const model = mongoose.model(name, schema, name)
 
-export default { name, schema, model }
+export default {name, schema, model}

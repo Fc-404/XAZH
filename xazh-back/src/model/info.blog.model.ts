@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { PRIVACY_TYPE } from "../types/privacy.types";
+import {List} from "../service/list.util.service";
 
 const ObjectId = Schema.Types.ObjectId
 const name: string = 'Blog.Info'
@@ -12,7 +13,7 @@ const schema = new mongoose.Schema({
     default: PRIVACY_TYPE.public
   },
   body: ObjectId,
-  comment_like: ObjectId,
+  comment_link: List,
   type: String,
   abstract: String,
   createtime: {

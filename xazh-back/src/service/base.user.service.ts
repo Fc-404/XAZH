@@ -3,7 +3,7 @@ import {IAddUser} from '../interface/user.interface';
 import {Types} from 'mongoose';
 
 import UserBase from '../model/base.user.model';
-import UserBlogs from '../model/blog.user.model'
+import UserBlog from '../model/blog.user.model'
 import UserConfig from '../model/config.user.model'
 import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
@@ -51,7 +51,7 @@ export class UserService {
       }], {session})
 
       // Personal Blog.
-      const blogs = await UserBlogs.model.create([{
+      const blogs = await UserBlog.model.create([{
         _id: user[0]._id
       }], {session})
       user[0].set('blogs_link', blogs[0]._id)

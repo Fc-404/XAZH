@@ -45,7 +45,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
             const dateNow = new Date().getTime()
             const differDate = (dateNow - new Date(date).getTime()) ?? -1
 
-            // Get user name, level and ranks.
+            // Get username, level and ranks.
             rawToken = base64.decode(rawToken as string)
             const tokename = (rawToken as string)
               .slice(0, parseInt(
@@ -64,7 +64,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
             ctx.user['ranks'] = result.ranks
           } catch (e) {
             await (await ctx.requestContext.getAsync(LogService)).red(
-              'getUserInfo() execution error. This is middlware.', e)
+              'getUserInfo() execution error. This is middleware.', e)
             break
           } finally {
             break
@@ -77,7 +77,6 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
       //   ctx.user['ipv4'] = /(\d{1,3}.){3}.\d{1,3}/.exec(ctx.ip)[0]
       // } catch { }
 
-      console.log(ctx.ip);
       console.log(ctx.user);
       return await next()
     }

@@ -17,6 +17,7 @@ export class ListUtilService {
   /**
    * Create a new list.
    * @param chunkLen
+   * @param session
    * @returns ObjectId
    */
   async createList(chunkLen: number = 100, session?: mongoose.ClientSession): Promise<List> {
@@ -81,6 +82,16 @@ export class ListUtilService {
     }
 
     return result
+  }
+
+  /**
+   * Prepend one value to the list.
+   * @param head
+   * @param value
+   * @param session
+   */
+  async prependOne(head: List, value: any, session?: mongoose.ClientSession): Promise<boolean> {
+    return this.insertOne(head, value, 0, session)
   }
 
   /**
@@ -434,13 +445,14 @@ export class ListUtilService {
   /**
    * Delete a list.
    * @param head
+   * @param session
    * @returns true | false
    */
-  async deleteList(head: List): Promise<boolean> {
+  async deleteList(head: List, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
     const root = await list.findOne({_id: head})
 
-    const session = await mongoose.startSession()
+    session = session || await mongoose.startSession()
     session.startTransaction()
     try {
       let node = root

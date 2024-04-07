@@ -31,7 +31,7 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
         return result
       } catch (error) {
         await (await ctx.requestContext.getAsync(LogService)).red(
-          'getUserInfo() execution error. This is middlware.', error)
+          'Execution error.', error)
         ctx.logger.warn(error)
         throw error
       }

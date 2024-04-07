@@ -1,7 +1,8 @@
 import { Controller, Get, Inject } from '@midwayjs/core';
 import { ListUtilService } from '../service/list.util.service';
-import { Types } from 'mongoose';
 import { LogService } from '../service/log.service';
+import {Types} from "mongoose";
+import UserBlogInteraction from "../model/interaction.blog.user.model";
 
 @Controller('/')
 export class HomeController {
@@ -18,7 +19,7 @@ export class HomeController {
   @Get('/test')
   async test(): Promise<any> {
     let result
-    this.log.red('test', new Error('error'))
+    // this.log.red('test', new Error('error'))
     // for (let i = 0; i < 200; i++)
     //   await this.log.red('error, user is bad.' + i)
 
@@ -42,6 +43,18 @@ export class HomeController {
     //   result = await this.l.deleteOne(headid, 651 + i)
 
     // result = await this.l.deleteOne(headid, 901, new Types.ObjectId('65e579955d8cf1a04749d5a1'))
+    // result = await this.l.insertOne(headid, 1, 5)
+
+    // await UserBlogInteraction.model.create({
+    //   _id: '123abc',
+    //   islike: true,
+    //   isstar: true,
+    // })
+    // const ubi = await UserBlogInteraction.model.findById('123abc')
+    // ubi.comment.set('123', {islike: true})
+    // const test = new Map()
+
+    // ubi.save()
 
     return result
   }

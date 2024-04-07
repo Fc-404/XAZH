@@ -8,5 +8,5 @@ export interface IBlogInfo {
   body: string,
   abstract?: string,
   keywords?: string[],
-  wordcloud?: string,
+  wordcloud?: object,
 }

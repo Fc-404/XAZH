@@ -1,7 +1,7 @@
 import {Provide, Inject} from "@midwayjs/core";
 import mongoose, {Types} from "mongoose";
-import BlogUser from "../model/blog.user.model";
-import CollBlog from "../model/collection.blog.model";
+import UserBlog from "../model/blog.user.model";
+import BlogColl from "../model/collection.blog.model";
 import {ICollectionCreate} from "../interface/collection.blog.interface";
 import {ListUtilService} from "./list.util.service";
 import {LogService} from "./log.service";
@@ -41,7 +41,7 @@ export class BlogCollectionService {
    * @returns
    */
   async getCollections(userid: Types.ObjectId, chunk?: Types.ObjectId): Promise<Array<Types.ObjectId>> {
-    const bu = await BlogUser.model.findById(userid)
+    const bu = await UserBlog.model.findById(userid)
     if (bu && !bu.collections)
       await this.initCollections(bu)
 
@@ -61,7 +61,7 @@ export class BlogCollectionService {
    * @returns
    */
   async getCollection(id: Types.ObjectId): Promise<any> {
-    return CollBlog.model.findById(id);
+    return BlogColl.model.findById(id);
   }
 
   /**
@@ -70,13 +70,15 @@ export class BlogCollectionService {
    */
   async createCollection(userid: Types.ObjectId, options: ICollectionCreate): Promise<Types.ObjectId> {
     let result = null
-    const bu = await BlogUser.model.findById(userid)
+    const bu = await UserBlog.model.findById(userid)
+    if (bu && !bu.collections)
+      await this.initCollections(bu)
 
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
       const listid = await this.list.createList(null, session)
-      const collection = await CollBlog.model.create([{
+      const collection = await BlogColl.model.create([{
         name: options.name,
         abstract: options.abstract,
         author: userid,
@@ -102,7 +104,7 @@ export class BlogCollectionService {
    */
   async deleteCollection(uid: Types.ObjectId, cid: Types.ObjectId, chunk?: Types.ObjectId): Promise<boolean> {
     let result = true
-    const bu = await BlogUser.model.findById(uid)
+    const bu = await UserBlog.model.findById(uid)
 
     const session = await mongoose.startSession()
     session.startTransaction()
@@ -110,7 +112,7 @@ export class BlogCollectionService {
       result = await this.list.deleteOne(bu.collections, cid, chunk, session)
       if (!result)
         throw new Error('Can not delete the collection in deleteCollection().')
-      await CollBlog.model.deleteOne({_id: cid}, {session})
+      await BlogColl.model.deleteOne({_id: cid}, {session})
       result = true
       await session.commitTransaction()
     } catch (e) {
@@ -133,7 +135,7 @@ export class BlogCollectionService {
    */
   async appendToCollection(uid: Types.ObjectId, cid: Types.ObjectId, bid: Types.ObjectId): Promise<boolean> {
     let result = true
-    const bc = await CollBlog.model.findById(cid)
+    const bc = await BlogColl.model.findById(cid)
     if (!uid.equals(bc.author)) {
       await this.log.yellow(`Refuse operation in appendToCollection(),\
         because user ${uid} want to append one item to collection ${cid} belong to ${bc.author}`)
@@ -155,7 +157,7 @@ export class BlogCollectionService {
    */
   async removeFromCollection(uid: Types.ObjectId, cid: Types.ObjectId, bid: Types.ObjectId, chunk?: Types.ObjectId) {
     let result = true
-    const bc = await CollBlog.model.findById(cid)
+    const bc = await BlogColl.model.findById(cid)
     if (!uid.equals(bc.author)) {
       await this.log.yellow(`Refuse operation in removeFromCollection(),\
         because user ${uid} want to remove one item from collection ${cid} belong to ${bc.author}`)
