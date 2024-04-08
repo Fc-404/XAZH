@@ -4,7 +4,7 @@ const ObjectId = Schema.Types.ObjectId
 const name: string = 'File.Info'
 
 const schema = new mongoose.Schema({
-  fileUid: {
+  fid: {
     type: String,
     unique: true,
   },

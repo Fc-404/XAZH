@@ -3,9 +3,9 @@
  * ! Convert to 'Stored Procedure'
  */
 
-import {Provide} from "@midwayjs/core";
+import { Provide } from "@midwayjs/core";
 import UtilList from "../model/list.util.model";
-import mongoose, {Schema, Types} from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 const list = UtilList.model
 
@@ -29,9 +29,9 @@ export class ListUtilService {
       body: [],
       prev: null,
       next: null,
-    }], {session})
+    }], { session })
     result[0].head = result[0].last = result[0]._id
-    await result[0].save({session})
+    await result[0].save({ session })
 
     return result[0]._id
   }
@@ -44,8 +44,8 @@ export class ListUtilService {
    * @returns true | false
    */
   async appendOne(head: List, value: any, session?: mongoose.ClientSession): Promise<boolean> {
-    const root = await list.findOne({_id: head}, ['chunkLen', 'totalLen', 'last'])
-    const last = await list.findOne({_id: root.last})
+    const root = await list.findOne({ _id: head }, ['chunkLen', 'totalLen', 'last'])
+    const last = await list.findOne({ _id: root.last })
     if (!last) {
       return false
     }
@@ -62,7 +62,7 @@ export class ListUtilService {
           body: [],
           prev: last._id,
           next: null,
-        }], {session}))[0]
+        }], { session }))[0]
         root.last = last.next = node._id
       }
       node.body.push(value)
@@ -70,9 +70,9 @@ export class ListUtilService {
       root.totalLen++
 
       node.markModified('body')
-      await last.save({session})
-      await node.save({session})
-      await root.save({session})
+      await last.save({ session })
+      await node.save({ session })
+      await root.save({ session })
       await session.commitTransaction()
     } catch {
       await session.abortTransaction()
@@ -105,7 +105,7 @@ export class ListUtilService {
    */
   async insertOne(head: List, value: any, index: number, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
-    const root = await list.findOne({_id: head})
+    const root = await list.findOne({ _id: head })
 
     if (index >= root.totalLen) {
       result = await this.appendOne(head, value)
@@ -124,7 +124,7 @@ export class ListUtilService {
         count += node.length
         if (count >= index)
           break
-        node = await list.findOne({_id: node.next})
+        node = await list.findOne({ _id: node.next })
       }
       index -= count
       if (!node) {
@@ -143,17 +143,17 @@ export class ListUtilService {
           body: [],
           prev: node._id,
           next: null,
-        }], {session}))[0]
+        }], { session }))[0]
         next.next = node.next
         node.next = next._id
         next.body = node.body.splice(root.chunkLen)
         node.markModified('body')
         next.length = node.length - root.chunkLen
         node.length = root.chunkLen
-        await next.save({session})
+        await next.save({ session })
       }
-      await node.save({session})
-      await root.save({session})
+      await node.save({ session })
+      await root.save({ session })
       await session.commitTransaction()
     } catch {
       await session.abortTransaction()
@@ -174,10 +174,10 @@ export class ListUtilService {
    */
   async deleteOne(head: List, value: any, chunkid?: Types.ObjectId, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
-    const root = await list.findOne({_id: head})
+    const root = await list.findOne({ _id: head })
     let chunk
     if (chunkid)
-      chunk = await list.findOne({_id: chunkid})
+      chunk = await list.findOne({ _id: chunkid })
 
     session = session || await mongoose.startSession()
     session.startTransaction()
@@ -187,27 +187,39 @@ export class ListUtilService {
 
       // Search the node.
       if (chunk) {
-        if (chunk.head != head)
+        if (!head.equals(chunk.head))
           throw new Error('Illegal chunk.')
-        index = chunk.body.indexOf(value)
+        // index = chunk.body.indexOf(value)
+        index = chunk.body.findIndex(
+          typeof value == 'function' ? value : v => v == value
+        )
         if (index == -1) {
           // Search the prev chunk.
           let nextid = chunk.next
-          chunk = await list.findOne({_id: chunk.prev})
-          index = chunk.body.indexOf(value)
+          chunk = await list.findOne({ _id: chunk.prev })
+          // index = chunk.body.indexOf(value)
+          index = chunk.body.findIndex(
+            typeof value == 'function' ? value : v => v == value
+          )
           if (index == -1) {
             // Search the next chunk.
-            chunk = await list.findOne({_id: nextid})
-            index = chunk.body.indexOf(value)
+            chunk = await list.findOne({ _id: nextid })
+            // index = chunk.body.indexOf(value)
+            index = chunk.body.findIndex(
+              typeof value == 'function' ? value : v => v == value
+            )
           }
         }
         node = chunk
       } else {
         while (node) {
-          index = node.body.indexOf(value)
+          // index = node.body.indexOf(value)
+          index = node.body.findIndex(
+            typeof value == 'function' ? value : v => v == value
+          )
           if (index != -1)
             break
-          node = await list.findOne({_id: node.next})
+          node = await list.findOne({ _id: node.next })
         }
       }
       if (!node || index == -1) {
@@ -220,26 +232,26 @@ export class ListUtilService {
       node.markModified('body')
       node.length--
       root.totalLen--
-      let next = await list.findOne({_id: node.next})
-      let prev = await list.findOne({_id: node.prev})
+      let next = await list.findOne({ _id: node.next })
+      let prev = await list.findOne({ _id: node.prev })
       if (node.length <= 0) {
         if (node == root) {
           if (next) {
             node.body = next.body
             node.next = next.next
             node.length = next.length
-            await next.deleteOne({session})
-            next = await list.findOne({_id: node.next})
+            await next.deleteOne({ session })
+            next = await list.findOne({ _id: node.next })
             next.prev = node._id
-            next.save({session})
+            next.save({ session })
           }
         } else {
           prev.next = node.next
           if (next)
             next.prev = prev._id
-          await prev.save({session})
-          await next.save({session})
-          await node.deleteOne({session})
+          await prev.save({ session })
+          await next.save({ session })
+          await node.deleteOne({ session })
         }
       } else {
         let prevL = prev?.length
@@ -251,24 +263,24 @@ export class ListUtilService {
           prev.length += nodeL
           prev.next = next._id
           next.prev = prev._id
-          node.deleteOne({session})
-          await prev.save({session})
-          await next.save({session})
+          node.deleteOne({ session })
+          await prev.save({ session })
+          await next.save({ session })
         } else if (nextL && nextL + nodeL <= root.chunkLen * 1.5) {
           next.body.unshift(...node.body)
           next.markModified('body')
           next.length += nodeL
           next.prev = prev._id
           prev.next = next._id
-          node.deleteOne({session})
-          await next.save({session})
-          await prev.save({session})
+          node.deleteOne({ session })
+          await next.save({ session })
+          await prev.save({ session })
         } else {
-          await node.save({session})
+          await node.save({ session })
         }
       }
 
-      await root.save({session})
+      await root.save({ session })
       await session.commitTransaction()
     } catch {
       result = false
@@ -288,7 +300,7 @@ export class ListUtilService {
    */
   async findOne(head: List, value: any) {
     let result = null
-    let node = await list.findOne({_id: head})
+    let node = await list.findOne({ _id: head })
     let count = 0
     while (node) {
       let index = node.body.indexOf(value)
@@ -301,7 +313,7 @@ export class ListUtilService {
         break
       } else {
         count += node.length
-        node = await list.findOne({_id: node.next})
+        node = await list.findOne({ _id: node.next })
       }
     }
 
@@ -316,7 +328,7 @@ export class ListUtilService {
    */
   async findByIndex(head: List, index: number) {
     let result = null
-    let node = await list.findOne({_id: head})
+    let node = await list.findOne({ _id: head })
     let count = 0
     while (node) {
       let recount = count
@@ -328,7 +340,7 @@ export class ListUtilService {
         break
       }
       count += node.length
-      node = await list.findOne({_id: node.next})
+      node = await list.findOne({ _id: node.next })
     }
 
     return result
@@ -342,7 +354,7 @@ export class ListUtilService {
    */
   async findByNode(head: List, nodeindex: number) {
     let result = null
-    let node = await list.findOne({_id: head})
+    let node = await list.findOne({ _id: head })
     let index = 0
     while (node) {
       if (nodeindex == index) {
@@ -354,7 +366,7 @@ export class ListUtilService {
         }
         break
       }
-      node = await list.findOne({_id: node.next})
+      node = await list.findOne({ _id: node.next })
       index++
     }
 
@@ -367,9 +379,13 @@ export class ListUtilService {
    * @param chunk
    * @returns
    */
-  async findByChunk(head: List, chunk: Types.ObjectId) {
-    const node = await list.findOne({_id: chunk})
-    if (node.head != head)
+  async findByChunk(head: List, chunkid?: Types.ObjectId) {
+    let node
+    if (chunkid)
+      node = await list.findOne({ _id: chunkid })
+    else
+      node = await list.findOne({ _id: head })
+    if (!head.equals(node.head))
       return null
 
     return {
@@ -397,7 +413,7 @@ export class ListUtilService {
       node: [],
       length: 0,
     }
-    const root = await list.findOne({_id: head})
+    const root = await list.findOne({ _id: head })
 
     let node = root
     let count = 0
@@ -436,7 +452,7 @@ export class ListUtilService {
         }
       }
 
-      node = await list.findOne({_id: node.next})
+      node = await list.findOne({ _id: node.next })
     }
 
     return result
@@ -450,7 +466,9 @@ export class ListUtilService {
    */
   async deleteList(head: List, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
-    const root = await list.findOne({_id: head})
+    const root = await list.findOne({ _id: head })
+    if (!root)
+      return true
 
     session = session || await mongoose.startSession()
     session.startTransaction()
@@ -458,8 +476,8 @@ export class ListUtilService {
       let node = root
       while (node) {
         let nextid = node.next
-        await node.deleteOne({session})
-        node = await list.findOne({_id: nextid})
+        await node.deleteOne({ session })
+        node = await list.findOne({ _id: nextid })
       }
       await session.commitTransaction()
     } catch {

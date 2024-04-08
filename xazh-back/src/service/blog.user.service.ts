@@ -8,13 +8,13 @@ import { Inject, Provide } from "@midwayjs/core";
 import UserBlog from "../model/blog.user.model";
 import UserBlogRead from "../model/read.blog.user.model";
 import UserBlogLike from "../model/like.blog.user.model";
-import UserBlogStar from "../model/star.blog.user.model";
 import UserBlogInteraction from "../model/interaction.blog.user.model";
 import BlogInfo from "../model/info.blog.model";
 import BlogBody from "../model/body.blog.model";
 import BlogCountlist from "../model/countlist.blog.model";
 import { LogService } from "./log.service";
 import { List, ListUtilService } from "./list.util.service";
+import { StarBlogUserService } from "./star.blog.user.service";
 import { IBlogInfo } from "../interface/blog.interface";
 import mongoose, { Types } from "mongoose";
 
@@ -25,6 +25,8 @@ export class BlogUserService {
   list: ListUtilService
   @Inject()
   log: LogService;
+  @Inject()
+  blogStar: StarBlogUserService
 
   /**
    * Checks whether exist the blog.
@@ -55,7 +57,7 @@ export class BlogUserService {
       await bu.save({ session })
       await session.commitTransaction()
     } catch (e) {
-      await this.log.red('initBlogs() execution error.', e)
+      await this.log.red('initBlogs() execution error in BlogUserService.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
@@ -75,12 +77,13 @@ export class BlogUserService {
       await this.initBlogs(bu)
 
     const session = await mongoose.startSession()
-
+    session.startTransaction()
     try {
       const { body, ...rest } = options
       const blogInfoResult = await BlogInfo.model.create([{
         ...rest,
       }], { session })
+      await this.list.prependOne(bu.blogs, blogInfoResult[0]._id, session)
       // blog body
       const blogBodyResult = await BlogBody.model.create([{
         _id: blogInfoResult[0]._id,
@@ -99,7 +102,7 @@ export class BlogUserService {
       await blogInfoResult[0].save({ session })
       await session.commitTransaction()
     } catch (e) {
-      await this.log.red('createBlog() execution error.', e)
+      await this.log.red('createBlog() execution error in BlogUserService.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
@@ -110,7 +113,7 @@ export class BlogUserService {
    * Delete a blog by id.
    * But not truely delete it.
    * Just maker it as deleted.
-   * @param id 
+   * @param id
    */
   async deleteBlog(id: Types.ObjectId) {
     const blog = await BlogInfo.model.findById(id)
@@ -127,9 +130,10 @@ export class BlogUserService {
   async dropBlog(id: Types.ObjectId): Promise<boolean> {
     let result = true
     const session = await mongoose.startSession()
+    session.startTransaction()
     try {
       const blogInfo = await BlogInfo.model.findById(id)
-      await this.list.deleteList(blogInfo.comment_link, session)
+      await this.list.deleteList(blogInfo.comments, session)
       // blog countlist
       const blogCountList = await BlogCountlist.model.findById(id)
       await this.list.deleteList(blogCountList.wholike, session)
@@ -140,7 +144,7 @@ export class BlogUserService {
 
       await session.commitTransaction()
     } catch (e) {
-      await this.log.red('deleteBlog() execution error.', e)
+      await this.log.red('deleteBlog() execution error in BlogUserService.', e)
       await session.abortTransaction()
       result = false
     } finally {
@@ -170,8 +174,8 @@ export class BlogUserService {
 
   /**
    * Set read record for the blog.
-   * @param id 
-   * @param uid 
+   * @param id
+   * @param uid
    */
   async read(id: Types.ObjectId, uid?: Types.ObjectId) {
     // Add read count for the blog.info
@@ -181,6 +185,7 @@ export class BlogUserService {
       return
 
     // Add read record for the user.blog.read
+
     const userBlogRead = await UserBlogRead.model.findById(
       (await UserBlog.model.findById(uid)).read
     )
@@ -196,9 +201,9 @@ export class BlogUserService {
   /**
    * Set like record for the blog.
    * This function is irreversible for data, except data of blog.likecount.
-   * @param id 
-   * @param uid 
-   * @param value 
+   * @param id
+   * @param uid
+   * @param value
    */
   async like(id: Types.ObjectId, uid: Types.ObjectId, value: boolean = true) {
     // Add like count for the blog.info
@@ -210,9 +215,7 @@ export class BlogUserService {
     await this.list.prependOne(countlist.wholike, uid)
 
     // Add like record for the user.blog.like
-    const userBlogLike = await UserBlogLike.model.findById(
-      (await UserBlog.model.findById(uid)).like
-    )
+    const userBlogLike = await UserBlogLike.model.findById(uid)
     if (userBlogLike.list.length >= UserBlogLike.listMax) {
       await userBlogLike.updateOne({ $pop: { list: -1 } })
     }
@@ -226,18 +229,28 @@ export class BlogUserService {
     )
   }
 
-  async star(id: Types.ObjectId, uid: Types.ObjectId, value: boolean = true) {
+  /**
+   * Star the blog.
+   * @param id 
+   * @param uid 
+   * @param value 
+   * @param folder 
+   * @param chunk 
+   */
+  async star(id: Types.ObjectId, uid: Types.ObjectId,
+    value: boolean = true, folder?: string, chunk?: Types.ObjectId) {
     const blog = await BlogInfo.model.findById(id)
-    blog.starcount++
+    blog.starcount = blog.starcount + (value ? 1 : -1)
 
     // Add like record for the blog.countlist
     const countlist = await BlogCountlist.model.findById(id)
     await this.list.prependOne(countlist.whostar, uid)
 
-    // Add like record for the user.blog.like
-    const userBlogStar = await UserBlogStar.model.findById(
-      (await UserBlog.model.findById(uid)).star
-    )
+    // Add or remove like record for the user.blog.star
+    if (value)
+      await this.blogStar.star(uid, id, folder)
+    else
+      await this.blogStar.unstar(uid, id, folder, chunk)
 
     // Add like record for the user.blog.interaction
     await UserBlogInteraction.model.findOneAndUpdate(
@@ -249,9 +262,9 @@ export class BlogUserService {
 
   /**
    * Get interaction information between user and blog.
-   * @param id 
-   * @param uid 
-   * @returns 
+   * @param id
+   * @param uid
+   * @returns
    */
   async getInteraction(id: Types.ObjectId, uid: Types.ObjectId) {
     return UserBlogInteraction.model.findById(id.toString() + uid.toString())
@@ -259,21 +272,21 @@ export class BlogUserService {
 
   /**
    * Disable the blog.
-   * @param id 
+   * @param id
    */
   async disable(id: Types.ObjectId) {
     const blog = await BlogInfo.model.findById(id)
     blog.disabled = true
-    blog.save()
+    return blog.save()
   }
 
   /**
    * Enable the blog.
-   * @param id 
+   * @param id
    */
   async enable(id: Types.ObjectId) {
     const blog = await BlogInfo.model.findById(id)
     blog.disabled = false
-    blog.save()
+    return blog.save()
   }
 }

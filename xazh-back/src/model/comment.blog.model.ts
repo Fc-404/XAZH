@@ -1,33 +1,26 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { List } from "../service/list.util.service";
 
+const ObjectId = Schema.Types.ObjectId
 const name: string = 'Blog.Comment'
 
-/**
-replyTemp {
-  user: ObjectId,       // reply's auther
-  content: String,      // reply content
-  likecount: Number,    // like counter
-  atwho: [ObjectId],    // the list of user who be at
-  date: {               // date
-    type: Date,
-    default: Date.now
-  }
-}
-*/
-
 const schema = new mongoose.Schema({
-  count: Number,
-  body: Object,
-  /**
-  key userid+time
-  value {
-    ...replyTemp,
-    reply: [{
-      ...replyTemp,
-      replywho: String  // The string is reply's ID
-    }]
-  }
-  */
+  // common
+  bid: ObjectId,        // blog id
+  author: ObjectId,     // comment's auther
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+  atwho: [ObjectId],    // the list of user who be at
+  content: String,      // comment content
+  likecount: Number,    // like counter
+  wholike: List,        // the list of user who like this comment
+  // special
+  cid: ObjectId,        //- comment id, only used to reply main comment
+  replywho: ObjectId,   //- the user who be reply, only used to reply in main comment
+  subcomments: List,    //+ the list of subcomment, only used in main comment
+  subcount: Number,     //+ the counter of subcomment, only used in main comment
 })
 
 const model = mongoose.model(name, schema, name)

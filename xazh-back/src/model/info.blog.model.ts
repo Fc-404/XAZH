@@ -13,7 +13,7 @@ const schema = new mongoose.Schema({
     default: PRIVACY_TYPE.public
   },
   body: ObjectId,
-  comment_link: List,
+  comments: List,
   type: String,
   abstract: String,
   createtime: {
@@ -24,6 +24,7 @@ const schema = new mongoose.Schema({
   readcount: Number,
   likecount: Number,
   starcount: Number,
+  commentcount: Number,
   keyword: [String],
   // TODO
   wordcloud: Object,

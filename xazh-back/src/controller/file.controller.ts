@@ -24,10 +24,10 @@ export class FileController {
   /**
    * Upload file.
    * You have to provide the file name and size in the header.
-   * @param boundary 
-   * @param filesize 
-   * @param filename 
-   * @returns 
+   * @param boundary
+   * @param filesize
+   * @param filename
+   * @returns
    */
   @Post('/Upload')
   @UseGuard(TokenGuard)
@@ -81,9 +81,9 @@ export class FileController {
 
           let r = await this.fs.upload({
             name: i.filename,
-            type: FILE_TYPE[fileSuffix],  
+            type: FILE_TYPE[fileSuffix],
             author: this.ctx.user['id'],
-            uid: fileuid,
+            fid: fileuid,
             data: i.body
           })
           if (r <= 0)
@@ -102,8 +102,8 @@ export class FileController {
 
   /**
    * Delete the file.
-   * @param uid 
-   * @returns 
+   * @param uid
+   * @returns
    */
   @Post('/Delete')
   @UseGuard(TokenGuard)
@@ -111,7 +111,7 @@ export class FileController {
     const result = await this.fs.delete({
       author: this.ctx.user['id'],
       level: this.ctx.user['level'],
-      uid: uid
+      fid: uid
     })
 
     return result
@@ -133,9 +133,9 @@ export class FileController {
 
   /**
    * Get the file.
-   * @param uid 
-   * @param save 
-   * @returns 
+   * @param uid
+   * @param save
+   * @returns
    */
   @Get('/:uid')
   async getFile(@Param('uid') uid: string, @Query('save') save: boolean) {
@@ -144,7 +144,7 @@ export class FileController {
 
     const result = await this.fs.get({
       level: this.ctx.user['level'],
-      uid
+      fid: uid
     })
 
     if (result == -1) {
@@ -176,9 +176,9 @@ export class FileController {
   /**
    * TODO
    * Get list of file.
-   * @param uid 
-   * @param save 
-   * @returns 
+   * @param uid
+   * @param save
+   * @returns
    */
   @Post('/Get')
   @UseGuard(TokenGuard)
@@ -188,7 +188,7 @@ export class FileController {
 
     const result = await this.fs.get({
       level: this.ctx.user['level'],
-      uid
+      fid: uid
     })
 
     if (result == -1) {

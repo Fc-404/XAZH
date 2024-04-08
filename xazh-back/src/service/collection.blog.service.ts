@@ -25,7 +25,7 @@ export class BlogCollectionService {
       await bu.save({session})
       await session.commitTransaction()
     } catch (e) {
-      await this.log.red('initCollections() execution error.', e)
+      await this.log.red('initCollections() execution error in BlogCollectionService.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
@@ -89,7 +89,7 @@ export class BlogCollectionService {
       await session.commitTransaction()
       result = collection[0]._id
     } catch (e) {
-      await this.log.red('createCollection() execution error.', e)
+      await this.log.red('createCollection() execution error in BlogCollectionService.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
@@ -117,7 +117,7 @@ export class BlogCollectionService {
       await session.commitTransaction()
     } catch (e) {
       result = false
-      await this.log.red('deleteCollection() execution error.', e)
+      await this.log.red('deleteCollection() execution error in BlogCollectionService.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
@@ -142,7 +142,7 @@ export class BlogCollectionService {
       return false
     }
 
-    result = await this.list.appendOne(bc.blogs, bid)
+    result = await this.list.prependOne(bc.blogs, bid)
 
     return result
   }

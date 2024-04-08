@@ -4,6 +4,9 @@ import {Types} from 'mongoose';
 
 import UserBase from '../model/base.user.model';
 import UserBlog from '../model/blog.user.model'
+import UserBlogRead from '../model/read.blog.user.model'
+import UserBlogLike from '../model/like.blog.user.model'
+import UserBlogStar from '../model/star.blog.user.model'
 import UserConfig from '../model/config.user.model'
 import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
@@ -55,6 +58,15 @@ export class UserService {
         _id: user[0]._id
       }], {session})
       user[0].set('blogs_link', blogs[0]._id)
+      await UserBlogRead.model.create([{
+        _id: user[0]._id
+      }], {session})
+      await UserBlogLike.model.create([{
+        _id: user[0]._id
+      }], {session})
+      await UserBlogStar.model.create([{
+        _id: user[0]._id
+      }], {session})
 
       // Personal Config.
       const config = await UserConfig.model.create([{
@@ -79,7 +91,7 @@ export class UserService {
       await user[0].save({session})
       await session.commitTransaction()
     } catch (e) {
-      await this.log.red('addUser() error.', e)
+      await this.log.red('addUser() execution error in UserService.', e)
       await session.abortTransaction()
       result = false
     } finally {
@@ -181,7 +193,7 @@ export class UserService {
       else
         throw 'Status error.'
     }).catch((e) => {
-      this.log.red('Failed to require information of ip.', e)
+      this.log.red('Failed to require information of ip, execution in UserService', e)
     })
 
     if (ipInfo?.rs != 1) {

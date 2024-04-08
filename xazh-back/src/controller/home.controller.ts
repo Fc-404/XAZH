@@ -42,7 +42,7 @@ export class HomeController {
     // for (let i = 0; i < 50; i++)
     //   result = await this.l.deleteOne(headid, 651 + i)
 
-    // result = await this.l.deleteOne(headid, 901, new Types.ObjectId('65e579955d8cf1a04749d5a1'))
+    // result = await this.l.deleteOne(headid, (v)=>v == '650', new Types.ObjectId('65e579955d8cf1a04749d5a1'))
     // result = await this.l.insertOne(headid, 1, 5)
 
     // await UserBlogInteraction.model.create({
