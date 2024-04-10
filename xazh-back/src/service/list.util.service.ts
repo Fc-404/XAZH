@@ -469,6 +469,8 @@ export class ListUtilService {
     const root = await list.findOne({ _id: head })
     if (!root)
       return true
+    if (!root.head.equals(head))
+      return false
 
     session = session || await mongoose.startSession()
     session.startTransaction()
@@ -487,6 +489,23 @@ export class ListUtilService {
       await session.endSession()
     }
 
+    return result
+  }
+
+  /**
+   * Foreach a list.
+   * @param head 
+   * @param callback 
+   * @returns 
+   */
+  async foreachList(head: List, callback: (value: any, index: number) => void) {
+    let result = true
+    let node = await list.findOne({ _id: head })
+    let index = 0
+    while (node) {
+      node.body.forEach(v => callback(v, index++))
+      node = await list.findOne({ _id: node.next })
+    }
     return result
   }
 

@@ -186,6 +186,34 @@ export class CommentBlogService {
   }
 
   /**
+   * Delete all comments in blog.
+   * @param bid 
+   */
+  async deleteAll(bid: Types.ObjectId) {
+    const blog = await BlogInfo.model.findById(bid)
+    const session = await mongoose.startSession()
+    session.startTransaction()
+    try {
+      await this.list.foreachList(blog.comments,
+        async (v) => {
+          let comment = await BlogComment.model.findById(v)
+          await this.list.deleteList(comment.wholike, session)
+          if (!comment.cid)
+            await this.list.deleteList(comment.subcomments, session)
+        }
+      )
+      await this.list.deleteList(blog.comments, session)
+
+      await session.commitTransaction()
+    } catch (e) {
+      await this.log.red('deleteAll() execution error in CommentBlogService.', e)
+      await session.abortTransaction()
+    } finally {
+      await session.endSession()
+    }
+  }
+
+  /**
    * Like comment.
    * @param id 
    * @param uid 

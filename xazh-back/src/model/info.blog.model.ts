@@ -14,7 +14,7 @@ const schema = new mongoose.Schema({
   },
   body: ObjectId,
   comments: List,
-  type: String,
+  type: Number,
   abstract: String,
   createtime: {
     type: Date,

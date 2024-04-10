@@ -14,6 +14,7 @@ import BlogBody from "../model/body.blog.model";
 import BlogCountlist from "../model/countlist.blog.model";
 import { LogService } from "./log.service";
 import { List, ListUtilService } from "./list.util.service";
+import { CommentBlogService } from "./comment.blog.service";
 import { StarBlogUserService } from "./star.blog.user.service";
 import { IBlogInfo } from "../interface/blog.interface";
 import mongoose, { Types } from "mongoose";
@@ -27,6 +28,8 @@ export class BlogUserService {
   log: LogService;
   @Inject()
   blogStar: StarBlogUserService
+  @Inject()
+  comment: CommentBlogService
 
   /**
    * Checks whether exist the blog.
@@ -70,8 +73,10 @@ export class BlogUserService {
    * Create a new blog.
    * @param uid
    * @param options
+   * @returns Boolean
    */
-  async createBlog(uid: Types.ObjectId, options: IBlogInfo) {
+  async createBlog(uid: Types.ObjectId, options: IBlogInfo): Promise<boolean> {
+    let result = true
     const bu = await UserBlog.model.findById(uid)
     if (bu && !bu.blogs)
       await this.initBlogs(bu)
@@ -102,23 +107,30 @@ export class BlogUserService {
       await blogInfoResult[0].save({ session })
       await session.commitTransaction()
     } catch (e) {
+      result = false
       await this.log.red('createBlog() execution error in BlogUserService.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
     }
+    return result
   }
 
   /**
    * Delete a blog by id.
    * But not truely delete it.
    * Just maker it as deleted.
-   * @param id
+   * @param uid
+   * @param bid
+   * @returns boolean | 0
    */
-  async deleteBlog(id: Types.ObjectId) {
-    const blog = await BlogInfo.model.findById(id)
+  async deleteBlog(uid: Types.ObjectId, bid: Types.ObjectId): Promise<boolean | 0> {
+    const blog = await BlogInfo.model.findById(bid)
+    if (!uid.equals(blog.author))
+      return false
     blog.deleted = true
-    blog.save()
+    const result = blog.save()
+    return result ? true : false
   }
 
   /**
@@ -140,6 +152,8 @@ export class BlogUserService {
       await this.list.deleteList(blogCountList.whostar, session)
       // blog body
       await BlogBody.model.deleteOne({ _id: id }, { session })
+      // blog comment
+      await this.comment.deleteAll(id)
       await blogInfo.deleteOne({ session })
 
       await session.commitTransaction()
@@ -159,7 +173,7 @@ export class BlogUserService {
    * @param id
    * @return object
    */
-  async getBlogInfo(id: Types.ObjectId) {
+  async getBlogInfo(id: Types.ObjectId): Promise<any> {
     return BlogInfo.model.findById(id)
   }
 
@@ -177,25 +191,35 @@ export class BlogUserService {
    * @param id
    * @param uid
    */
-  async read(id: Types.ObjectId, uid?: Types.ObjectId) {
+  async read(id: Types.ObjectId, uid?: Types.ObjectId): Promise<boolean> {
     // Add read count for the blog.info
     const blog = await BlogInfo.model.findById(id)
     blog.readcount++
+    blog.save()
     if (!uid)
-      return
+      return true
 
     // Add read record for the user.blog.read
-
     const userBlogRead = await UserBlogRead.model.findById(
       (await UserBlog.model.findById(uid)).read
     )
     if (!userBlogRead) {
       await this.log.yellow('The uid or uid.read is invalid in read().')
+      throw null
     }
     if (userBlogRead.list.length >= UserBlogRead.listMax) {
-      await userBlogRead.updateOne({ $pop: { list: -1 } })
+      await userBlogRead.updateOne({
+        $pop: {
+          list: {
+            $each: [],
+            $slice: UserBlogRead.listMax - userBlogRead.list.length
+          }
+        }
+      })
     }
     await userBlogRead.updateOne({ $push: { list: id } })
+
+    return true
   }
 
   /**
@@ -205,28 +229,55 @@ export class BlogUserService {
    * @param uid
    * @param value
    */
-  async like(id: Types.ObjectId, uid: Types.ObjectId, value: boolean = true) {
-    // Add like count for the blog.info
-    const blog = await BlogInfo.model.findById(id)
-    blog.likecount = blog.likecount + (value ? 1 : -1)
+  async like(id: Types.ObjectId, uid: Types.ObjectId, value: boolean = true): Promise<boolean> {
+    let result = true
+    const session = await mongoose.startSession()
+    session.startTransaction()
+    try {
+      // Add like count for the blog.info
+      const blog = await BlogInfo.model.findById(id)
+      blog.likecount = blog.likecount + (value ? 1 : -1)
+      blog.save({ session })
 
-    // Add like record for the blog.countlist
-    const countlist = await BlogCountlist.model.findById(id)
-    await this.list.prependOne(countlist.wholike, uid)
+      if (value) {
+        // Add like record for the blog.countlist
+        const countlist = await BlogCountlist.model.findById(id)
+        await this.list.prependOne(countlist.wholike, uid, session)
 
-    // Add like record for the user.blog.like
-    const userBlogLike = await UserBlogLike.model.findById(uid)
-    if (userBlogLike.list.length >= UserBlogLike.listMax) {
-      await userBlogLike.updateOne({ $pop: { list: -1 } })
+        // Add like record for the user.blog.like
+        const userBlogLike = await UserBlogLike.model.findById(uid)
+        if (userBlogLike.list.length >= UserBlogLike.listMax) {
+          let r = await userBlogLike.updateOne({
+            $pop: {
+              list: {
+                $each: [],
+                $slice: UserBlogLike.listMax - userBlogLike.list.length
+              }
+            }
+          })
+          if (!r)
+            await this.log.yellow('Failed to delete redundant records in BlogUserService.like().')
+        }
+        await userBlogLike.updateOne({ $push: { list: id } }, { session })
+      }
+
+      // Add like record for the user.blog.interaction
+      await UserBlogInteraction.model.findOneAndUpdate(
+        { _id: uid.toString() + id.toString() },
+        { $set: { like: value } },
+        { session, upsert: true }
+      )
+
+      await session.commitTransaction()
+    } catch (e) {
+      result = false
+      await this.log.red('like() execution error in BlogUserService.', e)
+      await session.abortTransaction()
+    } finally {
+      await session.endSession()
     }
-    await userBlogLike.updateOne({ $push: { list: id } })
 
-    // Add like record for the user.blog.interaction
-    await UserBlogInteraction.model.findOneAndUpdate(
-      { _id: uid.toString() + id.toString() },
-      { $set: { like: value } },
-      { upsert: true }
-    )
+    return result
   }
 
   /**
@@ -238,26 +289,46 @@ export class BlogUserService {
    * @param chunk 
    */
   async star(id: Types.ObjectId, uid: Types.ObjectId,
-    value: boolean = true, folder?: string, chunk?: Types.ObjectId) {
-    const blog = await BlogInfo.model.findById(id)
-    blog.starcount = blog.starcount + (value ? 1 : -1)
+    value: boolean = true, folder?: string, chunk?: Types.ObjectId): Promise<boolean> {
+    let result = true
+    const session = await mongoose.startSession()
+    session.startTransaction()
+    try {
+      const blog = await BlogInfo.model.findById(id)
+      blog.starcount = blog.starcount + (value ? 1 : -1)
+      blog.save({ session })
 
-    // Add like record for the blog.countlist
-    const countlist = await BlogCountlist.model.findById(id)
-    await this.list.prependOne(countlist.whostar, uid)
+      let r
+      // Add or remove like record for the user.blog.star
+      if (value) {
+        r = await this.blogStar.star(uid, id, folder)
+        // Add like record for the blog.countlist
+        const countlist = await BlogCountlist.model.findById(id)
+        await this.list.prependOne(countlist.whostar, uid, session)
+      } else
+        r = await this.blogStar.unstar(uid, id, folder, chunk)
+      if (!r) {
+        await this.log.red('star or unstar execution error in BlogUserService.star().')
+        throw null
+      }
 
-    // Add or remove like record for the user.blog.star
-    if (value)
-      await this.blogStar.star(uid, id, folder)
-    else
-      await this.blogStar.unstar(uid, id, folder, chunk)
+      // Add like record for the user.blog.interaction
+      await UserBlogInteraction.model.findOneAndUpdate(
+        { _id: uid.toString() + id.toString() },
+        { $set: { star: value } },
+        { session, upsert: true }
+      )
 
-    // Add like record for the user.blog.interaction
-    await UserBlogInteraction.model.findOneAndUpdate(
-      { _id: uid.toString() + id.toString() },
-      { $set: { star: value } },
-      { upsert: true }
-    )
+      await session.commitTransaction()
+    } catch (e) {
+      result = false
+      await this.log.red('star() execution error in BlogUserService.', e)
+      await session.abortTransaction()
+    } finally {
+      await session.endSession()
+    }
+
+    return result
   }
 
   /**
