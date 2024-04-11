@@ -14,13 +14,19 @@ const schema = new mongoose.Schema({
   },
   atwho: [ObjectId],    // the list of user who be at
   content: String,      // comment content
-  likecount: Number,    // like counter
+  likecount: {          // like counter
+    type: Number,
+    default: 0
+  },
   wholike: List,        // the list of user who like this comment
   // special
   cid: ObjectId,        //- comment id, only used to reply main comment
   replywho: ObjectId,   //- the user who be reply, only used to reply in main comment
   subcomments: List,    //+ the list of subcomment, only used in main comment
-  subcount: Number,     //+ the counter of subcomment, only used in main comment
+  subcount: {           //+ the counter of subcomment, only used in main comment
+    type: Number,
+    default: 0
+  },
 })
 
 const model = mongoose.model(name, schema, name)

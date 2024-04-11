@@ -1,8 +1,8 @@
 import { Controller, Get, Inject } from '@midwayjs/core';
 import { ListUtilService } from '../service/list.util.service';
 import { LogService } from '../service/log.service';
-import {Types} from "mongoose";
-import UserBlogInteraction from "../model/interaction.blog.user.model";
+// import {Types} from "mongoose";
+// import UserBlogInteraction from "../model/interaction.blog.user.model";
 
 @Controller('/')
 export class HomeController {

@@ -7,6 +7,7 @@ export class BadRequestErrorFilter {
     ctx.status = 400
     
     return {
+      code: -1,
       status: 400,
       message: 'Bad Request.',
       type: err.message == 'Bad Request' ? undefined : err.message

@@ -55,7 +55,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
             const username = await (await ctx.requestContext.getAsync(UserService)).getUserInfo(id, ['user', 'deleted'])
 
             // Set user's name, level, and ranks
-            ctx.user['id'] = new mongoose.Types.ObjectId(id)
+            ctx.user['id'] = mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : undefined
             ctx.user['name'] = username['user']
             ctx.user['deleted'] = username['deleted']
             ctx.user['tokename'] = tokename

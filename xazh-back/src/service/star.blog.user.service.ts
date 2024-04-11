@@ -7,6 +7,7 @@ import UserBlogStar from "../model/star.blog.user.model";
 
 @Provide()
 export class StarBlogUserService {
+
   @Inject()
   log: LogService
   @Inject()

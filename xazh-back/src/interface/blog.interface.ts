@@ -6,6 +6,7 @@ export interface IBlogInfo {
   author: Types.ObjectId,
   privacy: PRIVACY_TYPE,
   body: string,
+  date?: Date,
   type?: number,
   abstract?: string,
   keywords?: string[],

@@ -1,6 +1,6 @@
-import {Context, Inject, Provide, makeHttpRequest} from '@midwayjs/core';
-import {IAddUser} from '../interface/user.interface';
-import {Types} from 'mongoose';
+import { Context, Inject, Provide, makeHttpRequest } from '@midwayjs/core';
+import { IAddUser } from '../interface/user.interface';
+import { Types } from 'mongoose';
 
 import UserBase from '../model/base.user.model';
 import UserBlog from '../model/blog.user.model'
@@ -10,8 +10,8 @@ import UserBlogStar from '../model/star.blog.user.model'
 import UserConfig from '../model/config.user.model'
 import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
-import {sha1} from '../util/crypto.util';
-import {LogService} from './log.service';
+import { sha1 } from '../util/crypto.util';
+import { LogService } from './log.service';
 
 const ipMaxCount = 20
 
@@ -30,7 +30,7 @@ export class UserService {
    * @returns true | false
    */
   async haveUser(user: string): Promise<boolean> {
-    return !!(await UserBase.model.findOne({user: user}))
+    return !!(await UserBase.model.findOne({ user: user }))
   }
 
   /**
@@ -51,44 +51,44 @@ export class UserService {
         user: options.user,
         pswd: options.pswd,
         bind_mail: options.mail
-      }], {session})
+      }], { session })
 
       // Personal Blog.
       const blogs = await UserBlog.model.create([{
         _id: user[0]._id
-      }], {session})
+      }], { session })
       user[0].set('blogs_link', blogs[0]._id)
       await UserBlogRead.model.create([{
         _id: user[0]._id
-      }], {session})
+      }], { session })
       await UserBlogLike.model.create([{
         _id: user[0]._id
-      }], {session})
+      }], { session })
       await UserBlogStar.model.create([{
         _id: user[0]._id
-      }], {session})
+      }], { session })
 
       // Personal Config.
       const config = await UserConfig.model.create([{
         _id: user[0]._id
-      }], {session})
+      }], { session })
       user[0].set('config_link', config[0]._id)
 
       // Personal Message.
       const message = await UserMesg.model.create([{
         _id: user[0]._id
-      }], {session})
+      }], { session })
       user[0].set('message_link', message[0]._id)
 
       // Personal Relation.
       const relation = await UserRel.model.create([{
         _id: user[0]._id
-      }], {session})
+      }], { session })
       user[0].set('relation_link', relation[0]._id)
 
       // TODO: Other Documents haven't create.
 
-      await user[0].save({session})
+      await user[0].save({ session })
       await session.commitTransaction()
     } catch (e) {
       await this.log.red('addUser() execution error in UserService.', e)
@@ -133,9 +133,9 @@ export class UserService {
   async verifyPswd(account: string, pswd: string, userInfo?: Object): Promise<number> {
     const filter = ['_id', 'user', 'pswd']
 
-    var result = await UserBase.model.findOne({user: account}, filter)
+    var result = await UserBase.model.findOne({ user: account }, filter)
     if (!result)
-      result = await UserBase.model.findOne({bind_mail: account}, filter)
+      result = await UserBase.model.findOne({ bind_mail: account }, filter)
 
     // Whether exist account.
     if (!result)
@@ -156,7 +156,7 @@ export class UserService {
    * @returns true | false
    */
   async existMail(mail: string): Promise<boolean> {
-    return !!(await UserBase.model.findOne({bind_mail: mail, deleted: {$ne: true}}))
+    return !!(await UserBase.model.findOne({ bind_mail: mail, deleted: { $ne: true } }))
   }
 
   /**
@@ -201,7 +201,7 @@ export class UserService {
       return false
     }
 
-    const result = await UserBase.model.findOne({_id: userid}, ['recent_ip', 'belong_place'])
+    const result = await UserBase.model.findOne({ _id: userid }, ['recent_ip', 'belong_place'])
 
     result?.recent_ip?.unshift({
       ip: ip,
@@ -214,7 +214,7 @@ export class UserService {
 
     // Calclate the belong_place by the recent_ip.
     const places = {}
-    const mostPlace = {key: '', count: 0}
+    const mostPlace = { key: '', count: 0 }
     for (let i of result.recent_ip) {
       if (i.place != 'unknow') {
         let placeCount = places[i.place] ?? 0
@@ -242,8 +242,8 @@ export class UserService {
    */
   async getUserInfo(userid: Types.ObjectId, options = null): Promise<object> {
     return UserBase.model.findOne(
-      {_id: userid},
-      options ?? {pswd: 0}
+      { _id: userid },
+      options ?? { pswd: 0 }
     );
   }
 }

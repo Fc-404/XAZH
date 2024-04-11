@@ -7,6 +7,7 @@ export class NotFoundErrorFilter {
     ctx.status = 404
 
     return {
+      code: -1,
       status: 404,
       message: 'Not found.',
     }

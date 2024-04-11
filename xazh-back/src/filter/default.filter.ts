@@ -7,6 +7,7 @@ export class DefaultErrorFilter {
     ctx.status = 500
     // 所有的未分类错误会到这里
     return {
+      code: -1,
       status: 500,
       message: 'Unknown error.',
       body: err

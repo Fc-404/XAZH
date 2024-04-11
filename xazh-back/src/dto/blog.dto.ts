@@ -7,21 +7,21 @@ export class BlogInfoDTO {
   @Rule(RuleType.string().max(100000).required())
   body: string
 
-  @Rule(RuleType.string().max(512).required())
-  abstract: string
-
-  @Rule(RuleType.array<string>().max(32).required())
-  keywords: string[]
-
-  @Rule(RuleType.date().required())
+  // Not required.
+  @Rule(RuleType.date())
   createtime: Date
 
-  // Not required.
   @Rule(RuleType.number().max(8))
   privacy: number
 
   @Rule(RuleType.number().max(32))
   type: number
+  
+  @Rule(RuleType.string().max(512))
+  abstract: string
+
+  @Rule(RuleType.array<string>().max(32))
+  keywords: string[]
 
   @Rule(RuleType.object())
   wordcloud: object

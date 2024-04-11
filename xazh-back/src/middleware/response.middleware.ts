@@ -19,7 +19,7 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
       try {
         const body = await next()
         let result = {
-          code: ctx.code,
+          code: ctx.code == 0 && ctx.status >= 400 ? -1 : ctx.code,
           status: ctx.status,
           message: ctx.message,
           body: body
@@ -30,9 +30,13 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
 
         return result
       } catch (error) {
-        await (await ctx.requestContext.getAsync(LogService)).red(
-          'Execution error.', error)
-        ctx.logger.warn(error)
+        console.log(error)
+        if (error.status >= 400 && error.status < 500)
+          await (await ctx.requestContext.getAsync(LogService)).yellow(
+            'Client error.', error)
+        else
+          await (await ctx.requestContext.getAsync(LogService)).red(
+            'Server error.', error)
         throw error
       }
     }

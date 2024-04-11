@@ -1,4 +1,5 @@
 import { Inject, Provide, ILogger } from "@midwayjs/core";
+import { Context } from "koa";
 import Log from '../model/log.model'
 import { Types } from "mongoose";
 import { formatDate } from "../util/formatDate.util";
@@ -7,6 +8,9 @@ import { ListUtilService } from "./list.util.service";
 @Provide()
 export class LogService {
   @Inject()
+  ctx: Context
+
+  @Inject()
   list: ListUtilService
 
   @Inject()
@@ -14,7 +18,7 @@ export class LogService {
 
   /**
    * Append msg to DB.
-   * @param msg 
+   * @param msg
    */
   private async append(msg: string) {
     const logid = formatDate('YYYYMMDD')
@@ -33,14 +37,14 @@ export class LogService {
   /**
    * Red information.
    * Means error.
-   * @param msg 
-   * @param callerinfo 
+   * @param msg
+   * @param info
    */
   async red(msg, info: any = true) {
     info = info === true
       ? new Error().stack.slice(6) : info
-    let str = `[red][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
-              \n${info}`
+    let str = `[red][${formatDate('YYYY-MM-DD hh:mm:ss')}][${this.ctx.ip}][${this.ctx.user['id']}] ${msg}\
+              \n${info.stack}`
     this.error(str)
     await this.append(str)
   }
@@ -48,14 +52,14 @@ export class LogService {
   /**
    * Yellow information.
    * Means warning.
-   * @param msg 
-   * @param callerinfo 
+   * @param msg
+   * @param info
    */
   async yellow(msg, info: any = true) {
     info = info === true
       ? new Error().stack.slice(6) : info
-    let str = `[yellow][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
-              \n${info}`
+    let str = `[yellow][${formatDate('YYYY-MM-DD hh:mm:ss')}][${this.ctx.ip}][${this.ctx.user['id']}] ${msg}\
+              \n${info.stack}`
     this.warn(str)
     await this.append(str)
   }
@@ -63,23 +67,23 @@ export class LogService {
   /**
    * Green information.
    * Means safe.
-   * @param msg 
-   * @param callerinfo 
+   * @param msg
+   * @param info
    */
   async green(msg, info: any = false) {
     info = info === info
       ? new Error().stack.slice(6) : null
-    let str = `[green][${formatDate('YYYY-MM-DD hh:mm:ss')}] ${msg}\
-              \n${info}`
+    let str = `[green][${formatDate('YYYY-MM-DD hh:mm:ss')}][${this.ctx.ip}][${this.ctx.user['id']}] ${msg}\
+              \n${info.stack}`
     this.info(str)
     await this.append(str)
   }
 
   /**
    * Get log that in a chunk.
-   * @param date 
-   * @param chunk 
-   * @returns 
+   * @param date
+   * @param chunk
+   * @returns
    */
   async get(date, chunk?: Types.ObjectId) {
     let result

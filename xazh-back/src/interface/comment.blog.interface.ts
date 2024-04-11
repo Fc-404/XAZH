@@ -7,6 +7,6 @@ export interface ICommentBlog {
 }
 
 export interface ICommentToBlog extends ICommentBlog {
-  cid: Types.ObjectId,        // comment's id in comments.
+  cid: string,                // comment's id in comments.
   replywho?: Types.ObjectId,  // who be reply
 }

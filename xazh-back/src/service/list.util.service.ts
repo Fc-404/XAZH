@@ -45,14 +45,17 @@ export class ListUtilService {
    */
   async appendOne(head: List, value: any, session?: mongoose.ClientSession): Promise<boolean> {
     const root = await list.findOne({ _id: head }, ['chunkLen', 'totalLen', 'last'])
+    if (!root) {
+      return false
+    }
     const last = await list.findOne({ _id: root.last })
     if (!last) {
       return false
     }
-    let result = true
-    session = session || (await mongoose.startSession())
-    session.startTransaction()
 
+    let result = true
+    const insession = session ?? await mongoose.startSession()
+    session ?? insession.startTransaction()
     try {
       let node = last
       if (last.length >= root.chunkLen) {
@@ -73,12 +76,12 @@ export class ListUtilService {
       await last.save({ session })
       await node.save({ session })
       await root.save({ session })
-      await session.commitTransaction()
+      session ?? await insession.commitTransaction()
     } catch {
-      await session.abortTransaction()
+      session ?? await insession.abortTransaction()
       result = false
     } finally {
-      await session.endSession()
+      session ?? await insession.endSession()
     }
 
     return result
@@ -106,6 +109,9 @@ export class ListUtilService {
   async insertOne(head: List, value: any, index: number, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
+    if (!root) {
+      throw new Error('List not found. That is ' + head.toString())
+    }
 
     if (index >= root.totalLen) {
       result = await this.appendOne(head, value)
@@ -114,8 +120,8 @@ export class ListUtilService {
       index = 0
     }
 
-    session = session || (await mongoose.startSession())
-    session.startTransaction()
+    const insession = session ?? await mongoose.startSession()
+    session ?? insession.startTransaction()
     try {
       // Search the node.
       let node = root
@@ -154,11 +160,11 @@ export class ListUtilService {
       }
       await node.save({ session })
       await root.save({ session })
-      await session.commitTransaction()
+      session ?? await insession.commitTransaction()
     } catch {
-      await session.abortTransaction()
+      session ?? await insession.abortTransaction()
     } finally {
-      await session.endSession()
+      session ?? await insession.endSession()
     }
 
     return result
@@ -175,12 +181,16 @@ export class ListUtilService {
   async deleteOne(head: List, value: any, chunkid?: Types.ObjectId, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
+    if (!root) {
+      return false
+    }
+
     let chunk
     if (chunkid)
       chunk = await list.findOne({ _id: chunkid })
 
-    session = session || await mongoose.startSession()
-    session.startTransaction()
+    const insession = session ?? await mongoose.startSession()
+    session ?? insession.startTransaction()
     try {
       let node = root
       let index = -1
@@ -281,12 +291,12 @@ export class ListUtilService {
       }
 
       await root.save({ session })
-      await session.commitTransaction()
+      session ?? await insession.commitTransaction()
     } catch {
       result = false
-      await session.abortTransaction()
+      session ?? await insession.abortTransaction()
     } finally {
-      await session.endSession()
+      session ?? await insession.endSession()
     }
 
     return result
@@ -385,14 +395,14 @@ export class ListUtilService {
       node = await list.findOne({ _id: chunkid })
     else
       node = await list.findOne({ _id: head })
-    if (!head.equals(node.head))
-      return null
+    if (!node || !node.head.equals(head))
+      return {}
 
     return {
-      value: node.body,
-      node: node._id,
-      prev: node.prev,
-      next: node.next
+      value: node?.body,
+      node: node?._id,
+      prev: node?.prev,
+      next: node?.next
     }
   }
 
@@ -472,8 +482,8 @@ export class ListUtilService {
     if (!root.head.equals(head))
       return false
 
-    session = session || await mongoose.startSession()
-    session.startTransaction()
+    const insession = session ?? await mongoose.startSession()
+    session ?? insession.startTransaction()
     try {
       let node = root
       while (node) {
@@ -481,12 +491,12 @@ export class ListUtilService {
         await node.deleteOne({ session })
         node = await list.findOne({ _id: nextid })
       }
-      await session.commitTransaction()
+      session ?? await insession.commitTransaction()
     } catch {
-      await session.abortTransaction()
+      session ?? await insession.abortTransaction()
       result = false
     } finally {
-      await session.endSession()
+      session ?? await insession.endSession()
     }
 
     return result

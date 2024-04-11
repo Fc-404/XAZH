@@ -15,27 +15,13 @@ export class CommentBlogService {
   log: LogService
 
   /**
-   * Initialize comment list.
-   * @param blog 
-   * @returns 
-   */
-  async initComment(blog: any) {
-    blog.comments = await this.list.createList()
-    return blog.save()
-  }
-
-  /**
    * Get comment chunk one by one.
-   * @param bid 
+   * @param id 
    * @param chunk 
    * @returns 
    */
-  async getComments(bid: Types.ObjectId, chunk?: Types.ObjectId) {
-    const blog = await BlogInfo.model.findById(bid)
-    if (!blog.comments) {
-      this.initComment(blog)
-    }
-    return this.list.findByChunk(blog.comments, chunk)
+  async getComments(id: Types.ObjectId, chunk?: Types.ObjectId) {
+    return this.list.findByChunk(id, chunk)
   }
 
   /**
@@ -43,8 +29,8 @@ export class CommentBlogService {
    * @param cid 
    * @returns 
    */
-  async getComent(cid: Types.ObjectId) {
-    return BlogComment.model.findById(cid)
+  async getComment(cid: Types.ObjectId) {
+    return BlogComment.model.findById(cid).lean()
   }
   /**
    * Get a comment without content.
@@ -61,6 +47,10 @@ export class CommentBlogService {
    */
   async reply(options: ICommentBlog) {
     let result = true
+    let commentsList
+    const blog = await BlogInfo.model.findById(options.bid)
+    if (!blog) throw new Error('Blog not found.')
+    if (blog.deleted) throw new Error('Blog has been deleted.')
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
@@ -71,7 +61,9 @@ export class CommentBlogService {
         content: options.content,
         wholike: wholikeList
       }], { session })
-      const blog = await BlogInfo.model.findById(options.bid)
+      if (!blog.comments) {
+        blog.comments = commentsList = await this.list.createList()
+      }
       await this.list.prependOne(blog.comments, comment[0]._id, session)
       blog.commentcount++
       await blog.save({ session })
@@ -79,6 +71,7 @@ export class CommentBlogService {
       await session.commitTransaction()
     } catch (e) {
       result = false
+      await this.list.deleteList(commentsList)
       await this.log.red('reply() execution error in CommentBlogService.', e)
       await session.abortTransaction()
     } finally {
@@ -93,6 +86,12 @@ export class CommentBlogService {
    */
   async replyTo(options: ICommentToBlog) {
     let result = true
+    let commentList
+    const commentObj = await BlogComment.model.findById(options.cid)
+    if (!commentObj) throw new Error('Comment not found.')
+    const blog = await BlogInfo.model.findById(options.bid)
+    if (blog && blog.deleted) throw new Error('Blog has been deleted.')
+
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
@@ -107,9 +106,8 @@ export class CommentBlogService {
         wholike: wholikeList
       }], { session })
       // prepend the new comment to the blog's main comment
-      const commentObj = await BlogComment.model.findById(options.cid)
       if (!commentObj.subcomments) {
-        commentObj.subcomments = await this.list.createList(null, session)
+        commentObj.subcomments = commentList = await this.list.createList()
       }
       await this.list.prependOne(commentObj.subcomments, comment[0]._id, session)
       // counter
@@ -119,6 +117,7 @@ export class CommentBlogService {
       await session.commitTransaction()
     } catch (e) {
       result = false
+      await this.list.deleteList(commentList)
       await this.log.red('replyTo() execution error in CommentBlogService.', e)
       await session.abortTransaction()
     } finally {
@@ -132,16 +131,22 @@ export class CommentBlogService {
    * @param id 
    * @param cid 
    */
-  async deleteMainComment(cid: Types.ObjectId, bid: Types.ObjectId, chunk?: Types.ObjectId) {
+  async deleteMainComment(cid: Types.ObjectId, bid: Types.ObjectId,
+    uid: Types.ObjectId, chunk?: Types.ObjectId): Promise<boolean> {
     const blog = await BlogInfo.model.findById(bid)
     const comment = await BlogComment.model.findById(cid)
+    if (!blog) return false
+    if (!comment) return false
+    if (!comment.author.equals(uid)) return false
     let result = true
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
       await this.list.deleteList(comment.wholike, session)
       await this.list.deleteList(comment.subcomments, session)
-      await this.list.deleteOne(blog.comments, cid, chunk, session)
+      await comment.deleteOne({ session })
+      const r = await this.list.deleteOne(blog.comments, v => cid.equals(v), chunk, session)
+      if (!r) throw new Error('Delete comment failed.')
       blog.commentcount--
       await blog.save({ session })
 
@@ -162,21 +167,27 @@ export class CommentBlogService {
    * @param cid 
    * @param chunk 
    */
-  async deleteComment(ccid: Types.ObjectId, cid: Types.ObjectId, chunk?: Types.ObjectId) {
+  async deleteComment(ccid: Types.ObjectId, cid: Types.ObjectId,
+    uid: Types.ObjectId, chunk?: Types.ObjectId): Promise<number> {
     const commentObj = await BlogComment.model.findById(cid)
     const comment = await BlogComment.model.findById(ccid)
-    let result = true
+    if (!comment || !commentObj) return 1
+    if (!comment.author.equals(uid)) return 2
+    if (!comment.cid.equals(commentObj._id)) return 3
+    let result = 0
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
       await this.list.deleteList(comment.wholike, session)
-      await this.list.deleteOne(commentObj.subcomments, ccid, chunk, session)
+      await comment.deleteOne({ session })
+      const r = await this.list.deleteOne(commentObj.subcomments, v => ccid.equals(v), chunk, session)
+      if (!r) throw new Error('Delete subcomment failed.')
       commentObj.subcount--
       await commentObj.save({ session })
 
       await session.commitTransaction()
     } catch (e) {
-      result = false
+      result = -1
       await this.log.red('deleteComment() execution error in CommentBlogService.', e)
       await session.abortTransaction()
     } finally {
@@ -190,27 +201,32 @@ export class CommentBlogService {
    * @param bid 
    */
   async deleteAll(bid: Types.ObjectId) {
+    let result = true
     const blog = await BlogInfo.model.findById(bid)
+    if (!blog) throw new Error('Blog not found.')
+    if (blog.deleted) throw new Error('Blog has been deleted.')
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
       await this.list.foreachList(blog.comments,
         async (v) => {
           let comment = await BlogComment.model.findById(v)
-          await this.list.deleteList(comment.wholike, session)
-          if (!comment.cid)
-            await this.list.deleteList(comment.subcomments, session)
+          await this.list.deleteList(comment?.wholike, session)
+          if (!comment?.cid)
+            await this.list.deleteList(comment?.subcomments, session)
         }
       )
       await this.list.deleteList(blog.comments, session)
 
       await session.commitTransaction()
     } catch (e) {
+      result = false
       await this.log.red('deleteAll() execution error in CommentBlogService.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
     }
+    return result
   }
 
   /**
@@ -219,28 +235,36 @@ export class CommentBlogService {
    * @param uid 
    * @param value 
    */
-  async like(cid: Types.ObjectId, uid: Types.ObjectId | null, value: boolean = true) {
+  async like(cid: Types.ObjectId, uid: Types.ObjectId, value: boolean = true) {
     const comment = await BlogComment.model.findById(cid)
+    if (!comment) return false
+
     let result = true
+    let interaction = await UserBlogInteraction.model.findById(uid.toString() + comment.bid.toString())
+    if (!interaction) {
+      interaction = await UserBlogInteraction.model.create({
+        _id: uid.toString() + comment.bid.toString(),
+      })
+    } else if (interaction.comment[cid.toString()]?.islike === value) {
+      return true
+    }
+
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
+      // Set islike status to Interaction.blog.user schema.
+      interaction.comment[cid.toString()] = { islike: value }
+      interaction.markModified('comment')
+      await interaction.save({ session })
+
       comment.likecount = comment.likecount + (value ? 1 : -1)
-      comment.save({ session })
+      await comment.save({ session })
       // Add uid to wholike list in comment schema.
-      if (uid) {
+      if (value) {
         await this.list.prependOne(comment.wholike, uid, session)
       }
-      // Set islike status to Interaction.blog.user schema.
-      await UserBlogInteraction.model.findOneAndUpdate(
-        { _id: uid.toString() + comment.bid.toString() },
-        { $set: { 'comment.$[element].islike': value } },
-        {
-          session,
-          'arrayFilters': [{ 'element._id': cid }],
-          upsert: true
-        }
-      )
+
+      await session.commitTransaction()
     } catch (e) {
       result = false
       await this.log.red('like() execution error in CommentBlogService.', e)
