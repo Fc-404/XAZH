@@ -9,7 +9,6 @@ import { ObjectId } from "mongodb";
 
 import { BlogUserService } from "../service/blog.user.service";
 import { CommentBlogService } from "../service/comment.blog.service";
-import { StarBlogUserService } from "../service/star.blog.user.service";
 import { PRIVACY_TYPE } from "../types/privacy.types";
 import { BlogCommentDTO, BlogInfoDTO } from "../dto/blog.dto";
 import { LevelGuard } from "../guard/level.guard";
@@ -23,8 +22,6 @@ export class BlogController {
   ctx: Context
   @Inject()
   blog: BlogUserService
-  @Inject()
-  star: StarBlogUserService
   @Inject()
   comment: CommentBlogService
 
@@ -216,6 +213,15 @@ export class BlogController {
     }
   }
 
+  /**
+   * To delete a comment in Blog.
+   * If provide ccid, will delete a comment-in-comment.
+   * @param cid 
+   * @param bid 
+   * @param ccid 
+   * @param chunk 
+   * @returns 
+   */
   @Post('/DeleteComment')
   @UseGuard(TokenGuard)
   async deleteComment(@Body('cid') cid: string, @Body('bid') bid: string,
@@ -231,18 +237,47 @@ export class BlogController {
     const bId = new ObjectId(bid)
     const ccId = ccid ? new ObjectId(ccid) : undefined
     const chunkId = chunk ? new ObjectId(chunk) : undefined
+    const isadmin = this.ctx.user.level >= USER_LEVEL.admin ? true : false
 
     let result
     if (ccId) {
-      result = await this.comment.deleteComment(ccId, cId, this.ctx.user.id, chunkId)
+      result = await this.comment.deleteComment(
+        ccId, cId, this.ctx.user.id, chunkId, isadmin
+      )
     } else {
-      result = await this.comment.deleteMainComment(cId, bId, this.ctx.user.id, chunkId)
+      result = await this.comment.deleteMainComment(
+        cId, bId, this.ctx.user.id, chunkId, isadmin
+      )
     }
     if (!result) {
       this.ctx.status = 422
       result = '参数错误'
     } else
       result = '删除成功'
+    return result
+  }
+
+  /**
+   * Add read record to a blog, 
+   * if have user'id will add read record to user's read list.
+   * @param bid 
+   * @param uid 
+   * @returns 
+   */
+  @Post('/HadRead')
+  async hadRead(@Body('bid') bid: string, @Body('uid') uid?: string) {
+    if (!ObjectId.isValid(bid) ||
+      (uid && !ObjectId.isValid(uid))) {
+      this.ctx.status = 403
+      return '无效的id'
+    }
+    const bId = new ObjectId(bid)
+    const uId = uid ? new ObjectId(uid) : undefined
+
+    let result = await this.blog.read(bId, uId)
+    if (!result) {
+      this.ctx.status = 500
+    }
     return result
   }
 
@@ -261,44 +296,6 @@ export class BlogController {
     }
     const bId = new ObjectId(bid)
     return await this.blog.like(bId, this.ctx.user.id, value)
-  }
-
-  /**
-   * Star a blog.
-   * @param bid
-   * @param folder
-   * @returns
-   */
-  @Post('/Star')
-  @UseGuard(TokenGuard)
-  async starBlog(@Body('bid') bid: string, @Body('folder') folder?: string) {
-    if (!ObjectId.isValid(bid)) {
-      this.ctx.status = 403
-      return '无效的博客id'
-    }
-    const bId = new ObjectId(bid)
-    return await this.star.star(this.ctx.user.id, bId, folder)
-  }
-
-  /**
-   * Unstar a blog.
-   * @param bid
-   * @param folder
-   * @param chunk
-   * @returns
-   */
-  @Post('/UnStar')
-  @UseGuard(TokenGuard)
-  async unstarBlog(@Body('bid') bid: string,
-    @Body('folder') folder?: string,
-    @Body('chunk') chunk?: string) {
-    if (!ObjectId.isValid(bid)) {
-      this.ctx.status = 403
-      return '无效的博客id'
-    }
-    const bId = new ObjectId(bid)
-    const chunkId = chunk ? new ObjectId(chunk) : undefined
-    return await this.star.unstar(this.ctx.user.id, bId, folder, chunkId)
   }
 
   /**
@@ -348,6 +345,13 @@ export class BlogController {
     return result
   }
 
+  /**
+   * Administrator Api.
+   * To remove thoroughly a blog.
+   * @param uid 
+   * @param bid 
+   * @returns 
+   */
   @Post('/Drop')
   @Level(USER_LEVEL.admin)
   @UseGuard([TokenGuard, LevelGuard])

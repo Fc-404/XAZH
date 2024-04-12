@@ -3,7 +3,9 @@ import { LogService } from "./log.service";
 import mongoose, { Types } from "mongoose";
 import { IBlogStarFolder, IBlogStarFolderModfiy } from "../interface/blog.interface";
 import { ListUtilService } from "./list.util.service";
+import BlogInfo from "../model/info.blog.model";
 import UserBlogStar from "../model/star.blog.user.model";
+import UserBlogInsteraction from "../model/interaction.blog.user.model";
 
 @Provide()
 export class StarBlogUserService {
@@ -21,13 +23,55 @@ export class StarBlogUserService {
    * @returns 
    */
   async star(uid: Types.ObjectId, bid: Types.ObjectId,
-    folder: string = 'Default') {
-    const result = await this.createFolder(uid, { name: folder })
-    if (!result) {
+    folders: string[] = ['Default']) {
+    const blog = await BlogInfo.model.findById(bid)
+    if (!blog) return false
+    const blogStar = await this.createFolder(uid, folders.map(v => ({ name: v })))
+    if (!blogStar) {
       await this.log.red('star() execution error in StarBlogUserService.')
       return false
     }
-    return this.list.prependOne(result.collectionId, bid)
+    const interaction = await UserBlogInsteraction.model.findOne(
+      { _id: uid.toString() + bid.toString() }, null, { upsert: true }
+    )
+
+    let result = true
+    const session = await mongoose.startSession()
+    session.startTransaction()
+    try {
+      let modified = false
+      for (let folder of folders) {
+        if (interaction.stars.includes(folder)) continue
+        // Add record to whostar
+        if (interaction.stars.length > 0) {
+          await this.list.prependOne(blog.whostar, uid, session)
+          blog.starcount++
+        }
+        // Set interaction
+        interaction.stars.push(folder)
+
+        // Add blog'id to user's starlist
+        await this.list.prependOne(
+          blogStar.list.find(v => v.name === folder).collections, bid, session
+        )
+
+        modified = true
+      }
+      if (modified) {
+        interaction.markModified('stars')
+        await blog.save({ session })
+        await interaction.save({ session })
+        await session.commitTransaction()
+      }
+    } catch (e) {
+      result = false
+      await this.log.red('star() execution error in StarBlogUserService.', e)
+      await session.abortTransaction()
+    } finally {
+      await session.endSession()
+    }
+
+    return result
   }
 
   /**
@@ -39,13 +83,50 @@ export class StarBlogUserService {
    * @returns 
    */
   async unstar(uid: Types.ObjectId, bid: Types.ObjectId,
-    folder: string = 'Default', chunk?: Types.ObjectId) {
-    const result = await this.createFolder(uid, { name: folder })
-    if (!result) {
-      await this.log.red('unstar() execution error in StarBlogUserService.')
-      return false
+    folders: string[] = ['Default'], chunk?: Types.ObjectId) {
+    const blogStar = await UserBlogStar.model.findById(uid)
+    if (!blogStar) return false
+    const blog = await BlogInfo.model.findById(bid)
+
+    let result = true
+    const session = await mongoose.startSession()
+    session.startTransaction()
+    try {
+      // Set interaction
+      const interaction = await UserBlogInsteraction.model.findOne(
+        { _id: uid.toString() + bid.toString() }, null, { upsert: true }
+      )
+
+      let modified = false
+      for (let folder of folders) {
+        if (!interaction.stars.includes(folder)) continue
+        // Remove blog'id from user's starlist
+        await this.list.deleteOne(
+          blogStar.list.find(v => v.name === folder).collections,
+          v => bid.equals(v), chunk, session
+        )
+        // Remove folder from interaction
+        interaction.stars = interaction.stars.filter(v => v !== folder)
+        modified = true
+      }
+      if (modified) {
+        if (interaction.stars.length <= 0) {
+          blog.starcount--
+          await blog.save({ session })
+        }
+        interaction.markModified('stars')
+        await interaction.save({ session })
+        await session.commitTransaction()
+      }
+    } catch (e) {
+      result = false
+      await this.log.red('unstar() execution error in StarBlogUserService.', e)
+      await session.abortTransaction()
+    } finally {
+      await session.endSession()
     }
-    return this.list.deleteOne(result.collectionId, bid, chunk)
+
+    return result
   }
 
   /**
@@ -54,37 +135,56 @@ export class StarBlogUserService {
    * @param options 
    * @returns Document | null
    */
-  async createFolder(uid: Types.ObjectId, options: IBlogStarFolder) {
+  async createFolder(uid: Types.ObjectId, options: IBlogStarFolder[]) {
     const userBlogStar = await UserBlogStar.model.findById(uid, null, { upsert: true })
-    let folder = userBlogStar.list.find(v => v.name === options.name)
-    let result = {
-      userBlogStar: userBlogStar,
-      collectionId: null,
-    }
-    if (folder) {
-      result.collectionId = folder.collections
-      return result
-    }
+    if (userBlogStar.list.length + options.length >= UserBlogStar.listMax) return false
 
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
-      if (userBlogStar.list.length >= UserBlogStar.listMax)
-        throw 'List is full. Max length is' + UserBlogStar.listMax
-      const l = this.list.createList(null, session)
-      userBlogStar.list.push({ ...options, collections: l })
+      for (let folder of options) {
+        if (userBlogStar.list.find(v => v.name === folder.name)) continue
+        const l = await this.list.createList(null, session)
+        userBlogStar.list.push({ ...folder, collections: l })
+      }
       userBlogStar.markModified('list')
-      userBlogStar.save({ session })
+      await userBlogStar.save({ session })
+
       await session.commitTransaction()
-      result.collectionId = l
     } catch (e) {
-      result = null
       await this.log.red('createFolder() execution error in StarBlogUserService.', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
     }
-    return result
+
+    return userBlogStar
+  }
+
+  /**
+   * Get user's starlist.
+   * @param uid 
+   * @returns 
+   */
+  async getFolders(uid: Types.ObjectId) {
+    return UserBlogStar.model.findById(uid).lean()
+  }
+
+  /**
+   * Get Items from a folder.
+   * @param uid 
+   * @param folderName 
+   * @param chunk 
+   * @returns 
+   */
+  async getItemsByFolder(uid: Types.ObjectId, folderName: string, chunk?: Types.ObjectId) {
+    const result = await UserBlogStar.model.findById(uid)
+    if (!result) return false
+    const item = result.list.find(v => v.name === folderName)
+    if (!item) {
+      return false
+    }
+    return this.list.findByChunk(item.collections, chunk)
   }
 
   /**
@@ -93,18 +193,22 @@ export class StarBlogUserService {
    * @param folderName
    * @returns Boolean
    */
-  async deleteFolder(uid: Types.ObjectId, folderName: string) {
+  async deleteFolder(uid: Types.ObjectId, folderNames: string[]) {
     const userBlogStar = await UserBlogStar.model.findById(uid)
-    const index = userBlogStar.list.findIndex(v => v.name === folderName)
-    if (index < 0) return true
     let result = true
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
-      await this.list.deleteList(userBlogStar.list[index].collections, session)
-      userBlogStar.list.splice(index, 1)
-      userBlogStar.markModified('list')
-      userBlogStar.save({ session })
+      for (let folderName of folderNames) {
+        let i = userBlogStar.list.findIndex(v => v.name === folderName)
+        if (i < 0) continue
+        await this.list.deleteList(userBlogStar.list[i].collections, session)
+        userBlogStar.list.splice(i, 1)
+        userBlogStar.markModified('list')
+      }
+
+      await userBlogStar.save({ session })
+      await session.commitTransaction()
     } catch (e) {
       result = false
       await this.log.red('deleteFolder() execution error in StarBlogUserService.', e)
@@ -117,27 +221,20 @@ export class StarBlogUserService {
   }
 
   /**
-   * Modfiy a folder infomations.
+   * Modify a folder infomations.
    * @param uid 
    * @param options 
    * @returns 
    */
-  async modfiyFolder(uid: Types.ObjectId, options: IBlogStarFolderModfiy) {
+  async modifyFolder(uid: Types.ObjectId, options: IBlogStarFolderModfiy) {
     return UserBlogStar.model.updateOne(
-      { _id: uid },
-      {
-        $set: {
-          'list.$[element].name': options.name,
-          'list.$[element].description': options.description,
-          'list.$[element].cover': options.cover,
-          'list.$[element].privacy': options.privacy,
-        }
-      },
-      {
-        'arrayFilters': [
-          { 'element.name': options.oldName }
-        ]
-      }
+      {_id: uid, 'list.name': options.name},
+      { $set: {
+        'list.$.name': options.newName,
+        'list.$.description': options.description,
+        'list.$.cover': options.cover,
+        'list.$.privacy': options.privacy
+      }}
     )
   }
 }

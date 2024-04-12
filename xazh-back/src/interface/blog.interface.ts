@@ -21,5 +21,5 @@ export interface IBlogStarFolder {
 }
 
 export interface IBlogStarFolderModfiy extends IBlogStarFolder {
-  oldName: string
+  newName: string
 }

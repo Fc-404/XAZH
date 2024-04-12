@@ -16,7 +16,7 @@ export class BlogInfoDTO {
 
   @Rule(RuleType.number().max(32))
   type: number
-  
+
   @Rule(RuleType.string().max(512))
   abstract: string
 
@@ -28,7 +28,7 @@ export class BlogInfoDTO {
 }
 
 export class BlogCommentDTO {
-  @Rule(RuleType.string().max(256).required())
+  @Rule(RuleType.string().length(24).required())
   bid: string
 
   @Rule(RuleType.string().max(1024).required())
@@ -37,8 +37,25 @@ export class BlogCommentDTO {
   @Rule(RuleType.array<string>().max(32))
   atwho: string[]
 
-  @Rule(RuleType.string().max(64))
+  @Rule(RuleType.string().length(24))
   cid: string
   @Rule(RuleType.string().max(32))
   replywho: string
+}
+
+export class StarFolderBlogDTO {
+  @Rule(RuleType.string().max(64).required())
+  name: string
+
+  @Rule(RuleType.string().max(512))
+  description: string
+
+  @Rule(RuleType.string().max(64))
+  newname: string
+
+  @Rule(RuleType.string().max(256))
+  cover: string
+
+  @Rule(RuleType.number().max(8))
+  privacy: number
 }

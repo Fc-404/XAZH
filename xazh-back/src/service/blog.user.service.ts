@@ -201,13 +201,13 @@ export class BlogUserService {
       return true
 
     // Add read record for the user.blog.read
-    const userBlogRead = await UserBlogRead.model.findById(
-      (await UserBlog.model.findById(uid)).read
-    )
+    const userBlogRead = await UserBlogRead.model.findById(uid)
     if (!userBlogRead) {
       await this.log.yellow('The uid or uid.read is invalid in read().')
       throw null
     }
+    if (id.equals(userBlogRead.list.pop()))
+      return true
     await userBlogRead.updateOne({
       $push: {
         list: {
@@ -249,7 +249,7 @@ export class BlogUserService {
       await interaction.save({ session })
 
       blog.likecount = blog.likecount + (value ? 1 : -1)
-      blog.save({ session })
+      await blog.save({ session })
 
       if (value) {
         // Add like record for the blog.countlist
@@ -257,14 +257,15 @@ export class BlogUserService {
 
         // Add like record for the user.blog.like
         const userBlogLike = await UserBlogLike.model.findById(uid)
-        await userBlogLike.updateOne({
-          $push: {
-            list: {
-              $each: [id],
-              $slice: -UserBlogLike.listMax
+        if (!userBlogLike.list.pop().equals(id))
+          await userBlogLike.updateOne({
+            $push: {
+              list: {
+                $each: [id],
+                $slice: -UserBlogLike.listMax
+              }
             }
-          }
-        }, { session })
+          }, { session })
       }
 
       await session.commitTransaction()
@@ -287,47 +288,47 @@ export class BlogUserService {
    * @param folder
    * @param chunk
    */
-  async star(id: Types.ObjectId, uid: Types.ObjectId,
-    value: boolean = true, folder?: string, chunk?: Types.ObjectId): Promise<boolean> {
-    let result = true
-    const session = await mongoose.startSession()
-    session.startTransaction()
-    try {
-      const blog = await BlogInfo.model.findById(id)
-      blog.starcount = blog.starcount + (value ? 1 : -1)
-      blog.save({ session })
+  // async star(id: Types.ObjectId, uid: Types.ObjectId,
+  //   value: boolean = true, folder?: string, chunk?: Types.ObjectId): Promise<boolean> {
+  //   let result = true
+  //   const session = await mongoose.startSession()
+  //   session.startTransaction()
+  //   try {
+  //     const blog = await BlogInfo.model.findById(id)
+  //     blog.starcount = blog.starcount + (value ? 1 : -1)
+  //     blog.save({ session })
 
-      let r
-      // Add or remove like record for the user.blog.star
-      if (value) {
-        r = await this.blogStar.star(uid, id, folder)
-        // Add like record for the blog.countlist
-        await this.list.prependOne(blog.whostar, uid, session)
-      } else
-        r = await this.blogStar.unstar(uid, id, folder, chunk)
-      if (!r) {
-        await this.log.red('star or unstar execution error in BlogUserService.star().')
-        throw null
-      }
+  //     let r
+  //     // Add or remove like record for the user.blog.star
+  //     if (value) {
+  //       r = await this.blogStar.star(uid, id, folder)
+  //       // Add like record for the blog.countlist
+  //       await this.list.prependOne(blog.whostar, uid, session)
+  //     } else
+  //       r = await this.blogStar.unstar(uid, id, folder, chunk)
+  //     if (!r) {
+  //       await this.log.red('star or unstar execution error in BlogUserService.star().')
+  //       throw null
+  //     }
 
-      // Add like record for the user.blog.interaction
-      await UserBlogInteraction.model.findOneAndUpdate(
-        { _id: uid.toString() + id.toString() },
-        { $set: { star: value } },
-        { session, upsert: true }
-      )
+  //     // Add like record for the user.blog.interaction
+  //     await UserBlogInteraction.model.findOneAndUpdate(
+  //       { _id: uid.toString() + id.toString() },
+  //       { $set: { star: value } },
+  //       { session, upsert: true }
+  //     )
 
-      await session.commitTransaction()
-    } catch (e) {
-      result = false
-      await this.log.red('star() execution error in BlogUserService.', e)
-      await session.abortTransaction()
-    } finally {
-      await session.endSession()
-    }
+  //     await session.commitTransaction()
+  //   } catch (e) {
+  //     result = false
+  //     await this.log.red('star() execution error in BlogUserService.', e)
+  //     await session.abortTransaction()
+  //   } finally {
+  //     await session.endSession()
+  //   }
 
-    return result
-  }
+  //   return result
+  // }
 
   /**
    * Get interaction information between user and blog.

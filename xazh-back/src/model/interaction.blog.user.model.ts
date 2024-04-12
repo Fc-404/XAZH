@@ -9,7 +9,7 @@ const commentSchema = {
 const schema = new mongoose.Schema({
   _id: String,             // User id, that is userid+blogid
   islike: Boolean,         // Whether like
-  isstar: Boolean,         // Whether star
+  stars: [String],         // Which folders are star blog.
   comment: {
     type: Object,
     of: commentSchema,

@@ -7,6 +7,7 @@ const listMax = 1000
 
 const starFolder = new mongoose.Schema({
   name: String,         // name for this favorite, unique key
+  rank: Number,         // rank
   description: String,  // descrition for this favorite
   cover: String,        // the fid of picture cover
   privacy: {            // privacy type

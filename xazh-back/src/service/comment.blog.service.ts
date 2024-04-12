@@ -38,7 +38,7 @@ export class CommentBlogService {
    * @returns 
    */
   async getCommentWithoutContent(cid: Types.ObjectId) {
-    return BlogComment.model.findById(cid, { content: 0 })
+    return BlogComment.model.findById(cid, { content: 0 }).lean()
   }
 
   /**
@@ -132,12 +132,12 @@ export class CommentBlogService {
    * @param cid 
    */
   async deleteMainComment(cid: Types.ObjectId, bid: Types.ObjectId,
-    uid: Types.ObjectId, chunk?: Types.ObjectId): Promise<boolean> {
+    uid: Types.ObjectId, chunk?: Types.ObjectId, isadmin: boolean = false): Promise<boolean> {
     const blog = await BlogInfo.model.findById(bid)
     const comment = await BlogComment.model.findById(cid)
     if (!blog) return false
     if (!comment) return false
-    if (!comment.author.equals(uid)) return false
+    if (!isadmin && !comment.author.equals(uid)) return false
     let result = true
     const session = await mongoose.startSession()
     session.startTransaction()
@@ -168,12 +168,12 @@ export class CommentBlogService {
    * @param chunk 
    */
   async deleteComment(ccid: Types.ObjectId, cid: Types.ObjectId,
-    uid: Types.ObjectId, chunk?: Types.ObjectId): Promise<number> {
+    uid: Types.ObjectId, chunk?: Types.ObjectId, isadmin: boolean = false): Promise<number> {
     const commentObj = await BlogComment.model.findById(cid)
     const comment = await BlogComment.model.findById(ccid)
     if (!comment || !commentObj) return 1
     if (!comment.author.equals(uid)) return 2
-    if (!comment.cid.equals(commentObj._id)) return 3
+    if (!isadmin && !comment.cid.equals(commentObj._id)) return 3
     let result = 0
     const session = await mongoose.startSession()
     session.startTransaction()
