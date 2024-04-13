@@ -70,16 +70,21 @@ export class StarBlogController {
    * @returns 
    */
   @Post('/Folder')
-  async getFolderItems(@Body('uid') uid: string, @Body('name') name: string,
+  async getFolderItems(@Body('name') name: string, @Body('uid') uid?: string,
     @Body('chunk') chunk?: string) {
-    if (!ObjectId.isValid(uid) ||
+    if (uid && !ObjectId.isValid(uid) ||
       chunk && !ObjectId.isValid(chunk)) {
       this.ctx.status = 422
       return '无效的chunk'
     }
+
+    const uId = uid ? new ObjectId(uid) : this.ctx.user.id
     const result = await this.star.getItemsByFolder(
-      new ObjectId(uid), name, chunk ? new ObjectId(chunk) : undefined
+      uId, name, chunk ? new ObjectId(chunk) : undefined
     )
+    if (!result) {
+      this.ctx.status = 400
+    }
     return result
   }
 
@@ -112,7 +117,7 @@ export class StarBlogController {
     if (!result) {
       this.ctx.status = 400
     }
-    return result
+    return result ? true : false
   }
 
   /**

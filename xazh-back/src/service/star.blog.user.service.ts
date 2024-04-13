@@ -226,15 +226,17 @@ export class StarBlogUserService {
    * @param options 
    * @returns 
    */
-  async modifyFolder(uid: Types.ObjectId, options: IBlogStarFolderModfiy) {
-    return UserBlogStar.model.updateOne(
-      {_id: uid, 'list.name': options.name},
-      { $set: {
-        'list.$.name': options.newName,
-        'list.$.description': options.description,
-        'list.$.cover': options.cover,
-        'list.$.privacy': options.privacy
-      }}
-    )
+  async modifyFolder(uid: Types.ObjectId, options: IBlogStarFolderModfiy): Promise<boolean> {
+    return (await UserBlogStar.model.updateOne(
+      { _id: uid, 'list.name': options.name },
+      {
+        $set: {
+          'list.$.name': options.newName,
+          'list.$.description': options.description,
+          'list.$.cover': options.cover,
+          'list.$.privacy': options.privacy
+        }
+      }
+    )).acknowledged
   }
 }
