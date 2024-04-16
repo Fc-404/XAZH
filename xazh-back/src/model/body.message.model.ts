@@ -1,23 +1,43 @@
 import mongoose, { Schema } from "mongoose";
+import { List } from "../service/list.util.service";
 
 const ObjectId = Schema.Types.ObjectId
 const name: string = 'Message.Body'
 
+/*
+const msgsType = {
+  seq: Number,                // Index of the msg
+  uid: Types.ObjectId,        // user who sent msg
+  quote: Number,              // index of the msg which be quoted
+  content: String,            // content of msg
+  date: Date,                 // date msg be sent
+  type: Number,               // Msg type
+}
+*/
+
+const user = {
+  id: ObjectId,
+  unread: {
+    type: Number,
+    default: 0,
+  },
+  ignore: {
+    type: Boolean,
+    default: false,
+  },
+}
+
 const schema = new mongoose.Schema({
-  name: String,           // Msg name
-  // TODO
-  type: String,           // Msg type
-  who: [ObjectId],        // user who join
-  msgc: Number,           // Msg counter
-  list: [{                // Msg body
-    i: Number,                // Index of the msg
-    who: ObjectId,            // user who sent msg
-    content: String,          // content of msg
-    date: {                   // date msg be sent
-      type: Date,
-      default: Date.now
-    },
-  }]
+  msgs: List,
+  users: {
+    type: Array,
+    of: user,
+  },
+  latest: Date,
+  length: {
+    type: Number,
+    default: 0
+  },
 })
 
 const model = mongoose.model(name, schema, name)

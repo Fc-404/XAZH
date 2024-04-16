@@ -95,8 +95,8 @@ export class BlogUserService {
       }], { session })
       blogInfoResult[0].body = blogBodyResult[0]._id
       // blog countlist
-      const wholikeListId = await this.list.createList(null, session)
-      const whostarListId = await this.list.createList(null, session)
+      const wholikeListId = await this.list.createList(1000, session)
+      const whostarListId = await this.list.createList(1000, session)
       blogInfoResult[0].wholike = wholikeListId
       blogInfoResult[0].whostar = whostarListId
 

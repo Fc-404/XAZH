@@ -15,6 +15,21 @@ export const List = Schema.Types.ObjectId
 @Provide()
 export class ListUtilService {
   /**
+   * Get the head info.
+   * @param head 
+   * @returns 
+   */
+  async getHeadInfo(head: List) {
+    const root = await list.findById(head)
+    if (!root) return null
+    return {
+      chunkLen: root.chunkLen,
+      totalLen: root.totalLen,
+      last: root.last
+    }
+  }
+
+  /**
    * Create a new list.
    * @param chunkLen
    * @param session
