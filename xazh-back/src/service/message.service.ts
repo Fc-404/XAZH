@@ -8,6 +8,7 @@ import { IMessageBody } from "../interface/message.interface";
 import UserMesg from "../model/message.user.model";
 import MesgBody from "../model/body.message.model";
 import UserBase from "../model/base.user.model";
+import { RelationUserService } from "./relation.user.service";
 
 /**
  * Generate a new message id.
@@ -28,6 +29,8 @@ export class MessageService {
   log: LogService
   @Inject()
   list: ListUtilService
+  @Inject()
+  rel: RelationUserService
 
   /**
    * Query message.user.model by uid.
@@ -51,7 +54,7 @@ export class MessageService {
    * @param uids 
    * @returns 
    */
-  async startChat(uids: Types.ObjectId[]) {
+  async startChat(uids: Types.ObjectId[]): Promise<Types.ObjectId> {
     if (uids.length < 2) return undefined
     const mid = generateId(uids)
     if (await UserMesg.model.findById(mid)) return mid
@@ -95,6 +98,14 @@ export class MessageService {
     if (options.uid == 'System') return false
     const msgBody = await MesgBody.model.findById(mid)
     if (!msgBody) return false
+    if (!msgBody.users.find(v => v.id == options.uid)) return false
+    if (msgBody.users.length == 2) {
+      const relation = await this.rel.getInteraction(
+        options.uid, options.uid.equals(msgBody.users[0].id) ?
+        msgBody.users[1].id : msgBody.users[0].id
+      )
+      if (relation && relation.isblacked) return false
+    }
 
     let result = true
     const session = await mongoose.startSession()
@@ -139,26 +150,43 @@ export class MessageService {
    * @param to 
    * @param options 
    */
-  async noticeTo(to: Types.ObjectId, options: IMessageBody): Promise<boolean> {
-    if (options.uid != 'System') return false
+  async noticeTo(to: Types.ObjectId, body: any): Promise<boolean> {
     const msgBody = await MesgBody.model.findOne(
       { _id: to }, null, { upsert: true }
     )
     if (!msgBody) return false
 
-    const msg = {
-      seq: msgBody.length++,
-      uid: options.uid,
-      quote: options.quote,
-      content: options.content,
-      date: Date.now(),
-      type: options.type,
-    }
-    await this.list.prependOne(msgBody.msgs, msg)
-    msgBody.latest = new Date()
-    const result = await msgBody.save()
+    let result = true
+    const session = await mongoose.startSession()
+    session.startTransaction()
+    try {
+      if (!msgBody.msgs)
+        msgBody.msgs = await this.list.createList()
 
-    return result ? true : false
+      const msg = {
+        seq: msgBody.length++,
+        body: body,
+        date: Date.now(),
+      }
+      await this.list.prependOne(msgBody.msgs, msg, session)
+      msgBody.latest = new Date()
+      let u = msgBody.users.find(v => v.id == to)
+      if (!u)
+        msgBody.users.push({ id: to, unread: 1 })
+      else
+        u.unread++
+      msgBody.markModified('users')
+      await msgBody.save({ session })
+      await session.commitTransaction()
+    } catch (e) {
+      result = false
+      await this.log.red('noticeTo() execution error in MessageService.', e)
+      await session.abortTransaction()
+    } finally {
+      await session.endSession()
+    }
+
+    return result
   }
 
   /**
@@ -170,7 +198,21 @@ export class MessageService {
   async getNewMsgs(uid: Types.ObjectId, chunk?: Types.ObjectId) {
     const userMsg = await this.getUserMessage(uid)
     if (!userMsg) return false
-    return this.list.findByChunk(userMsg.newmsgs, chunk)
+
+    let result = []
+    this.list.foreachList(userMsg.newmsgs, async v => {
+      let msgBody = await MesgBody.model.findById(v)
+      if (!msgBody) return
+      let u = msgBody.users.find(v => v.id == uid)
+      result.push({
+        mid: msgBody._id,
+        unread: u.unread,
+        ignore: u.ignore,
+        latest: msgBody.latest,
+        length: msgBody.length,
+      })
+    })
+    return result
   }
 
   /**

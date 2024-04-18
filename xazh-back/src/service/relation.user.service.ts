@@ -12,7 +12,6 @@ export class RelationUserService {
   log: LogService
   @Inject()
   list: ListUtilService
-  @Inject()
 
   /**
    * To follow or unfollow a user.
@@ -24,6 +23,7 @@ export class RelationUserService {
    */
   async follow(from: Types.ObjectId, to: Types.ObjectId,
     value: boolean = true, chunks?: Types.ObjectId[]): Promise<boolean> {
+    if (from.equals(to)) return false
     const interactionId = UserRelInteraction.generateId(from, to)
     const interaction = await UserRelInteraction.model.findOne(
       { _id: interactionId.id }, null, { upsert: true }
@@ -79,6 +79,7 @@ export class RelationUserService {
    * @param to 
    */
   async blacked(from: Types.ObjectId, to: Types.ObjectId, value: boolean = true) {
+    if (from.equals(to)) return false
     const interactionId = UserRelInteraction.generateId(from, to)
     const interaction = await UserRelInteraction.model.findOne(
       { _id: interactionId.id }, null, { upsert: true }
@@ -100,6 +101,7 @@ export class RelationUserService {
    * @param to 
    */
   async getInteraction(from: Types.ObjectId, to: Types.ObjectId) {
+    if (from.equals(to)) return false
     const interactionId = UserRelInteraction.generateId(from, to)
     const result = await UserRelInteraction.model.findById(interactionId.id)
     return {

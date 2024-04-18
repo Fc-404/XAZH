@@ -528,7 +528,9 @@ export class ListUtilService {
     let node = await list.findOne({ _id: head })
     let index = 0
     while (node) {
-      node.body.forEach(v => callback(v, index++))
+      // node.body.forEach(v => callback(v, index++))
+      for (let i of node.body)
+        await callback(i, index++)
       node = await list.findOne({ _id: node.next })
     }
     return result

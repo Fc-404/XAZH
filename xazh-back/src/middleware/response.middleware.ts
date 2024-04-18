@@ -18,8 +18,11 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
 
       try {
         const body = await next()
+        if (ctx.code == 0 && ctx.status >= 400)
+          ctx.code = -1
+
         let result = {
-          code: ctx.code == 0 && ctx.status >= 400 ? -1 : ctx.code,
+          code: ctx.code,
           status: ctx.status,
           message: ctx.message,
           body: body
