@@ -38,8 +38,8 @@ export class MessageService {
    * @returns 
    */
   async getUserMessage(uid: Types.ObjectId) {
-    const result = await UserMesg.model.findOne(
-      { _id: uid }, null, { upsert: true }
+    const result = await UserMesg.model.findOneAndUpdate(
+      { _id: uid }, {}, { upsert: true, new: true }
     )
     if (!result.msgslist)
       result.msgslist = await this.list.createList()
@@ -151,8 +151,8 @@ export class MessageService {
    * @param options 
    */
   async noticeTo(to: Types.ObjectId, body: any): Promise<boolean> {
-    const msgBody = await MesgBody.model.findOne(
-      { _id: to }, null, { upsert: true }
+    const msgBody = await MesgBody.model.findOneAndUpdate(
+      { _id: to }, {}, { upsert: true, new: true }
     )
     if (!msgBody) return false
 

@@ -31,8 +31,8 @@ export class StarBlogUserService {
       await this.log.red('star() execution error in StarBlogUserService.')
       return false
     }
-    const interaction = await UserBlogInsteraction.model.findOne(
-      { _id: uid.toString() + bid.toString() }, null, { upsert: true }
+    const interaction = await UserBlogInsteraction.model.findOneAndUpdate(
+      { _id: uid.toString() + bid.toString() }, {}, { upsert: true, new: true }
     )
 
     let result = true
@@ -93,8 +93,8 @@ export class StarBlogUserService {
     session.startTransaction()
     try {
       // Set interaction
-      const interaction = await UserBlogInsteraction.model.findOne(
-        { _id: uid.toString() + bid.toString() }, null, { upsert: true }
+      const interaction = await UserBlogInsteraction.model.findOneAndUpdate(
+        { _id: uid.toString() + bid.toString() }, {}, { upsert: true, new: true }
       )
 
       let modified = false
@@ -136,7 +136,7 @@ export class StarBlogUserService {
    * @returns Document | null
    */
   async createFolder(uid: Types.ObjectId, options: IBlogStarFolder[]) {
-    const userBlogStar = await UserBlogStar.model.findById(uid, null, { upsert: true })
+    const userBlogStar = await UserBlogStar.model.findByIdAndUpdate(uid, {}, { upsert: true, new: true })
     if (userBlogStar.list.length + options.length >= UserBlogStar.listMax) return false
 
     const session = await mongoose.startSession()

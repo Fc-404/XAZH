@@ -3,7 +3,7 @@ import {
 } from "@midwayjs/core";
 import { Context } from "koa";
 
-@Controller('/User/Collection')
+@Controller('/Blog/Collection')
 export class BlogCollectionController {
 
   @Inject()
@@ -29,5 +29,11 @@ export class BlogCollectionController {
 
   @Post('/Modify')
   async modifyColl() { }
+
+  @Post('/Subscribe')
+  async subscribeColl() { }
+
+  @Post('/Unsubscribe')
+  async unsubscribeColl() { }
 
 }

@@ -25,12 +25,21 @@ export class RelationUserService {
     value: boolean = true, chunks?: Types.ObjectId[]): Promise<boolean> {
     if (from.equals(to)) return false
     const interactionId = UserRelInteraction.generateId(from, to)
-    const interaction = await UserRelInteraction.model.findOne(
-      { _id: interactionId.id }, null, { upsert: true }
+    const interaction = await UserRelInteraction.model.findOneAndUpdate(
+      { _id: interactionId.id }, {}, { upsert: true, new: true }
     )
     const fromRel = await UserRel.model.findById(from)
     const toRel = await UserRel.model.findById(to)
     if (!fromRel || !toRel) return false
+    // update relation list
+    if (!fromRel.follow) {
+      fromRel.follow = await this.list.createList()
+      await fromRel.save()
+    }
+    if (!toRel.follower) {
+      toRel.follower = await this.list.createList()
+      await toRel.save()
+    }
 
     let result = true
     const session = await mongoose.startSession()
@@ -46,18 +55,16 @@ export class RelationUserService {
       }
       await interaction.save({ session })
 
-      // update relation list
-      if (!fromRel.follow)
-        fromRel.follow = await this.list.createList(null, session)
-      if (!toRel.follower)
-        toRel.follow = await this.list.createList(null, session)
-
       if (value) {
         await this.list.prependOne(fromRel.follow, to, session)
         await this.list.prependOne(toRel.follower, from, session)
       } else {
-        await this.list.deleteOne(fromRel.follow, v => to.equals(v), chunks[0], session)
-        await this.list.deleteOne(toRel.follower, v => from.equals(v), chunks[1], session)
+        await this.list.deleteOne(fromRel.follow,
+          v => to.equals(v),
+          chunks ? chunks[0] : undefined, session)
+        await this.list.deleteOne(toRel.follower,
+          v => from.equals(v),
+          chunks ? chunks[1] : undefined, session)
       }
 
       await fromRel.save({ session })
@@ -81,8 +88,8 @@ export class RelationUserService {
   async blacked(from: Types.ObjectId, to: Types.ObjectId, value: boolean = true) {
     if (from.equals(to)) return false
     const interactionId = UserRelInteraction.generateId(from, to)
-    const interaction = await UserRelInteraction.model.findOne(
-      { _id: interactionId.id }, null, { upsert: true }
+    const interaction = await UserRelInteraction.model.findOneAndUpdate(
+      { _id: interactionId.id }, {}, { upsert: true, new: true }
     )
 
     let index = interaction.blacklist.indexOf(to)
@@ -104,7 +111,7 @@ export class RelationUserService {
     if (from.equals(to)) return false
     const interactionId = UserRelInteraction.generateId(from, to)
     const result = await UserRelInteraction.model.findById(interactionId.id)
-    return {
+    return result ? {
       followtime: interactionId.reverse ?
         result.followertime : result.followtime,
       followertime: interactionId.reverse ?
@@ -117,7 +124,7 @@ export class RelationUserService {
         true : false,
       isblacked: result.blacklist.indexOf(from) != -1 ?
         true : false
-    }
+    } : null
   }
 
   /**
@@ -128,7 +135,7 @@ export class RelationUserService {
    */
   async getFollowList(uid: Types.ObjectId, chunk?: Types.ObjectId) {
     const userRel = await UserRel.model.findById(uid)
-    return this.list.findByChunk(userRel.follow, chunk)
+    return userRel.follow ? this.list.findByChunk(userRel.follow, chunk) : null
   }
 
   /**
@@ -139,6 +146,6 @@ export class RelationUserService {
    */
   async getFollowerList(uid: Types.ObjectId, chunk?: Types.ObjectId) {
     const userRel = await UserRel.model.findById(uid)
-    return this.list.findByChunk(userRel.follower, chunk)
+    return userRel.follower ? this.list.findByChunk(userRel.follower, chunk) : null
   }
 }

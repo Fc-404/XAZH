@@ -23,6 +23,7 @@ export class RelationUserController {
    */
   @Post('/Follow')
   async follow(@Body('users') users: string[]) {
+    if (!users) return
     users = typeof users === 'string' ? [users] : users
     let result = []
     for (let user of users) {
@@ -44,6 +45,7 @@ export class RelationUserController {
    */
   @Post('/Unfollow')
   async unfollow(@Body('users') users: string[], @Body('chunks') chunks?: any) {
+    if (!users) return
     users = typeof users === 'string' ? [users] : users
     let chunksT = chunks ? chunks as { [key: string]: string[] } : null
     let cs = new Array(2)
@@ -76,7 +78,8 @@ export class RelationUserController {
    */
   @Post('/Block')
   async block(@Body('user') user: string, @Body('value') value: boolean = true) {
-    if (!ObjectId.isValid(user)) {
+    if (!user) return
+    if (user && !ObjectId.isValid(user)) {
       this.ctx.status = 403
       return false
     }
@@ -90,7 +93,8 @@ export class RelationUserController {
    * @returns 
    */
   @Post('/GetInteraction')
-  async getInteraction(@Body('user') users: string[]) {
+  async getInteraction(@Body('users') users: string[]) {
+    if (!users) return
     users = typeof users === 'string' ? [users] : users
     let result = []
     for (let user of users) {
@@ -110,12 +114,13 @@ export class RelationUserController {
    * @returns 
    */
   @Post('/GetFollow')
-  async getFollow(@Body('chunk') chunk: string) {
-    if (!ObjectId.isValid(chunk)) {
+  async getFollow(@Body('chunk') chunk?: string) {
+    if (chunk && !ObjectId.isValid(chunk)) {
       this.ctx.status = 403
       return false
     }
-    return await this.rel.getFollowList(this.ctx.user.id, new ObjectId(chunk))
+    return await this.rel.getFollowList(this.ctx.user.id,
+      chunk ? new ObjectId(chunk) : undefined)
   }
 
   /**
@@ -124,11 +129,12 @@ export class RelationUserController {
    * @returns 
    */
   @Post('/GetFollower')
-  async getFollower(@Body('chunk') chunk: string) {
-    if (!ObjectId.isValid(chunk)) {
+  async getFollower(@Body('chunk') chunk?: string) {
+    if (chunk && !ObjectId.isValid(chunk)) {
       this.ctx.status = 403
       return false
     }
-    return await this.rel.getFollowerList(this.ctx.user.id, new ObjectId(chunk))
+    return await this.rel.getFollowerList(this.ctx.user.id,
+      chunk ? new ObjectId(chunk) : undefined)
   }
 }

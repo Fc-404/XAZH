@@ -38,6 +38,7 @@ export class ListUtilService {
   async createList(chunkLen: number = 100, session?: mongoose.ClientSession): Promise<List> {
     if (!chunkLen) chunkLen = 100
     const result = await list.create([{
+      ishead: true,
       chunkLen: chunkLen,
       totalLen: 0,
       length: 0,
@@ -61,11 +62,11 @@ export class ListUtilService {
   async appendOne(head: List, value: any, session?: mongoose.ClientSession): Promise<boolean> {
     const root = await list.findOne({ _id: head }, ['chunkLen', 'totalLen', 'last'])
     if (!root) {
-      return false
+      throw new Error('List not found. That is ' + head?.toString())
     }
     const last = await list.findOne({ _id: root.last })
     if (!last) {
-      return false
+      throw new Error('Last node not found. Head of List is ' + head?.toString())
     }
 
     let result = true
@@ -125,7 +126,7 @@ export class ListUtilService {
     let result = true
     const root = await list.findOne({ _id: head })
     if (!root) {
-      throw new Error('List not found. That is ' + head.toString())
+      throw new Error('List not found. That is ' + head?.toString())
     }
 
     if (index >= root.totalLen) {
@@ -197,7 +198,7 @@ export class ListUtilService {
     let result = true
     const root = await list.findOne({ _id: head })
     if (!root) {
-      return false
+      throw new Error('List not found. That is ' + head?.toString())
     }
 
     let chunk
@@ -326,6 +327,7 @@ export class ListUtilService {
   async findOne(head: List, value: any) {
     let result = null
     let node = await list.findOne({ _id: head })
+    if (!node) throw new Error('List not found. That is ' + head?.toString())
     let count = 0
     while (node) {
       let index = node.body.indexOf(value)
@@ -354,6 +356,7 @@ export class ListUtilService {
   async findByIndex(head: List, index: number) {
     let result = null
     let node = await list.findOne({ _id: head })
+    if (!node) throw new Error('List not found. That is ' + head?.toString())
     let count = 0
     while (node) {
       let recount = count
@@ -380,6 +383,7 @@ export class ListUtilService {
   async findByNode(head: List, nodeindex: number) {
     let result = null
     let node = await list.findOne({ _id: head })
+    if (!node) throw new Error('List not found. That is ' + head?.toString())
     let index = 0
     while (node) {
       if (nodeindex == index) {
@@ -410,14 +414,17 @@ export class ListUtilService {
       node = await list.findOne({ _id: chunkid })
     else
       node = await list.findOne({ _id: head })
-    if (!node || !node.head.equals(head))
-      return {}
+    if (!node)
+      throw new Error('Chunk not found. That is ' + chunkid?.toString() + ', Head of List is ' + head?.toString())
+    if (!node.head.equals(head))
+      throw new Error('Chunk\'s head is not ' + head?.toString())
 
     return {
       value: node?.body,
+      head: node?.head,
       node: node?._id,
       prev: node?.prev,
-      next: node?.next
+      next: node?.next,
     }
   }
 
@@ -439,6 +446,9 @@ export class ListUtilService {
       length: 0,
     }
     const root = await list.findOne({ _id: head })
+    if (!root) {
+      throw new Error('List not found. That is ' + head?.toString())
+    }
 
     let node = root
     let count = 0
@@ -495,7 +505,7 @@ export class ListUtilService {
     if (!root)
       return true
     if (!root.head.equals(head))
-      return false
+      throw new Error('Need head\'s id to delete. That is ' + head?.toString())
 
     const insession = session ?? await mongoose.startSession()
     session ?? insession.startTransaction()

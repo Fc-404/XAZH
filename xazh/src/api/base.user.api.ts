@@ -12,7 +12,7 @@ export async function VerifyTokenAPI(param: object | null = null) {
   let token = param ? null : cookie.get('token') || null
   let data = param ? null : base64WithDate(token ?? '')
 
-  const result = await xazhAxios.post("/User/VerifyToken", param ?? {
+  const result = await xazhAxios.post("/VerifyToken", param ?? {
     id: id,
     token: data?.data,
     date: data?.date
@@ -27,7 +27,7 @@ export async function VerifyTokenAPI(param: object | null = null) {
  * @returns true if send successfully, otherwise false
  */
 export async function SendMailValidCodeAPI(mail: string) {
-  const result = await xazhAxios.post("/User/SendMailValidCode", {
+  const result = await xazhAxios.post("/SendMailValidCode", {
     mail: mail
   })
 

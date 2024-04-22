@@ -5,6 +5,7 @@ const name = 'Util.List'
 
 const schema = new mongoose.Schema({
   // Headnode-specific.
+  ishead: Boolean,    // Is head node.
   chunkLen: Number,   // Each chunk standard length.
   totalLen: Number,   // Total length in this list.
   last: ObjectId,     // Previous chunk.
@@ -14,6 +15,11 @@ const schema = new mongoose.Schema({
   length: Number,     // Total length in this chunk.
   prev: ObjectId,     // Previous chunk.
   next: ObjectId,     // Next chunk.
+  //
+  createdAt: {        // Created time.
+    type: Date,
+    default: Date.now,
+  },
 })
 
 const model = mongoose.model(name, schema, name)

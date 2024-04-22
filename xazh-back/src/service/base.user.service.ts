@@ -10,7 +10,7 @@ import UserBlogStar from '../model/star.blog.user.model'
 import UserConfig from '../model/config.user.model'
 import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
-import { sha1 } from '../util/crypto.util';
+import { md5 } from '../util/crypto.util';
 import { LogService } from './log.service';
 
 const ipMaxCount = 20
@@ -145,7 +145,8 @@ export class UserService {
       return 1
 
     // Confusion password verification.
-    if (sha1(account + result.pswd + account) == pswd) {
+    // if (sha1(account + result.pswd + account) == pswd) {
+    if (md5(account + result.pswd + account) == pswd) {
       for (let i of filter)
         userInfo[i] = result[i]
       return 0
