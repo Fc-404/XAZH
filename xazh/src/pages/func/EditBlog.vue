@@ -74,15 +74,15 @@
                   <UploadPic
                     ref="uploadRef"
                     style="margin-top: 1rem"
-                    :src="blogInfo.coverImg"
+                    v-model:fid="blogInfo.coverImg"
                     :uploadCtl="true"
                   ></UploadPic>
                   <a-button
                     type="text"
                     @click="blogInfo.coverImg = ''"
                     style="margin-left: 4px"
-                    >取消设置</a-button
-                  >
+                    >取消设置
+                  </a-button>
                 </div>
                 <div style="width: 18rem">
                   <a-tabs
@@ -299,7 +299,6 @@ const save = function () {
     title: title.value,
     content: editor.value.content,
     time: new Date(),
-    imgs: editor.value.imgs,
   }
 
   // cookie.set('EditBlog/draft', JSON.stringify(draft))
@@ -318,7 +317,7 @@ const loadingDraft = function () {
 
     title.value = draft.title
     draftContent.value = draft.content
-    draftImgs.value = draft.imgs
+    if (!title.value && !draftContent.value) return
 
     const time = new Date(draft.time)
     notification.success({
@@ -399,6 +398,14 @@ const publishBtn = function () {
     signinOpen.value = true
     return
   }
+  if (!title.value) {
+    message.error('请输入标题！')
+    return
+  }
+  if (!editor.value.content) {
+    message.error('请输入内容！')
+    return
+  }
   getServerData()
   blogPublishOpen.value = true
 }
@@ -446,6 +453,7 @@ const publishBlog = async function () {
   }
 
   const result = await PublishBlog(form)
+  publishLoading.value = false
   if (result.code == 0) {
     message.success('发布成功！')
     blogPublishOpen.value = false
@@ -455,7 +463,6 @@ const publishBlog = async function () {
   } else {
     message.error('发布失败！')
   }
-  publishLoading.value = false
 }
 
 /**

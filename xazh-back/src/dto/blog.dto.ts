@@ -8,7 +8,7 @@ export class BlogInfoDTO {
   body: string
 
   // Not required.
-  @Rule(RuleType.string().max(40))
+  @Rule(RuleType.string().min(0).max(40))
   cover: string
 
   @Rule(RuleType.date())

@@ -36,7 +36,7 @@ const id = ref<string>(uid())
 const store = useStore()
 const props = defineProps({
   commit: Boolean,
-  src: {
+  fid: {
     type: String,
     default: undefined,
   },
@@ -61,15 +61,18 @@ const props = defineProps({
 })
 
 // true if not select, false if selected, undefined if loading.
+const emit = defineEmits(['update:fid'])
 const uploadState = ref<boolean | undefined>(true)
 const previewSrc = ref<string>()
 let file: File
 
 watch(
-  () => props.src,
+  () => props.fid,
   () => {
-    uploadState.value = props.src ? false : true
-    previewSrc.value = store.getters['config/baseApi'] + 'File/' + props.src
+    uploadState.value = props.fid ? false : true
+    if (uploadState.value === false && props.fid !== 'wait') {
+      previewSrc.value = store.getters['config/baseApi'] + 'File/' + props.fid
+    }
   }
 )
 
@@ -77,8 +80,7 @@ watch(
  * Upload Pictrue.
  */
 const uploadPic = async function () {
-  if (!file) return undefined
-  if (props.src) return props.src
+  if (props.fid != 'wait') return props.fid
   uploadState.value = undefined
   const result = await UploadFileAPI(file.name, file)
   uploadState.value = false
@@ -88,6 +90,7 @@ const customReq = async function (options: any) {
   previewSrc.value = (await getBase64(options.file)) as string
   uploadState.value = false
   file = options.file
+  emit('update:fid', 'wait')
 
   if (!props.uploadCtl) uploadPic()
 }
