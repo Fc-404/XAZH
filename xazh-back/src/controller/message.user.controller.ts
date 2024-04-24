@@ -17,7 +17,10 @@ export class MessageController {
 
   @Post('/StartChat')
   async startChat(@Body('uids') uids: string[]) {
+    uids = typeof uids === 'string' ? [uids] : uids
+    if (uids.length < 1 || uids.length > 16) return false
     const users = []
+    users.push(this.ctx.user.id)
     for (let uid of uids)
       if (ObjectId.isValid(uid))
         users.push(new ObjectId(uid))
@@ -32,12 +35,7 @@ export class MessageController {
   @Post('/Send')
   async send(@Body('mid') mid: string, @Body('content') content: string,
     @Body('quote') quote?: number, @Body('type') type?: number) {
-    if (!ObjectId.isValid(mid)) {
-      this.ctx.status = 403
-      return false
-    }
-
-    const result = await this.msg.sendTo(new ObjectId(mid), {
+    const result = await this.msg.sendTo(mid, {
       uid: this.ctx.user.id, content: content,
       quote: quote, type: type
     })
@@ -50,19 +48,18 @@ export class MessageController {
   @Post('/Get')
   async get(@Body('mid') mid: string, @Body('seq') seq?: number,
     @Body('chunk') chunk?: string) {
-    if (!ObjectId.isValid(mid) || (chunk && !ObjectId.isValid(chunk))) {
+    if ((chunk && !ObjectId.isValid(chunk))) {
       this.ctx.status = 403
       return false
     }
-    const mId = new ObjectId(mid)
     const result = await this.msg.getMsgs(
-      this.ctx.user.id, mId, seq
+      this.ctx.user.id, mid, seq
     )
     if (!result) {
       this.ctx.status = 500
     } else {
       await this.msg.readed(
-        this.ctx.user.id, mId, chunk ? new ObjectId(chunk) : undefined
+        this.ctx.user.id, mid, chunk ? new ObjectId(chunk) : undefined
       )
     }
     return result

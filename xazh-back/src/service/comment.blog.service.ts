@@ -51,6 +51,11 @@ export class CommentBlogService {
     const blog = await BlogInfo.model.findById(options.bid)
     if (!blog) throw new Error('Blog not found.')
     if (blog.deleted) throw new Error('Blog has been deleted.')
+    if (!blog.comments) {
+      blog.comments = commentsList = await this.list.createList()
+      await blog.save()
+    }
+
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
@@ -61,9 +66,7 @@ export class CommentBlogService {
         content: options.content,
         wholike: wholikeList
       }], { session })
-      if (!blog.comments) {
-        blog.comments = commentsList = await this.list.createList()
-      }
+
       await this.list.prependOne(blog.comments, comment[0]._id, session)
       blog.commentcount++
       await blog.save({ session })
@@ -71,7 +74,6 @@ export class CommentBlogService {
       await session.commitTransaction()
     } catch (e) {
       result = false
-      await this.list.deleteList(commentsList)
       await this.log.red('reply() execution error in CommentBlogService.', e)
       await session.abortTransaction()
     } finally {
@@ -86,11 +88,15 @@ export class CommentBlogService {
    */
   async replyTo(options: ICommentToBlog) {
     let result = true
-    let commentList
     const commentObj = await BlogComment.model.findById(options.cid)
-    if (!commentObj) throw new Error('Comment not found.')
     const blog = await BlogInfo.model.findById(options.bid)
     if (blog && blog.deleted) throw new Error('Blog has been deleted.')
+    if (!commentObj) throw new Error('Comment not found.')
+    // prepend the new comment to the blog's main comment
+    if (!commentObj.subcomments) {
+      commentObj.subcomments = await this.list.createList()
+      await commentObj.save()
+    }
 
     const session = await mongoose.startSession()
     session.startTransaction()
@@ -105,10 +111,7 @@ export class CommentBlogService {
         content: options.content,
         wholike: wholikeList
       }], { session })
-      // prepend the new comment to the blog's main comment
-      if (!commentObj.subcomments) {
-        commentObj.subcomments = commentList = await this.list.createList()
-      }
+
       await this.list.prependOne(commentObj.subcomments, comment[0]._id, session)
       // counter
       commentObj.subcount++
@@ -117,7 +120,6 @@ export class CommentBlogService {
       await session.commitTransaction()
     } catch (e) {
       result = false
-      await this.list.deleteList(commentList)
       await this.log.red('replyTo() execution error in CommentBlogService.', e)
       await session.abortTransaction()
     } finally {

@@ -16,6 +16,7 @@ const msgsType = {
 */
 
 const user = {
+  _id: false,
   id: ObjectId,
   unread: {
     type: Number,
@@ -28,6 +29,7 @@ const user = {
 }
 
 const schema = new mongoose.Schema({
+  _id: String,
   msgs: List,
   users: {
     type: Array,

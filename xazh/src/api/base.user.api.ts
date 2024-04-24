@@ -12,7 +12,7 @@ export async function VerifyTokenAPI(param: object | null = null) {
   let token = param ? null : cookie.get('token') || null
   let data = param ? null : base64WithDate(token ?? '')
 
-  const result = await xazhAxios.post("/VerifyToken", param ?? {
+  const result = await xazhAxios.post("/User/VerifyToken", param ?? {
     id: id,
     token: data?.data,
     date: data?.date

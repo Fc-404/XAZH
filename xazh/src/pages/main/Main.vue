@@ -52,6 +52,7 @@ provide('setFooterMargin', (x: string = '') => {
   #main-header {
     padding: 0;
     background-color: transparent;
+    z-index: 99999;
   }
 }
 </style>

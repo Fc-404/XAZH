@@ -398,9 +398,7 @@ const back = function () {
  */
 onBeforeMount(() => {
   loadingDraft()
-  console.time();
   console.log(mdSummary(draftContent.value ?? ''));
-  console.timeEnd()
 })
 onMounted(() => {
   window.onbeforeunload = function () {

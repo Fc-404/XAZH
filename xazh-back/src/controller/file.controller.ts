@@ -90,7 +90,7 @@ export class FileController {
             result.push(fileuid)
           else {
             this.ctx.code = 1
-            this.ctx.message = '上传失败'
+            this.ctx.message = 'Upload failed.'
             reject(filename)
           }
         }
