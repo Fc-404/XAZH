@@ -13,9 +13,10 @@ const schema = new mongoose.Schema({
     default: PRIVACY_TYPE.public
   },
   body: ObjectId,
-  comments: List,
   type: Number,
+  cover: String,
   abstract: String,
+  comments: List,
   createtime: {
     type: Date,
     default: Date.now

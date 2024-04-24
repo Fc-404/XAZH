@@ -74,8 +74,8 @@ export class BlogUserService {
    * @param options
    * @returns Boolean
    */
-  async createBlog(uid: Types.ObjectId, options: IBlogInfo): Promise<boolean> {
-    let result = true
+  async createBlog(uid: Types.ObjectId, options: IBlogInfo): Promise<Types.ObjectId | undefined> {
+    let result
     const bu = await UserBlog.model.findById(uid)
     if (bu && !bu.blogs)
       await this.initBlogs(bu)
@@ -102,8 +102,8 @@ export class BlogUserService {
 
       await blogInfoResult[0].save({ session })
       await session.commitTransaction()
+      result = blogInfoResult[0]._id
     } catch (e) {
-      result = false
       await this.log.red('createBlog() execution error in BlogUserService.', e)
       await session.abortTransaction()
     } finally {

@@ -102,16 +102,16 @@ export class FileController {
 
   /**
    * Delete the file.
-   * @param uid
+   * @param fid
    * @returns
    */
   @Post('/Delete')
   @UseGuard(TokenGuard)
-  async deleteFile(@Body('uid') uid: string) {
+  async deleteFile(@Body('fid') fid: string) {
     const result = await this.fs.delete({
       author: this.ctx.user['id'],
       level: this.ctx.user['level'],
-      fid: uid
+      fid: fid
     })
 
     return result
@@ -120,10 +120,10 @@ export class FileController {
   /**
    * Get information of file.
    */
-  @Get('/GetInfo/:uid')
-  async getInfoByUID(@Param('uid') uid: string) {
-    const filter = ['fileUid', 'fileName', 'fileSize', 'fileType']
-    const result = await this.fs.getInfo(uid, filter)
+  @Get('/GetInfo/:fid')
+  async getInfoByFid(@Param('fid') fid: string) {
+    const filter = ['fid', 'fileName', 'fileSize', 'fileType']
+    const result = await this.fs.getInfo(fid, filter)
     if (!result) {
       this.ctx.code = 1
       return 'No information.'
@@ -133,18 +133,18 @@ export class FileController {
 
   /**
    * Get the file.
-   * @param uid
+   * @param fid
    * @param save
    * @returns
    */
-  @Get('/:uid')
-  async getFile(@Param('uid') uid: string, @Query('save') save: boolean) {
+  @Get('/:fid')
+  async getFile(@Param('fid') fid: string, @Query('save') save: boolean) {
     this.ctx.set('Transfer-Encoding', 'chunked')
     this.ctx.set('Access-Control-Allow-Origin', '*')
 
     const result = await this.fs.get({
       level: this.ctx.user['level'],
-      fid: uid
+      fid: fid
     })
 
     if (result == -1) {
@@ -176,19 +176,19 @@ export class FileController {
   /**
    * TODO
    * Get list of file.
-   * @param uid
+   * @param fid
    * @param save
    * @returns
    */
   @Post('/Get')
   @UseGuard(TokenGuard)
-  async getFiles(@Body('uid') uid: string, @Body('save') save: boolean) {
+  async getFiles(@Body('fid') fid: string, @Body('save') save: boolean) {
     this.ctx.set('Transfer-Encoding', 'chunked')
     this.ctx.set('Access-Control-Allow-Origin', '*')
 
     const result = await this.fs.get({
       level: this.ctx.user['level'],
-      fid: uid
+      fid: fid
     })
 
     if (result == -1) {

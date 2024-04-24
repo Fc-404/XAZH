@@ -38,10 +38,11 @@ export class BlogController {
     const result = await this.blog.createBlog(uid, {
       title: options.title,
       author: uid,
+      body: options.body,
       abstract: options.abstract,
+      cover: options.cover,
       keywords: options.keywords,
       privacy: options.privacy ?? PRIVACY_TYPE.public,
-      body: options.body,
       type: options.type ?? -1,
       wordcloud: options.wordcloud ?? {}
     })

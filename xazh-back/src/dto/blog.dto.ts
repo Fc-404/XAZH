@@ -4,10 +4,13 @@ export class BlogInfoDTO {
   @Rule(RuleType.string().max(256).required())
   title: string
 
-  @Rule(RuleType.string().max(100000).required())
+  @Rule(RuleType.string().max(200000).required())
   body: string
 
   // Not required.
+  @Rule(RuleType.string().max(40))
+  cover: string
+
   @Rule(RuleType.date())
   createtime: Date
 
@@ -17,7 +20,7 @@ export class BlogInfoDTO {
   @Rule(RuleType.number().max(32))
   type: number
 
-  @Rule(RuleType.string().max(512))
+  @Rule(RuleType.string().min(0).max(512))
   abstract: string
 
   @Rule(RuleType.array<string>().max(32))

@@ -8,6 +8,7 @@
 <template>
   <div id="md-editor">
     <mavon-editor
+      ref="vm"
       id="md-editor-"
       fontSize="1rem"
       toolbarsBackground="var(--colorBgContainer)"
@@ -19,32 +20,20 @@
       :editable="editorOptions.editable"
       :toolbarsFlag="editorOptions.toolbarsFlag"
       :placeholder="editorOptions.placeholder"
+      @imgAdd="addImg"
+      @imgDel="delImg"
       @save="save"
       v-model="content"
     >
-      <template
-        #left-toolbar-before
-        v-if="porps.mode == 'tiny'"
-      >
-        <a-button
-          type="text"
-          class="top-3"
-          title="表情"
-        >
+      <template #left-toolbar-before v-if="props.mode == 'tiny'">
+        <a-button type="text" class="top-3" title="表情">
           <SmileOutlined />
         </a-button>
-        <a-button
-          type="text"
-          class="top-3"
-          title="图片"
-        >
+        <a-button type="text" class="top-3" title="图片">
           <PictureOutlined />
         </a-button>
       </template>
-      <template
-        #right-toolbar-after
-        v-if="porps.mode == 'tiny'"
-      >
+      <template #right-toolbar-after v-if="props.mode == 'tiny'">
         <a-button
           type="text"
           @click="tinyPreview()"
@@ -55,7 +44,7 @@
           <EyeOutlined v-show="!tinyData.preview" />
           <EyeInvisibleOutlined
             v-show="tinyData.preview"
-            style="margin-left: 0 !important;"
+            style="margin-left: 0 !important"
           />
         </a-button>
         <a-button
@@ -64,7 +53,8 @@
           @mouseenter="tinyPreview(false)"
           @mouseleave="tinyPreview(true)"
           @click="$emit('send', content)"
-        >发送</a-button>
+          >发送
+        </a-button>
       </template>
     </mavon-editor>
   </div>
@@ -74,34 +64,57 @@
 import mavon from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 import {
-  EyeOutlined, EyeInvisibleOutlined,
-  SmileOutlined, PictureOutlined
-} from '@ant-design/icons-vue';
+  EyeOutlined,
+  EyeInvisibleOutlined,
+  SmileOutlined,
+  PictureOutlined,
+} from '@ant-design/icons-vue'
+import { DeleteFileAPI, UploadFileAPI } from '../../api/file.api'
+import { useStore } from 'vuex'
 
+const store = useStore()
 
-const porps = defineProps({
+const props = defineProps({
   // MODE:
-  // edit, show, tiny. 
+  // edit, show, tiny.
   mode: { type: String, default: 'edit' },
-  value: { type: String },    // default value
-  save: { type: Function }    // backcall of save event
+  value: { type: String }, // default value
+  imgs: { type: Object, default: {} }, // imgs
+  save: { type: Function }, // backcall of save event
 })
 
 const mavonEditor = mavon.mavonEditor
-const toolbars = porps.mode == 'edit' ? undefined : {}
+const vm = ref()
+const toolbars = props.mode == 'edit' ? undefined : {}
 const editorOptions = reactive({
   subfield: false,
   defaultOpen: 'edit',
   editable: true,
   toolbarsFlag: true,
-  placeholder: '开始编辑...'
+  placeholder: '开始编辑...',
 })
+
+/**
+ * Image events.
+ */
+const addImg = async function (pos: number, file: File) {
+  const fid = await UploadFileAPI(file.name, file)
+  vm.value.$img2Url(pos, store.getters['config/baseApi'] + 'File/' + fid)
+  props.save ? props.save() : null
+}
+const delImg = async function (pos: any) {
+  console.log(pos)
+  const url = pos[0]
+  const fid = url.split('/').pop()
+  await DeleteFileAPI(fid)
+  props.save ? props.save() : null
+}
 
 /**
  * Events for MODE of tiny.
  */
 const tinyData = reactive({
-  preview: false
+  preview: false,
 })
 const tinyPreview = function (is?: boolean | undefined) {
   let p = tinyData.preview
@@ -113,7 +126,7 @@ const tinyPreview = function (is?: boolean | undefined) {
 /**
  * Content deal.
  */
-const content = ref<string>(porps.value ?? '')
+const content = ref<string>(props.value ?? '')
 defineExpose({ content })
 
 /**
@@ -121,7 +134,7 @@ defineExpose({ content })
  */
 onMounted(() => {
   // Set editor options
-  switch (porps.mode) {
+  switch (props.mode) {
     case 'edit':
       editorOptions.subfield = true
       editorOptions.defaultOpen = ''
@@ -136,7 +149,6 @@ onMounted(() => {
       editorOptions.placeholder = '回车键发送...'
   }
 })
-
 </script>
 
 <style lang="less" scoped>

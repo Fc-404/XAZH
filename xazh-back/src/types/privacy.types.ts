@@ -4,6 +4,7 @@
 
 export enum PRIVACY_TYPE {
   public = 0,
-  onlyfriend,
+  followers,      // user follows and user's followers
+  onlyfriend,     // follow each other
   onlyself,
 }

@@ -8,6 +8,7 @@ export interface IBlogInfo {
   body: string,
   date?: Date,
   type?: number,
+  cover?: string,
   abstract?: string,
   keywords?: string[],
   wordcloud?: object,

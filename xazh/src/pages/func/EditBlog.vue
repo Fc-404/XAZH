@@ -1,18 +1,12 @@
 <template>
   <div id="editp">
     <div id="editp-head">
-      <a-button
-        type="text"
-        @click="back"
-      >
-        <LeftOutlined style="margin-left: -6px;" />
+      <a-button type="text" @click="back">
+        <LeftOutlined style="margin-left: -6px" />
         返回
       </a-button>
-      <div style="width: 1rem;"></div>
-      <a-divider
-        type="vertical"
-        style="height: 100%;"
-      ></a-divider>
+      <div style="width: 1rem"></div>
+      <a-divider type="vertical" style="height: 100%"></a-divider>
       <a-input
         placeholder="标题"
         :bordered="false"
@@ -20,19 +14,10 @@
         show-count
         v-model:value="title"
       ></a-input>
-      <a-divider
-        type="vertical"
-        style="height: 100%;"
-      ></a-divider>
-      <div style="width: 1.8rem;"></div>
-      <a-button
-        type="primary"
-        @click="publishBtn"
-      >发布</a-button>
-      <a-popover
-        placement="bottomRight"
-        trigger="click"
-      >
+      <a-divider type="vertical" style="height: 100%"></a-divider>
+      <div style="width: 1.8rem"></div>
+      <a-button type="primary" @click="publishBtn">发布</a-button>
+      <a-popover placement="bottomRight" trigger="click">
         <template #content>
           <table id="editp-head-setting-table">
             <tr>
@@ -57,15 +42,13 @@
                   min="10"
                   style="width: 2.4rem"
                   @change="changeAutoSaveTimeout"
-                ></a-input-number>秒
+                ></a-input-number
+                >秒
               </td>
             </tr>
           </table>
         </template>
-        <a-button
-          id="editp-head-setting"
-          type="text"
-        >
+        <a-button id="editp-head-setting" type="text">
           <SettingOutlined></SettingOutlined>
         </a-button>
       </a-popover>
@@ -74,38 +57,41 @@
       <Editor
         :save="save"
         :value="draftContent"
-        style="position: relative; z-index: 99;"
+        :imgs="draftImgs"
+        style="position: relative; z-index: 99"
         ref="editor"
       ></Editor>
     </div>
     <div id="editp-publish">
-      <a-modal
-        v-model:open="blogPublishOpen"
-        width="44rem"
-      >
+      <a-modal v-model:open="blogPublishOpen" width="44rem">
         <p id="editp-publish-title">发布文章</p>
         <form id="editp-publish-form">
           <tr>
             <td>文章封面</td>
             <td>
-              <a-space style="align-items: flex-start;">
+              <a-space style="align-items: flex-start">
                 <div>
                   <UploadPic
-                    style="margin-top: 1rem;"
+                    ref="uploadRef"
+                    style="margin-top: 1rem"
                     :src="blogInfo.coverImg"
+                    :uploadCtl="true"
                   ></UploadPic>
                   <a-button
                     type="text"
                     @click="blogInfo.coverImg = ''"
-                    style="margin-left: 4px;"
-                  >取消设置</a-button>
+                    style="margin-left: 4px"
+                    >取消设置</a-button
+                  >
                 </div>
-                <div style="width: 18rem;">
-                  <a-tabs :tabBarStyle="{
-                    marginTop: '-1rem',
-                  }">
+                <div style="width: 18rem">
+                  <a-tabs
+                    :tabBarStyle="{
+                      marginTop: '-1rem',
+                    }"
+                  >
                     <a-tab-pane
-                      v-for="i in  serverData.coverImg "
+                      v-for="i in serverData.coverImg"
                       :key="i['tag']"
                       :tab="i['tag']"
                     >
@@ -114,7 +100,9 @@
                           v-for="uid in i['value']"
                           :class="[
                             'editp-publish-cover-img',
-                            blogInfo.coverImg == uid.toString() ? 'cover-img-selected' : ''
+                            blogInfo.coverImg == uid.toString()
+                              ? 'cover-img-selected'
+                              : '',
                           ]"
                           :src="store.getters['config/baseApi'] + 'File/' + uid"
                           @click="blogInfo.coverImg = uid.toString()"
@@ -130,7 +118,7 @@
             <td>文章标签</td>
             <td>
               <SelectFlex
-                style="width: 25rem;"
+                style="width: 25rem"
                 :options="serverData.tags"
                 v-model:value="blogInfo.tags"
               ></SelectFlex>
@@ -143,31 +131,39 @@
                 v-model:value="blogInfo.abstract"
                 show-count
                 :maxlength="256"
-                style="width: 25rem; height: 8rem; resize: none;"
+                style="width: 25rem; height: 8rem; resize: none"
                 placeholder="请输入文章摘要"
-              ></a-textarea>
+              >
+              </a-textarea>
+              <a-button
+                type="text"
+                size="small"
+                style="margin: 1px 0px; font-size: 0.8rem"
+                @click="autoGenAbstract"
+              >
+                一键生成
+              </a-button>
             </td>
           </tr>
           <tr>
             <td>文章专栏</td>
             <td>
               <SelectFlex
-                style="width: 25rem;"
+                :disabled="true"
+                style="width: 25rem"
                 :flex="false"
                 v-model:value="blogInfo.collection"
-              ></SelectFlex>
+              >
+              </SelectFlex>
             </td>
           </tr>
           <tr>
             <td>文章类型</td>
             <td>
-              <a-radio-group
-                v-model:value="blogInfo.type"
-                button-style="solid"
-              >
-                <a-radio-button value="original">原创</a-radio-button>
-                <a-radio-button value="retransmit">转载</a-radio-button>
-                <a-radio-button value="modification">二创</a-radio-button>
+              <a-radio-group v-model:value="blogInfo.type" button-style="solid">
+                <a-radio-button :value="1">原创</a-radio-button>
+                <a-radio-button :value="2">转载</a-radio-button>
+                <a-radio-button :value="3">二创</a-radio-button>
               </a-radio-group>
             </td>
           </tr>
@@ -178,73 +174,88 @@
                 v-model:value="blogInfo.privacy"
                 buttonStyle="solid"
               >
-                <a-radio-button value="public">公开</a-radio-button>
-                <a-radio-button value="follow">关注&粉丝</a-radio-button>
-                <a-radio-button value="friend">仅好友</a-radio-button>
-                <a-radio-button value="self">仅自己</a-radio-button>
+                <a-radio-button :value="0">公开</a-radio-button>
+                <a-radio-button :value="1">关注&粉丝</a-radio-button>
+                <a-radio-button :value="2">仅好友</a-radio-button>
+                <a-radio-button :value="3">仅自己</a-radio-button>
               </a-radio-group>
             </td>
           </tr>
           <tr>
-            <td :class="[blogInfoValid.timing ? '' : 'error']">定时发布
-            </td>
+            <td :class="[blogInfoValid.timing ? '' : 'error']">定时发布</td>
             <td>
-              <a-checkbox v-model:checked="blogInfo.timing.open">开启</a-checkbox>
-              <div
-                v-show="blogInfo.timing.open"
-                style="margin-top: .2rem;"
-              >
-                <a-date-picker v-model:value="blogInfo.timing.date"></a-date-picker>
+              <a-checkbox v-model:checked="blogInfo.timing.open" disabled>
+                开启
+              </a-checkbox>
+              <div v-show="blogInfo.timing.open" style="margin-top: 0.2rem">
+                <a-date-picker
+                  v-model:value="blogInfo.timing.date"
+                ></a-date-picker>
                 <a-divider type="vertical"></a-divider>
-                <a-time-picker v-model:value="blogInfo.timing.time"></a-time-picker>
+                <a-time-picker
+                  v-model:value="blogInfo.timing.time"
+                ></a-time-picker>
               </div>
             </td>
           </tr>
         </form>
         <template #footer>
-          <a-button>取消</a-button>
+          <a-button @click="blogPublishOpen = false">取消</a-button>
           <a-button @click="save">保存草稿</a-button>
-          <a-button type="primary">发布文章</a-button>
+          <a-button
+            type="primary"
+            @click="publishBlog"
+            :loading="publishLoading"
+            >发布文章</a-button
+          >
         </template>
       </a-modal>
     </div>
+    <SigninModal v-model:open="signinOpen"></SigninModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { LeftOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import { message, notification } from 'ant-design-vue';
-import { useStore } from 'vuex';
+import { LeftOutlined, SettingOutlined } from '@ant-design/icons-vue'
+import { message, notification } from 'ant-design-vue'
+import { useStore } from 'vuex'
 import { UploadPConfAPI } from '../../api/config.user.api'
-import { debounceByName } from '../../util/debounce.tool';
-import { GetPanelConfigAPI } from '../../api/panel.api';
+import { debounceByName } from '../../util/debounce.tool'
+import { GetPanelConfigAPI } from '../../api/panel.api'
 import cookie from 'js-cookie'
 import mdSummary from '../../util/mdSummary.tool'
-
+import SigninModal from '../../components/common/SigninModal.vue'
+import { PublishBlog } from '../../api/blog.api'
+import { useRouter } from 'vue-router'
 const store = useStore()
+const router = useRouter()
 
-const title = ref<string>()
+const title = ref<string>('')
 const editor = ref()
-const draftContent = ref<string>()
+const draftContent = ref<string>('')
+const draftImgs = ref()
 let autoSaveHandle: NodeJS.Timeout
 
 const autoSave = ref<boolean>(store.getters['pconf/blogsEditorAutoSave'])
-const autoSaveTimeout = ref<number>(store.getters['pconf/blogsEditorAutoSaveTimeout'])
+const autoSaveTimeout = ref<number>(
+  store.getters['pconf/blogsEditorAutoSaveTimeout']
+)
 
-const blogPublishOpen = ref<boolean>(true)
+const blogPublishOpen = ref<boolean>(false)
 const blogInfo = reactive({
   coverImg: '',
   tags: [],
   collection: [],
   abstract: '',
-  type: 'original',
-  privacy: 'public',
+  type: 1,
+  privacy: 0,
   timing: {
     open: false,
     date: '',
     time: '',
-  }
+  },
 })
+const uploadRef = ref()
 const blogInfoValid = reactive({
   timing: true,
 })
@@ -252,9 +263,10 @@ const blogInfoValid = reactive({
 const serverData = reactive({
   coverImg: [],
   tags: [],
+  collection: [],
 })
 
-
+const signinOpen = ref<boolean>(false)
 
 /**
  * Compute the timing result.
@@ -268,13 +280,16 @@ const getBlogInfoTiming = function () {
   ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}
   `)
 
-  blogInfoValid.timing = !blogInfo.timing.open ||
-    !!(result.getTime() - new Date().getTime() > 0)
+  blogInfoValid.timing =
+    !blogInfo.timing.open || !!(result.getTime() - new Date().getTime() > 0)
   return result
 }
-watch(() => [blogInfo.timing.date, blogInfo.timing.time], () => {
-  getBlogInfoTiming()
-})
+watch(
+  () => [blogInfo.timing.date, blogInfo.timing.time],
+  () => {
+    getBlogInfoTiming()
+  }
+)
 
 /**
  * Save content to cookie.
@@ -284,6 +299,7 @@ const save = function () {
     title: title.value,
     content: editor.value.content,
     time: new Date(),
+    imgs: editor.value.imgs,
   }
 
   // cookie.set('EditBlog/draft', JSON.stringify(draft))
@@ -302,6 +318,7 @@ const loadingDraft = function () {
 
     title.value = draft.title
     draftContent.value = draft.content
+    draftImgs.value = draft.imgs
 
     const time = new Date(draft.time)
     notification.success({
@@ -318,11 +335,11 @@ const loadingDraft = function () {
           h('td', {
             innerText: `${time.getFullYear()}年${time.getMonth()}月${time.getDate()}日`,
             style: {
-              float: 'right'
-            }
+              float: 'right',
+            },
           }),
-        ])
-      ])
+        ]),
+      ]),
     })
   } catch {
     return
@@ -334,36 +351,54 @@ const loadingDraft = function () {
  */
 const changeAutoSave = function () {
   store.commit('pconf/set', {
-    blogsEditorAutoSave: autoSave.value
+    blogsEditorAutoSave: autoSave.value,
   })
 
   autoSave.value
-    ? autoSaveHandle = setInterval(() => { save() },
-      autoSaveTimeout.value * 1000)
+    ? (autoSaveHandle = setInterval(() => {
+        save()
+      }, autoSaveTimeout.value * 1000))
     : clearInterval(autoSaveHandle)
 
   UploadPConfAPI()
 }
 const changeAutoSaveTimeout = function (v: any) {
-  debounceByName('EditBlog/changeAutoSaveTimeout', () => {
-    if (v < 10 || v > 300)
-      return
+  debounceByName(
+    'EditBlog/changeAutoSaveTimeout',
+    () => {
+      if (v < 10 || v > 300) return
 
-    store.commit('pconf/set', {
-      blogsEditorAutoSaveTimeout: v
-    })
+      store.commit('pconf/set', {
+        blogsEditorAutoSaveTimeout: v,
+      })
 
-    clearInterval(autoSaveHandle)
-    autoSaveHandle = setInterval(() => { save() },
-      autoSaveTimeout.value * 1000)
-    UploadPConfAPI()
-  }, 200)
+      clearInterval(autoSaveHandle)
+      autoSaveHandle = setInterval(() => {
+        save()
+      }, autoSaveTimeout.value * 1000)
+      UploadPConfAPI()
+    },
+    200
+  )
+}
+
+/**
+ * Auto Generate Abstract.
+ */
+const autoGenAbstract = function () {
+  const abstract = mdSummary(editor.value.content)
+  blogInfo.abstract = abstract
 }
 
 /**
  * Publish
  */
 const publishBtn = function () {
+  if (!store.getters['signin/on']) {
+    message.warning('请先登录！')
+    signinOpen.value = true
+    return
+  }
   getServerData()
   blogPublishOpen.value = true
 }
@@ -374,16 +409,53 @@ const publishBtn = function () {
 const getServerData = async function () {
   const [cover, tags] = await Promise.all([
     GetPanelConfigAPI('web', 'cover', 'blogoptions'),
-    GetPanelConfigAPI('web', 'tags', 'blogoptions')
+    GetPanelConfigAPI('web', 'tags', 'blogoptions'),
   ])
 
   const coverUsed = cookie.get('EditBlog/cover/used')?.split(',')
   cover.value.push({
     tag: '常用',
-    value: coverUsed
+    value: coverUsed,
   })
   serverData.coverImg = cover.value
   serverData.tags = tags.value
+}
+
+/**
+ * Publish the blog.
+ */
+const publishLoading = ref<boolean>(false)
+const publishBlog = async function () {
+  publishLoading.value = true
+  const coverId = await uploadRef.value.upload()
+  if (coverId === null) {
+    message.error('封面上传失败！')
+  }
+
+  const form = {
+    title: title.value,
+    body: editor.value.content,
+
+    type: blogInfo.type,
+    cover: coverId,
+    privacy: blogInfo.privacy,
+    keywords: blogInfo.tags,
+    abstract: blogInfo.abstract,
+    // TODO:
+    // createtime:
+  }
+
+  const result = await PublishBlog(form)
+  if (result.code == 0) {
+    message.success('发布成功！')
+    blogPublishOpen.value = false
+    localStorage.removeItem('EditBlog/draft')
+    router.push('/404')
+    return
+  } else {
+    message.error('发布失败！')
+  }
+  publishLoading.value = false
 }
 
 /**
@@ -398,7 +470,6 @@ const back = function () {
  */
 onBeforeMount(() => {
   loadingDraft()
-  console.log(mdSummary(draftContent.value ?? ''));
 })
 onMounted(() => {
   window.onbeforeunload = function () {
@@ -417,18 +488,18 @@ onUnmounted(() => {
 
   &-head {
     height: 2rem;
-    padding: .2rem .2rem .2rem .2rem;
+    padding: 0.2rem 0.2rem 0.2rem 0.2rem;
     display: flex;
 
     &-setting {
-      margin-left: .2rem;
+      margin-left: 0.2rem;
       transition: height 1s;
 
       &-table {
         width: 16rem;
 
         td {
-          padding: .4rem;
+          padding: 0.4rem;
         }
 
         tr td:last-child {
@@ -465,7 +536,7 @@ onUnmounted(() => {
       }
 
       tr td {
-        padding: .8rem;
+        padding: 0.8rem;
         vertical-align: top;
       }
 
@@ -490,13 +561,12 @@ onUnmounted(() => {
   object-fit: cover;
   margin-right: 1rem;
   border-radius: 5px;
-  transition: all .2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .editp-publish-cover-img:hover {
   filter: brightness(80%);
 }
-
 
 .cover-img-selected {
   box-shadow: 0 0 0 3px var(--colorPrimary);
@@ -505,4 +575,4 @@ onUnmounted(() => {
 .error {
   color: var(--red-6);
 }
-</style>../../util/mdSummary.tool
+</style>
