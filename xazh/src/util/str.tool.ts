@@ -1,4 +1,10 @@
-export default function MDSummary(mdString: string, length: number = 256): string {
+/**
+ * To Generate abstract of markdown text.
+ * @param mdString
+ * @param length
+ * @returns
+ */
+export function MDSummary(mdString: string, length: number = 256): string {
   const mdLen = mdString.length
 
   let p = 0
@@ -24,4 +30,13 @@ export default function MDSummary(mdString: string, length: number = 256): strin
   }
 
   return result
+}
+
+/**
+ * User's img text from user's name
+ * @param user 
+ * @returns 
+ */
+export function user2ImgText(user: string): string {
+  return /[\u4e00-\u9fa5]/.test(user[0]) ? user[0] : user.substring(0, 2)
 }

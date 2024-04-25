@@ -7,6 +7,7 @@ import {
   TokenRDTO
 } from '../dto/signup.user.dto';
 import { Context } from '@midwayjs/koa';
+import { ObjectId } from 'mongodb';
 import { UserService } from '../service/base.user.service';
 import { UserTokenService } from '../service/token.user.service';
 import { MailService } from '../service/mail.service';
@@ -150,6 +151,27 @@ export class UserController {
   @UseGuard([TokenGuard])
   async getUserInfo() {
     const result = await this.userBaseService.getUserInfo(this.ctx.user['id'])
+    return result
+  }
+
+  /**
+   * Get some users info.
+   * @param users 
+   * @returns 
+   */
+  @Post('/UsersInfo')
+  async usersInfo(@Body('users') users: string[]) {
+    users = typeof users === 'string' ? [users] : users
+    const result = {}
+    for (let user of users) {
+      if (!ObjectId.isValid(user)) continue
+      let r = await this.userBaseService.getUserInfo(new ObjectId(user), [
+        '_id', 'himg', 'user', 'belong_place', 'exp', 'level', 'ranks', 
+        'signup_date', 'disabled', 'deleted', 
+      ])
+      result[r['_id']] = r
+    }
+
     return result
   }
 

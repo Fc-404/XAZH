@@ -1,29 +1,45 @@
 <script setup lang="ts">
 import { useStore } from 'vuex'
-import { theme } from 'ant-design-vue'
+import { message, theme } from 'ant-design-vue'
 import { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
 import { GlobalToken } from 'ant-design-vue/es/theme'
 import axios from 'axios'
 import cookie from 'js-cookie'
-import { setXazhAxios } from './axios/xazh.axios'
-
+import { setXazhAxios, xazhAxios } from './axios/xazh.axios'
+import { AxiosErrorCatch } from './axios/error.axios'
 import SigninEventRegister from './handle/signinEventRegister.vue'
 import CookieHandle from './handle/cookieHandle.vue'
-import { AxiosErrorCatch } from './axios/error.axios'
 
 // import Modal from 'ant-design-vue/es/modal/Modal'
 
 const store = useStore()
 
 /**
+ * Set message config.
+ */
+message.config({
+  duration: 6,
+  maxCount: 6,
+})
+
+/**
  * Set backend's base api for axios.
  */
-axios.interceptors.response.use(response => response,
-  error => {
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
     AxiosErrorCatch(error)
     return Promise.reject(error)
-  })
+  }
+)
 setXazhAxios({ baseURL: store.getters['config/baseApi'] })
+xazhAxios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    AxiosErrorCatch(error)
+    return Promise.resolve(error)
+  }
+)
 
 /**
  * Switch what style of display in the light of
@@ -72,15 +88,13 @@ const modifyMinWidth = function () {
     appDom!.style.minWidth = 'none'
   }
 }
-store.commit('addResizeEvent',
-  {
-    name: 'listenWindowSize',
-    fn: modifyMinWidth,
-    debounce: 444
-  })
+store.commit('addResizeEvent', {
+  name: 'listenWindowSize',
+  fn: modifyMinWidth,
+  debounce: 444,
+})
 store.subscribe((m) => {
-  if (m.type == 'config/platform')
-    modifyMinWidth()
+  if (m.type == 'config/platform') modifyMinWidth()
 })
 // Modify min-width of body
 modifyMinWidth()
@@ -89,7 +103,7 @@ modifyMinWidth()
  * Set the theme of App
  */
 class Theme {
-  static updateThemeToStyle: Function = () => { }
+  static updateThemeToStyle: Function = () => {}
   static appTheme = ref<ThemeConfig>({})
 
   private static themeToken: GlobalToken
@@ -114,18 +128,16 @@ class Theme {
       for (let key in Theme.themeToken) {
         let value = Theme.themeToken[key as keyof typeof Theme.themeToken]
         if (key == 'borderRadius') {
-          Theme.themeTokenStyleVar +=
-            '--' + key + ':' + value + 'px;'
+          Theme.themeTokenStyleVar += '--' + key + ':' + value + 'px;'
           continue
         }
-        Theme.themeTokenStyleVar +=
-          '--' + key + ':' + value + ';'
+        Theme.themeTokenStyleVar += '--' + key + ':' + value + ';'
       }
 
       store.commit('config/themeToken', Theme.themeToken)
       document.body.style.cssText = Theme.themeTokenStyleVar
 
-      Theme.updateThemeToStyle = () => { }
+      Theme.updateThemeToStyle = () => {}
     }
   }
 
@@ -152,8 +164,7 @@ provide('onDark', Theme.onDark)
 const initDarkStyle = function () {
   // Get onDark
   const ondarkC = cookie.get('ondark') == 'true' ? true : false
-  if (ondarkC)
-    Theme.onDark()
+  if (ondarkC) Theme.onDark()
 }
 
 /**
@@ -163,9 +174,9 @@ onMounted(() => {
   // Default theme.
   Theme.setTheme({
     token: {
-      "colorPrimary": "#1e80ff",
-      "fontSize": 14,
-      "borderRadius": 6,
+      colorPrimary: '#1e80ff',
+      fontSize: 14,
+      borderRadius: 6,
     },
   })
 
@@ -174,7 +185,6 @@ onMounted(() => {
 onUpdated(() => {
   Theme.updateThemeToStyle()
 })
-
 </script>
 
 <template>

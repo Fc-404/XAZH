@@ -89,6 +89,7 @@ export class BlogController {
         body: blogBody
       }
     }
+    return false
   }
 
   /**

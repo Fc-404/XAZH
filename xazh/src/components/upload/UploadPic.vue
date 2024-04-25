@@ -71,7 +71,7 @@ watch(
   () => {
     uploadState.value = props.fid ? false : true
     if (uploadState.value === false && props.fid !== 'wait') {
-      previewSrc.value = store.getters['config/baseApi'] + 'File/' + props.fid
+      previewSrc.value = store.getters['config/fileUrl'](props.fid)
     }
   }
 )

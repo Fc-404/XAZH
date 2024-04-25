@@ -1,6 +1,6 @@
-import { xazhAxios } from "../axios/xazh.axios";
+import { xazhAxios } from '../axios/xazh.axios'
 import cookie from 'js-cookie'
-import { base64WithDate } from "../util/encodeMsg.tool";
+import { base64WithDate } from '../util/encodeMsg.tool'
 
 /**
  * Verify user's token.
@@ -12,11 +12,14 @@ export async function VerifyTokenAPI(param: object | null = null) {
   let token = param ? null : cookie.get('token') || null
   let data = param ? null : base64WithDate(token ?? '')
 
-  const result = await xazhAxios.post("/User/VerifyToken", param ?? {
-    id: id,
-    token: data?.data,
-    date: data?.date
-  });
+  const result = await xazhAxios.post(
+    '/User/VerifyToken',
+    param ?? {
+      id: id,
+      token: data?.data,
+      date: data?.date,
+    }
+  )
 
   return result.data.code == 0 ? true : false
 }
@@ -27,8 +30,8 @@ export async function VerifyTokenAPI(param: object | null = null) {
  * @returns true if send successfully, otherwise false
  */
 export async function SendMailValidCodeAPI(mail: string) {
-  const result = await xazhAxios.post("/SendMailValidCode", {
-    mail: mail
+  const result = await xazhAxios.post('/SendMailValidCode', {
+    mail: mail,
   })
 
   return result.data.body ? true : false
@@ -40,7 +43,7 @@ export async function SendMailValidCodeAPI(mail: string) {
  * @returns true if user is exist, otherwise false
  */
 export async function UserExistAPI(user: string) {
-  const result = await xazhAxios.get("/User/isExist/" + user)
+  const result = await xazhAxios.get('/User/isExist/' + user)
 
   return result.data.code == 0 ? true : false
 }
@@ -52,7 +55,7 @@ export async function UserExistAPI(user: string) {
  * @returns object include code and body
  */
 export async function UserSignupAPI(param: object) {
-  const result = await xazhAxios.post("/User/Signup", param)
+  const result = await xazhAxios.post('/User/Signup', param)
 
   return {
     code: result.data.code,
@@ -66,7 +69,7 @@ export async function UserSignupAPI(param: object) {
  * @returns object include code and body
  */
 export async function UserSigninAPI(param: object) {
-  const result = await xazhAxios.post("/User/Signin", param)
+  const result = await xazhAxios.post('/User/Signin', param)
 
   return {
     code: result.data.code,
@@ -76,7 +79,7 @@ export async function UserSigninAPI(param: object) {
 
 /**
  * Get user's information.
- * @returns 
+ * @returns
  */
 export async function GetUserInfoAPI(withparam?: boolean) {
   const param: any = {}
@@ -86,16 +89,26 @@ export async function GetUserInfoAPI(withparam?: boolean) {
     param['Custom-Token'] = tokenData?.data || ''
     param['Custom-Date'] = tokenData?.date.toISOString() || ''
   }
-  const result = await xazhAxios.post("/User/GetUserInfo", null, {
-    headers: withparam ? {
-      'Custom-ID': param['Custom-ID'],
-      'Custom-Token': param['Custom-Token'],
-      'Custom-Date': param['Custom-Date']
-    } : {}
+  const result = await xazhAxios.post('/User/GetUserInfo', null, {
+    headers: withparam
+      ? {
+          'Custom-ID': param['Custom-ID'],
+          'Custom-Token': param['Custom-Token'],
+          'Custom-Date': param['Custom-Date'],
+        }
+      : {},
   })
 
   return {
     code: result.data.code,
     body: result.data.body,
   }
+}
+
+export async function UsersInfoAPI(users: string[]) {
+  const result = await xazhAxios.post('/User/UsersInfo', {
+    users: users,
+  })
+
+  return result.data ? result.data.body : null
 }

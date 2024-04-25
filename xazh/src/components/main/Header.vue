@@ -16,7 +16,7 @@
       ></a-progress>
       <div id="header-container">
         <div id="header-box">
-          <div style="width: 4rem;"></div>
+          <div style="width: 4rem"></div>
 
           <!-- LOGO -->
           <div id="header-logo">
@@ -25,37 +25,42 @@
               size="3rem"
               color="var(--colorPrimary)"
             ></Logo>
-            <label>夏至星球</label>
+            <label>{{ store.getters['config/name'] }}</label>
           </div>
-          <div style="flex-grow: 1;"></div>
+          <div style="flex-grow: 1"></div>
 
           <!-- Menu -->
           <div
             id="header-blog"
             class="header-item"
             @click="toMenu('MainBlogs')"
-          >博客
+          >
+            博客
           </div>
           <div
             id="header-project"
             class="header-item"
             @click="toMenu('MainProjects')"
-          >项目</div>
+          >
+            项目
+          </div>
           <div
             id="header-tool"
             class="header-item"
             @click="toMenu('MainTools')"
-          >工具</div>
+          >
+            工具
+          </div>
           <div
             id="header-favor"
             class="header-item"
             @click="toMenu('MainFavors')"
-          >推荐</div>
-          <div
-            id="header-xazh"
-            class="header-item"
-            @click="toMenu('MainXAZH')"
-          >夏至</div>
+          >
+            推荐
+          </div>
+          <div id="header-xazh" class="header-item" @click="toMenu('MainXAZH')">
+            夏至
+          </div>
           <div id="header-slider"></div>
 
           <div>
@@ -67,10 +72,7 @@
               <template #content>
                 <FnNotice :size="2"></FnNotice>
               </template>
-              <a-button
-                ghost
-                type="primary"
-              >
+              <a-button ghost type="primary">
                 <search-outlined />
               </a-button>
             </a-popover>
@@ -87,20 +89,13 @@
           </div>
 
           <!-- Signup -->
-          <div
-            id="header-self"
-            v-if="!isSignin"
-          >
+          <div id="header-self" v-if="!isSignin">
             <router-link to="/signup?type=signup">
               <a-button id="header-signup">注册</a-button>
             </router-link>
             <div style="width: 1rem; display: inline-block"></div>
             <router-link to="/signup?type=signin">
-              <a-button
-                id="header-signin"
-                type="primary"
-              >登录
-              </a-button>
+              <a-button id="header-signin" type="primary">登录 </a-button>
             </router-link>
           </div>
 
@@ -108,7 +103,7 @@
           <div v-if="isSignin">
             <SelfPanel></SelfPanel>
           </div>
-          <div style="width: 2rem;"></div>
+          <div style="width: 2rem"></div>
         </div>
         <div id="title-box">
           <!-- Title -->
@@ -123,11 +118,10 @@
 import { useStore } from 'vuex'
 import { ModeHeaderPageI } from '../../interface/page.i.ts'
 
-import { SearchOutlined } from '@ant-design/icons-vue';
-import { useRoute, useRouter } from 'vue-router';
+import { SearchOutlined } from '@ant-design/icons-vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const store = useStore()
-
 
 /**
  * To Menu
@@ -136,7 +130,7 @@ const router = useRouter()
 const route = useRoute()
 const toMenu = function (name: string) {
   router.push({
-    name: name
+    name: name,
   })
 }
 
@@ -144,13 +138,27 @@ const toMenu = function (name: string) {
  * Set the slider.
  */
 const initSlider = function () {
-  const hs = document.querySelector('#header-box > #header-slider') as HTMLElement
-  const blog = document.querySelector('#header-box > #header-blog') as HTMLElement
-  const project = document.querySelector('#header-box > #header-project') as HTMLElement
-  const tool = document.querySelector('#header-box > #header-tool') as HTMLElement
-  const favor = document.querySelector('#header-box > #header-favor') as HTMLElement
-  const xazh = document.querySelector('#header-box > #header-xazh') as HTMLElement
-  const items = document.querySelectorAll('#header-box > .header-item') as NodeListOf<HTMLElement>
+  const hs = document.querySelector(
+    '#header-box > #header-slider'
+  ) as HTMLElement
+  const blog = document.querySelector(
+    '#header-box > #header-blog'
+  ) as HTMLElement
+  const project = document.querySelector(
+    '#header-box > #header-project'
+  ) as HTMLElement
+  const tool = document.querySelector(
+    '#header-box > #header-tool'
+  ) as HTMLElement
+  const favor = document.querySelector(
+    '#header-box > #header-favor'
+  ) as HTMLElement
+  const xazh = document.querySelector(
+    '#header-box > #header-xazh'
+  ) as HTMLElement
+  const items = document.querySelectorAll(
+    '#header-box > .header-item'
+  ) as NodeListOf<HTMLElement>
 
   let initFunc = blog
   const funcName = router.currentRoute.value.path.split('/')[1]
@@ -186,9 +194,12 @@ const initSlider = function () {
     }
   }
   otherPathDeal(funcName)
-  watch(() => route.path, (path) => {
-    otherPathDeal(path.slice(1))
-  })
+  watch(
+    () => route.path,
+    (path) => {
+      otherPathDeal(path.slice(1))
+    }
+  )
 
   // event
   items.forEach((v) => {
@@ -212,7 +223,7 @@ const initSlider = function () {
     fn: () => {
       hs.style.left = index.offsetLeft + 'px'
       hs.style.width = index.offsetWidth + 'px'
-    }
+    },
   })
 }
 
@@ -220,12 +231,12 @@ const initSlider = function () {
  * TODO: Progress
  */
 window.addEventListener('scroll', () => {
-  if (!store.getters['header/onProgress'])
-    return
+  if (!store.getters['header/onProgress']) return
   let progressOld = -1
   let progress = Math.round(
     (document.documentElement.scrollTop * 100) /
-    (document.documentElement.scrollHeight - window.innerHeight))
+      (document.documentElement.scrollHeight - window.innerHeight)
+  )
 
   if (progressOld != progress) {
     store.commit('header/progress', progress)
@@ -239,21 +250,30 @@ window.addEventListener('scroll', () => {
 const onDark = ref<boolean>(store.getters['config/ondark'])
 const onDarkFn = inject('onDark')
 watch(onDark, () => {
-  (onDarkFn as Function)(onDark.value)
+  ;(onDarkFn as Function)(onDark.value)
 })
-watch(computed(() => {
-  return store.getters['config/ondark']
-}), (v) => {
-  onDark.value = v
-})
+watch(
+  computed(() => {
+    return store.getters['config/ondark']
+  }),
+  (v) => {
+    onDark.value = v
+  }
+)
 
 /**
  * Title Hook
  */
 const headerDeal = function () {
-  const headerContainer: HTMLElement = document.getElementById('header-container') as HTMLElement
-  const headerHover: HTMLElement = document.getElementById('header-hover') as HTMLElement
-  const headerRoot: HTMLElement = document.getElementById('header') as HTMLElement
+  const headerContainer: HTMLElement = document.getElementById(
+    'header-container'
+  ) as HTMLElement
+  const headerHover: HTMLElement = document.getElementById(
+    'header-hover'
+  ) as HTMLElement
+  const headerRoot: HTMLElement = document.getElementById(
+    'header'
+  ) as HTMLElement
   var scrollTopForTitle: number = 0
   var changeTitleDebounceHandle: NodeJS.Timeout
   var headerLeaveHandle: NodeJS.Timeout
@@ -280,20 +300,20 @@ const headerDeal = function () {
         case ModeHeaderPageI.SCROLL:
           headerRoot.style.top = '0'
           if (store.getters['header/title'] === null) {
-            return;
+            return
           }
           if (scrollTopForTitleT > scrollTopForTitle) {
             headerContainer.style.top = 'calc(var(--headerHeight) * -1)'
           } else {
             headerContainer.style.top = '0'
           }
-          scrollTopForTitle = scrollTopForTitleT;
-          break;
+          scrollTopForTitle = scrollTopForTitleT
+          break
 
         case ModeHeaderPageI.CONSTANT:
           headerRoot.style.top = '0'
           headerContainer.style.top = 'calc(var(--headerHeight) * -1)'
-          break;
+          break
 
         case ModeHeaderPageI.AUTO_SHOW:
           headerRoot.style.top = '0'
@@ -302,15 +322,14 @@ const headerDeal = function () {
           } else {
             headerRoot.style.top = '0'
           }
-          scrollTopForTitle = scrollTopForTitleT;
-          break;
+          scrollTopForTitle = scrollTopForTitleT
+          break
 
         case ModeHeaderPageI.AUTO_HIDDEN:
           setTimeout(() => {
             headerRoot.style.top = 'calc(var(--headerHeight) * -1)'
           }, 3000)
-          break;
-
+          break
       }
     }, 44)
   }
@@ -340,12 +359,14 @@ const headerDeal = function () {
  * Self Panel
  */
 const isSignin = ref<boolean>(store.getters['signin/on'])
-watch(computed(() => {
-  return store.getters['signin/on']
-}), (v) => {
-  isSignin.value = v
-})
-
+watch(
+  computed(() => {
+    return store.getters['signin/on']
+  }),
+  (v) => {
+    isSignin.value = v
+  }
+)
 
 /**
  * HOOK
@@ -354,7 +375,6 @@ onMounted(() => {
   initSlider()
   headerDeal()
 })
-
 </script>
 
 <style scoped lang="less">
@@ -366,7 +386,7 @@ onMounted(() => {
   position: fixed;
   top: 0;
   overflow: hidden;
-  transition: all .2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 
   &-hover {
     position: fixed;
@@ -385,7 +405,7 @@ onMounted(() => {
     height: 200%;
     width: 100%;
     position: absolute;
-    transition: all .2s ease-in-out;
+    transition: all 0.2s ease-in-out;
 
     #header-box {
       width: 100%;
@@ -400,7 +420,7 @@ onMounted(() => {
           margin-top: 0.5rem;
         }
 
-        >label {
+        > label {
           font-size: 1.5rem;
           font-weight: bold;
           line-height: 3rem;

@@ -57,7 +57,7 @@
       <Editor
         :save="save"
         :value="draftContent"
-        :imgs="draftImgs"
+        mode="edit"
         style="position: relative; z-index: 99"
         ref="editor"
       ></Editor>
@@ -97,15 +97,15 @@
                     >
                       <div id="editp-publish-cover-container">
                         <img
-                          v-for="uid in i['value']"
+                          v-for="fid in i['value']"
                           :class="[
                             'editp-publish-cover-img',
-                            blogInfo.coverImg == uid.toString()
+                            blogInfo.coverImg == fid.toString()
                               ? 'cover-img-selected'
                               : '',
                           ]"
-                          :src="store.getters['config/baseApi'] + 'File/' + uid"
-                          @click="blogInfo.coverImg = uid.toString()"
+                          :src="store.getters['config/fileUrl'](fid.toString())"
+                          @click="blogInfo.coverImg = fid.toString()"
                         />
                       </div>
                     </a-tab-pane>
@@ -223,7 +223,7 @@ import { UploadPConfAPI } from '../../api/config.user.api'
 import { debounceByName } from '../../util/debounce.tool'
 import { GetPanelConfigAPI } from '../../api/panel.api'
 import cookie from 'js-cookie'
-import mdSummary from '../../util/mdSummary.tool'
+import { MDSummary } from '../../util/str.tool'
 import SigninModal from '../../components/common/SigninModal.vue'
 import { PublishBlog } from '../../api/blog.api'
 import { useRouter } from 'vue-router'
@@ -233,7 +233,6 @@ const router = useRouter()
 const title = ref<string>('')
 const editor = ref()
 const draftContent = ref<string>('')
-const draftImgs = ref()
 let autoSaveHandle: NodeJS.Timeout
 
 const autoSave = ref<boolean>(store.getters['pconf/blogsEditorAutoSave'])
@@ -385,7 +384,7 @@ const changeAutoSaveTimeout = function (v: any) {
  * Auto Generate Abstract.
  */
 const autoGenAbstract = function () {
-  const abstract = mdSummary(editor.value.content)
+  const abstract = MDSummary(editor.value.content)
   blogInfo.abstract = abstract
 }
 
@@ -470,6 +469,7 @@ const publishBlog = async function () {
  */
 const back = function () {
   save()
+  router.back()
 }
 
 /**

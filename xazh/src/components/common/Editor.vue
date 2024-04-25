@@ -20,6 +20,7 @@
       :editable="editorOptions.editable"
       :toolbarsFlag="editorOptions.toolbarsFlag"
       :placeholder="editorOptions.placeholder"
+      :xssOptions="editorOptions.xssOptions"
       @imgAdd="addImg"
       @imgDel="delImg"
       @save="save"
@@ -79,8 +80,7 @@ const props = defineProps({
   // edit, show, tiny.
   mode: { type: String, default: 'edit' },
   value: { type: String }, // default value
-  imgs: { type: Object, default: {} }, // imgs
-  save: { type: Function }, // backcall of save event
+  save: { type: Function, default: () => null }, // backcall of save event
 })
 
 const mavonEditor = mavon.mavonEditor
@@ -92,6 +92,11 @@ const editorOptions = reactive({
   editable: true,
   toolbarsFlag: true,
   placeholder: '开始编辑...',
+  xssOptions: {
+    whiteList: {
+      span: ['style'],
+    },
+  },
 })
 
 /**
@@ -99,7 +104,7 @@ const editorOptions = reactive({
  */
 const addImg = async function (pos: number, file: File) {
   const fid = await UploadFileAPI(file.name, file)
-  vm.value.$img2Url(pos, store.getters['config/baseApi'] + 'File/' + fid)
+  vm.value.$img2Url(pos, store.getters['config/fileUrl'](fid))
   props.save ? props.save() : null
 }
 const delImg = async function (pos: any) {
@@ -132,23 +137,24 @@ defineExpose({ content })
 /**
  * HOOK
  */
-onMounted(() => {
-  // Set editor options
-  switch (props.mode) {
-    case 'edit':
-      editorOptions.subfield = true
-      editorOptions.defaultOpen = ''
-      break
-    case 'show':
-      editorOptions.defaultOpen = 'preview'
-      editorOptions.editable = false
-      editorOptions.toolbarsFlag = false
-      break
-    case 'tiny':
-    default:
-      editorOptions.placeholder = '回车键发送...'
-  }
-})
+// onMounted(() => {
+// Set editor options
+switch (props.mode) {
+  case 'edit':
+    editorOptions.subfield = true
+    editorOptions.defaultOpen = ''
+    break
+  case 'show':
+    editorOptions.defaultOpen = 'preview'
+    // editorOptions.editable = false
+    editorOptions.subfield = false
+    editorOptions.toolbarsFlag = false
+    break
+  case 'tiny':
+  default:
+    editorOptions.placeholder = '回车键发送...'
+}
+// })
 </script>
 
 <style lang="less" scoped>
