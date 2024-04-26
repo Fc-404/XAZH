@@ -257,7 +257,7 @@ export class BlogUserService {
 
         // Add like record for the user.blog.like
         const userBlogLike = await UserBlogLike.model.findById(uid)
-        if (!userBlogLike.list.pop().equals(id))
+        if (!id.equals(userBlogLike.list.pop()))
           await userBlogLike.updateOne({
             $push: {
               list: {

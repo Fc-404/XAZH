@@ -43,7 +43,7 @@ export class StarBlogUserService {
       for (let folder of folders) {
         if (interaction.stars.includes(folder)) continue
         // Add record to whostar
-        if (interaction.stars.length > 0) {
+        if (interaction.stars.length <= 0) {
           await this.list.prependOne(blog.whostar, uid, session)
           blog.starcount++
         }

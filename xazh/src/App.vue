@@ -174,7 +174,7 @@ onMounted(() => {
   // Default theme.
   Theme.setTheme({
     token: {
-      colorPrimary: '#1e80ff',
+      colorPrimary: '#fa541c',
       fontSize: 14,
       borderRadius: 6,
     },

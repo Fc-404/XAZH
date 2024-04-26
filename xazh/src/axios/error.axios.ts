@@ -1,8 +1,8 @@
 /**
  * Handle error for axios
- * @param error 
+ * @param error
  */
-import { message } from "ant-design-vue"
+import { message } from 'ant-design-vue'
 
 export function AxiosErrorCatch(error: any) {
   const response = error.response
@@ -29,5 +29,5 @@ export function AxiosErrorCatch(error: any) {
     // No response received
     message.error('服务器未响应！')
   }
-  console.log(error);
+  console.log(error)
 }

@@ -64,5 +64,6 @@ declare module 'vue' {
     Signup: typeof import('./components/common/Signup.vue')['default']
     UploadPic: typeof import('./components/upload/UploadPic.vue')['default']
     UploadPicList: typeof import('./components/upload/UploadPicList.vue')['default']
+    UserInfoCard: typeof import('./components/common/UserInfoCard.vue')['default']
   }
 }

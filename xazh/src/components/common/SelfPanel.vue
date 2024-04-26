@@ -1,16 +1,13 @@
 <template>
   <div id="selfp">
     <!-- Handle -->
-    <a-badge
-      :count="messageSumCount"
-      :offset="[-4, 4]"
-      :overflow-count="99"
-    >
+    <a-badge :count="messageSumCount" :offset="[-4, 4]" :overflow-count="99">
       <a-avatar
         id="selfp-head"
         :size="headImgSize"
         @click="openSelfpc"
-      >{{ userInfo.userF }}
+        :src="userInfo.userHimg"
+        >{{ userInfo.userF }}
       </a-avatar>
     </a-badge>
 
@@ -22,89 +19,42 @@
       :rootStyle="{ maxHeight: '100vh' }"
     >
       <div id="selfp-ctl">
-        <div id="selfp-ctl-">
-          <div id="selfp-ctl-info">
-            <p id="selfp-ctl-info-name">
-              {{ userInfo?.user ?? '请登录' }}
-            </p>
-            <p>
-              <a-tag :color="getUserLevelTagColor(userInfo.level)">{{ getUserLevelName(userInfo.level) }}</a-tag>
-              <a-divider
-                type="vertical"
-                style="margin: 0 4px"
-              ></a-divider>
-              <span id="selfp-ctl-info-exp">
-                Exp:
-                <span :title="userInfo.exp.toString()">
-                  {{ userInfo.exp ?? 999 }}
-                </span>
-              </span>
-            </p>
-            <p>
-              <a-tag style="border: none;">无头衔</a-tag>
-            </p>
-            <p id="selfp-ctl-info-local">
-              <EnvironmentOutlined />
-              {{ userInfo.local || '未知' }}
-            </p>
-          </div>
-          <a-avatar id="selfp-ctl-img">
-            {{ userInfo.userF }}
-          </a-avatar>
-        </div>
+        <UserInfoCard
+          id="selfp-ctl-info"
+          :style="{ margin: 0 }"
+          :info="store.getters['signin/info']"
+        ></UserInfoCard>
 
         <a-divider></a-divider>
         <!-- Function -->
         <div id="selfp-ctl-fun">
-          <a-button
-            type="text"
-            class="selfp-ctl-fun"
-          >
+          <a-button type="text" class="selfp-ctl-fun">
             <MessageTwoTone two-tone-color="#73d13d" />
             消息
-            <a-badge
-              :count="messageCount"
-              :offset="[12, -5]"
-            >
-            </a-badge>
+            <a-badge :count="messageCount" :offset="[12, -5]"> </a-badge>
           </a-button>
-          <a-button
-            type="text"
-            class="selfp-ctl-fun"
-          >
+          <a-button type="text" class="selfp-ctl-fun">
             <FileTwoTone two-tone-color="#4096ff" />
             文章管理
           </a-button>
-          <a-button
-            type="text"
-            class="selfp-ctl-fun"
-          >
+          <a-button type="text" class="selfp-ctl-fun">
             <StarTwoTone two-tone-color="#f759ab" />
             我的收藏
           </a-button>
-          <a-button
-            type="text"
-            class="selfp-ctl-fun"
-          >
+          <a-button type="text" class="selfp-ctl-fun">
             <IdcardTwoTone two-tone-color="#36cfc9" />
             个人中心
           </a-button>
-          <a-button
-            type="text"
-            class="selfp-ctl-fun"
-          >
+          <a-button type="text" class="selfp-ctl-fun">
             <SettingTwoTone two-tone-color="#ffc53d" />
             设置
           </a-button>
-          <a-button
-            type="text"
-            class="selfp-ctl-fun"
-          >
+          <a-button type="text" class="selfp-ctl-fun">
             <BulbTwoTone two-tone-color="#9254de" />
             反馈 & 建议
           </a-button>
         </div>
-        <div style="height: 7rem;"></div>
+        <div style="height: 7rem"></div>
 
         <div id="selfp-ctl-bottom">
           <div v-if="userInfo.level >= 2">
@@ -116,15 +66,12 @@
               <FundTwoTone two-tone-color="#2f54eb" />
               网站面板
             </a-button>
-            <a-button
-              type="text"
-              class="selfp-ctl-fun"
-            >
+            <a-button type="text" class="selfp-ctl-fun">
               <ControlTwoTone two-tone-color="#fa541c" />
               管理员面板
             </a-button>
           </div>
-          <a-divider style="margin-top: 0;"></a-divider>
+          <a-divider style="margin-top: 0"></a-divider>
           <!-- Logout -->
           <a-button
             id="selfp-ctl-bottom-exit"
@@ -142,26 +89,33 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from 'vuex';
+import { useStore } from 'vuex'
 import { message } from 'ant-design-vue'
 import {
-  MessageTwoTone, FileTwoTone,
-  StarTwoTone, IdcardTwoTone,
-  SettingTwoTone, ImportOutlined,
-  BulbTwoTone, EnvironmentOutlined,
-  ControlTwoTone, FundTwoTone
-} from '@ant-design/icons-vue';
+  MessageTwoTone,
+  FileTwoTone,
+  StarTwoTone,
+  IdcardTwoTone,
+  SettingTwoTone,
+  ImportOutlined,
+  BulbTwoTone,
+  ControlTwoTone,
+  FundTwoTone,
+} from '@ant-design/icons-vue'
 
-import { getUserLevelName, getUserLevelTagColor } from '../../types/level.user.type'
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
+import { user2ImgText } from '../../util/str.tool'
+import UserInfoCard from './UserInfoCard.vue'
 
 const store = useStore()
-
 
 // head-img size
 const headImgSize: number =
   parseInt(
-    window.getComputedStyle(document.body).getPropertyValue('--headerHeight').slice(0, -2)
+    window
+      .getComputedStyle(document.body)
+      .getPropertyValue('--headerHeight')
+      .slice(0, -2)
   ) * 0.66
 
 const selfpcOpen = ref<boolean>(false)
@@ -194,24 +148,28 @@ const userInfo = reactive({
   level: 0,
   exp: 0,
   ranks: [],
-  local: '未知'
+  local: '未知',
 })
 const setUserInfo = function (v: any) {
-  v.user ? userInfo.user = v.user : null
-  v.level ? userInfo.level = v.level : null
-  v.exp ? userInfo.exp = v.exp : null
-  v.ranks ? userInfo.ranks = v.ranks : null
-  v.local ? userInfo.local = v.local : null
+  v.user ? (userInfo.user = v.user) : null
+  v.himg ? (userInfo.userHimg = v.himg) : null
+  v.level ? (userInfo.level = v.level) : null
+  v.exp ? (userInfo.exp = v.exp) : null
+  v.ranks ? (userInfo.ranks = v.ranks) : null
+  v.local ? (userInfo.local = v.local) : null
 
-  userInfo.userF = /[\u4e00-\u9fa5]/.test(userInfo.user[0]) ?
-    userInfo.user[0] : userInfo.user.substring(0, 2)
+  userInfo.userF = user2ImgText(userInfo.user)
+  userInfo.userHimg = store.getters['config/fileUrl'](userInfo.userHimg)
 }
 setUserInfo(store.getters['signin/info'])
-watch(computed(() => {
-  return store.getters['signin/info']
-}), (v) => {
-  setUserInfo(v)
-})
+watch(
+  computed(() => {
+    return store.getters['signin/info']
+  }),
+  (v) => {
+    setUserInfo(v)
+  }
+)
 
 /**
  * Go to router.
@@ -227,8 +185,7 @@ const toRouter = function (name: string) {
 /**
  * HOOK
  */
-onMounted(() => {
-})
+onMounted(() => {})
 </script>
 
 <style scoped lang="less">
@@ -239,60 +196,12 @@ onMounted(() => {
   &-head {
     margin-bottom: 4px;
     cursor: pointer;
+    border: none;
   }
 
   &-ctl {
     width: 100%;
     height: 100%;
-
-    &- {
-      display: grid;
-      grid-template-columns: repeat(6, 50px);
-      grid-template-rows: repeat(2, 50px);
-
-      &info {
-        grid-column: 4 / 7;
-        grid-row: 1 / 3;
-        margin-top: -1rem;
-        margin-left: -20px;
-        font-size: 1rem;
-        color: var(--colorTextBase);
-
-        >p {
-          margin-top: .5rem;
-        }
-
-        &-name {
-          font-size: 1.4rem !important;
-        }
-
-        &-exp {
-          font-size: .8rem;
-          display: inline-block;
-          width: 6rem;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-        }
-
-        &-local {
-          color: var(--colorText);
-          font-size: .8rem !important;
-        }
-      }
-
-      &img {
-        grid-column: 1 / 3;
-        grid-row: 1 / 3;
-
-        width: 100%;
-        height: 100%;
-
-        font-size: 3rem;
-        line-height: 100px;
-        cursor: pointer;
-      }
-    }
 
     .selfp-ctl-fun {
       width: 100%;
@@ -305,7 +214,7 @@ onMounted(() => {
       user-select: none;
       cursor: pointer;
 
-      >.anticon {
+      > .anticon {
         margin-right: 1.1rem;
       }
     }

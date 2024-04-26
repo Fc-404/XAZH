@@ -40,7 +40,7 @@ const schema = new mongoose.Schema({
   },
   wholike: List,
   whostar: List,
-  keyword: [String],
+  keywords: [String],
   // TODO
   wordcloud: Object,
   disabled: Boolean,

@@ -60,7 +60,7 @@ export class BlogController {
   @Post('/Get')
   async getBlog(@Body('bid') bid: string) {
     if (!ObjectId.isValid(bid)) {
-      this.ctx.status = 403
+      this.ctx.status = 404
       return '无效的博客id'
     }
     const blogId = new ObjectId(bid)
@@ -324,7 +324,7 @@ export class BlogController {
     const bId = new ObjectId(bid)
     const result = await this.blog.getInteraction(bId, this.ctx.user.id)
     if (!result)
-      throw new httpError.NotFoundError('Not found.')
+      return false
     return result
   }
 

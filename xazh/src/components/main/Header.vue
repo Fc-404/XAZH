@@ -178,8 +178,8 @@ const initSlider = function () {
   }
   let index: HTMLElement = initFunc
 
-  hs.style.left = initFunc.offsetLeft + 'px'
-  hs.style.width = initFunc.offsetWidth + 'px'
+  hs.style.left = initFunc?.offsetLeft + 'px'
+  hs.style.width = initFunc?.offsetWidth + 'px'
   index.style.color = 'var(--colorPrimary)'
 
   const otherPathDeal = function (path: string) {

@@ -27,7 +27,7 @@ const schema = new mongoose.Schema({
         about_me: String,               // User signature
     },
 
-    himg: ObjectId,                     // User headimg, point to Id of file
+    himg: String,                     // User headimg, point to Id of file
     user: {                             // User account
         type: String,
         unique: true,
