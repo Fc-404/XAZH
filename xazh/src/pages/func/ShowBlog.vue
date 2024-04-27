@@ -4,8 +4,24 @@
       <div id="showblog-left">
         <div id="showblog-user">
           <UserInfoCard :info="userInfo"></UserInfoCard>
-          <div id="showblog-user-ctl">
-            <a-button class="btn" type="primary" size="small">关注</a-button>
+          <div
+            id="showblog-user-ctl"
+            v-if="userInfo.uid != store.getters['signin/id']"
+          >
+            <a-button
+              class="btn"
+              type="primary"
+              size="small"
+              :style="{
+                background: actState.follow
+                  ? 'var(--colorFill)'
+                  : 'var(--colorPrimary)',
+              }"
+              @click="followAuthor"
+              :loading="actState.follow === undefined"
+            >
+              {{ actState.follow ? '取关' : '关注' }}
+            </a-button>
             <a-button class="btn" type="default" size="small">私信</a-button>
           </div>
         </div>
@@ -30,14 +46,17 @@
             <p>{{ numberFormat(blogInfo.likecount) }}</p>
           </div>
           <div>
-            <a-button
-              size="large"
-              type="text"
-              shape="circle"
-              class="interact-btn"
-            >
-              <CommentOutlined></CommentOutlined>
-            </a-button>
+            <a-tooltip>
+              <template #title>待开发...</template>
+              <a-button
+                size="large"
+                type="text"
+                shape="circle"
+                class="interact-btn"
+              >
+                <CommentOutlined></CommentOutlined>
+              </a-button>
+            </a-tooltip>
             <p>{{ numberFormat(blogInfo.commentcount) }}</p>
           </div>
           <div>
@@ -88,6 +107,9 @@
             CC 4.0 BY-SA
           </a>
           版权协议，转载请附上原文出处链接和本声明
+          <span style="float: right">
+            <a title="待开发">举报</a>
+          </span>
         </p>
         <div id="showblog-text-tags">
           <a-tag v-for="i in blogInfo.keywords" :bordered="false">{{
@@ -105,10 +127,33 @@
       </div>
     </div>
     <div id="showblog-right" v-if="false"></div>
+    <div id="showblog-func">
+      <a-button
+        type="primary"
+        shape="circle"
+        size="large"
+        class="btn"
+        title="回到顶部"
+        @click="scrollTop"
+      >
+        <VerticalAlignTopOutlined style="margin-top: 0.1rem" />
+      </a-button>
+      <a-button
+        type="primary"
+        shape="circle"
+        size="large"
+        class="btn"
+        title="分享链接"
+        @click="clickCopy($event, null, url)"
+      >
+        <ShareAltOutlined style="margin-right: 0.1rem" />
+      </a-button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const url = window.location.href
 import { useRoute, useRouter } from 'vue-router'
 import {
   GetBUInteractionAPI,
@@ -118,6 +163,7 @@ import {
   StarBlogAPI,
   UnstarBlogAPI,
 } from '../../api/blog.api'
+import { clickCopy } from '../../util/clickCopy.tool'
 import { useTitle } from '../../composables/useTitle'
 import { useHeaderMode } from '../../composables/useHeaderMode'
 import { ModeHeaderPageI } from '../../interface/page.i'
@@ -134,8 +180,15 @@ import {
   StarOutlined,
   StarFilled,
   LoadingOutlined,
+  VerticalAlignTopOutlined,
+  ShareAltOutlined,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
+import {
+  FollowUserAPI,
+  GetRelationInteractionAPI,
+  UnfollowUserAPI,
+} from '../../api/relation.api'
 
 const route = useRoute()
 const router = useRouter()
@@ -170,8 +223,8 @@ const userInfo = reactive({
   exp: 0,
   level: 0,
   ranks: '',
-  signup_data: '',
-  disablee: false,
+  signup_date: '',
+  disabled: false,
   deleted: false,
 })
 const actState = reactive<{ [key: string]: boolean | undefined }>({
@@ -215,6 +268,12 @@ const getInfo = async function () {
   if (!ia) return
   if (ia?.islike) actState.like = true
   if (ia?.stars.length) actState.star = true
+
+  // Get interaction of relation between user and author
+  const ua = await GetRelationInteractionAPI([blogInfo.author])
+  if (!ua) return
+  if (ua[blogInfo.author]?.isfollow) actState.follow = true
+  console.log(ua)
 }
 
 const likeBlog = async function () {
@@ -252,6 +311,28 @@ const starBlog = async function () {
     actState.star = s
     blogInfo.starcount += s ? 1 : -1
   }
+}
+const followAuthor = async function () {
+  if (!store.getters['signin/on']) {
+    message.warning('访客请先登录！')
+    return
+  }
+  let s = !actState.follow
+  actState.follow = undefined
+  let r
+  if (s) r = await FollowUserAPI([blogInfo.author])
+  else r = await UnfollowUserAPI([blogInfo.author])
+  if (!r) {
+    actState.follow = false
+    message.warning('操作失败！')
+    return
+  } else {
+    actState.follow = s
+  }
+}
+
+const scrollTop = function () {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 useTitle(title)
@@ -313,9 +394,13 @@ onMounted(async () => {
   }
   &-user {
     &-ctl {
+      display: flex;
+      justify-content: space-around;
+      padding-right: 5rem;
+
       .btn {
-        margin-left: 2.5rem;
         border: none;
+        box-shadow: none;
       }
     }
   }
@@ -337,6 +422,21 @@ onMounted(async () => {
       text-align: center;
       padding-right: .1rem;
       color: var(--colorTextTertiary);
+      user-select: none;
+    }
+  }
+
+  &-func {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+
+    .btn {
+      margin: 1rem;
+      font-size: 1.5rem;
+      line-height: 1.5rem;
     }
   }
 }

@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AAffix: typeof import('ant-design-vue/es')['Affix']
+    AAlert: typeof import('ant-design-vue/es')['Alert']
     AAvatar: typeof import('ant-design-vue/es')['Avatar']
     ABadge: typeof import('ant-design-vue/es')['Badge']
     AButton: typeof import('ant-design-vue/es')['Button']
@@ -17,6 +18,7 @@ declare module 'vue' {
     ADivider: typeof import('ant-design-vue/es')['Divider']
     ADrawer: typeof import('ant-design-vue/es')['Drawer']
     AEmpty: typeof import('ant-design-vue/es')['Empty']
+    AImage: typeof import('ant-design-vue/es')['Image']
     AInput: typeof import('ant-design-vue/es')['Input']
     AInputNumber: typeof import('ant-design-vue/es')['InputNumber']
     ALayout: typeof import('ant-design-vue/es')['Layout']

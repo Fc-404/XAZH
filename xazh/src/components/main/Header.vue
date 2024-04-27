@@ -15,7 +15,7 @@
         :size="3"
       ></a-progress>
       <div id="header-container">
-        <div id="header-box">
+        <div id="header-box" @click.stop="scrollTop">
           <div style="width: 4rem"></div>
 
           <!-- LOGO -->
@@ -367,6 +367,10 @@ watch(
     isSignin.value = v
   }
 )
+
+const scrollTop = function () {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 /**
  * HOOK

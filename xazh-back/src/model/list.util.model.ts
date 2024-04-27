@@ -6,6 +6,7 @@ const name = 'Util.List'
 const schema = new mongoose.Schema({
   // Headnode-specific.
   ishead: Boolean,    // Is head node.
+  label: String,      // Label of this list.
   chunkLen: Number,   // Each chunk standard length.
   totalLen: Number,   // Total length in this list.
   last: ObjectId,     // Previous chunk.

@@ -33,11 +33,11 @@ export class RelationUserService {
     if (!fromRel || !toRel) return false
     // update relation list
     if (!fromRel.follow) {
-      fromRel.follow = await this.list.createList()
+      fromRel.follow = await this.list.createList(UserRel.name + '/follow')
       await fromRel.save()
     }
     if (!toRel.follower) {
-      toRel.follower = await this.list.createList()
+      toRel.follower = await this.list.createList(UserRel.name + '/follower')
       await toRel.save()
     }
 

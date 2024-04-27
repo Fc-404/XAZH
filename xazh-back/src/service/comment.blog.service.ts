@@ -47,19 +47,18 @@ export class CommentBlogService {
    */
   async reply(options: ICommentBlog) {
     let result = true
-    let commentsList
     const blog = await BlogInfo.model.findById(options.bid)
     if (!blog) throw new Error('Blog not found.')
     if (blog.deleted) throw new Error('Blog has been deleted.')
     if (!blog.comments) {
-      blog.comments = commentsList = await this.list.createList()
+      blog.comments = await this.list.createList(BlogInfo.name + '/comments')
       await blog.save()
     }
 
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
-      const wholikeList = await this.list.createList(null, session)
+      const wholikeList = await this.list.createList(BlogComment.name + '/wholike' ,null, session)
       const comment = await BlogComment.model.create([{
         bid: options.bid,
         author: options.uid,
@@ -94,7 +93,7 @@ export class CommentBlogService {
     if (!commentObj) throw new Error('Comment not found.')
     // prepend the new comment to the blog's main comment
     if (!commentObj.subcomments) {
-      commentObj.subcomments = await this.list.createList()
+      commentObj.subcomments = await this.list.createList(BlogComment.name + '/subcomments')
       await commentObj.save()
     }
 
@@ -102,7 +101,7 @@ export class CommentBlogService {
     session.startTransaction()
     try {
       // create a new comment for blog's main comment
-      const wholikeList = await this.list.createList(null, session)
+      const wholikeList = await this.list.createList(BlogComment.name + '/wholike' ,null, session)
       const comment = await BlogComment.model.create([{
         bid: options.bid,
         cid: options.cid,

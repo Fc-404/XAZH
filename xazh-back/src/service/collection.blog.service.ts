@@ -21,7 +21,7 @@ export class BlogCollectionService {
     session.startTransaction()
     try {
       if (!bu.collections)
-        bu.collections = await this.list.createList(null, session)
+        bu.collections = await this.list.createList(UserBlog.name + '/collections', null, session)
       await bu.save({session})
       await session.commitTransaction()
     } catch (e) {
@@ -77,7 +77,7 @@ export class BlogCollectionService {
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
-      const listid = await this.list.createList(null, session)
+      const listid = await this.list.createList(BlogColl.name + '/blogs', null, session)
       const collection = await BlogColl.model.create([{
         name: options.name,
         abstract: options.abstract,

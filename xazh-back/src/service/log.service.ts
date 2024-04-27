@@ -24,7 +24,7 @@ export class LogService {
     const logid = formatDate('YYYYMMDD')
     let log = await Log.model.findById(logid)
     if (!log) {
-      const list = await this.list.createList()
+      const list = await this.list.createList(Log.name + '/msgs')
       log = await Log.model.create({
         _id: logid,
         msgs: list,

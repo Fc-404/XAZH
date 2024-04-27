@@ -95,6 +95,12 @@ const editorOptions = reactive({
   xssOptions: {
     whiteList: {
       span: ['style'],
+      b: ['style'],
+      i: ['style'],
+      em: ['style'],
+      small: ['style'],
+      strong: ['style'],
+      kbd: ['style'],
     },
   },
 })

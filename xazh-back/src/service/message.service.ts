@@ -42,9 +42,9 @@ export class MessageService {
       { _id: uid }, {}, { upsert: true, new: true }
     )
     if (!result.msgslist)
-      result.msgslist = await this.list.createList()
+      result.msgslist = await this.list.createList(UserMesg.name + '/msgslist')
     if (!result.newmsgs)
-      result.newmsgs = await this.list.createList()
+      result.newmsgs = await this.list.createList(UserMesg.name + '/newmsgs')
     await result.save()
     return result
   }
@@ -63,7 +63,7 @@ export class MessageService {
     const session = await mongoose.startSession()
     session.startTransaction()
     try {
-      const msgList = await this.list.createList(null, session)
+      const msgList = await this.list.createList(MesgBody.name + '/msgs' ,null, session)
       msgBody = await MesgBody.model.create([{
         _id: mid,
         msgs: msgList,
@@ -163,7 +163,7 @@ export class MessageService {
     )
     if (!msgBody) return false
     if (!msgBody.msgs) {
-      msgBody.msgs = await this.list.createList()
+      msgBody.msgs = await this.list.createList(MesgBody.name + '/msgs')
       await msgBody.save()
     }
 

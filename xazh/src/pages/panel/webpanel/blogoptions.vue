@@ -1,25 +1,18 @@
 <template>
   <div id="blogoptions">
-    <section
-      name="cover"
-      id="blogoptions-cover"
-    >
+    <section name="cover" id="blogoptions-cover">
       <p class="title">博客封面</p>
       <a-tabs
         v-model:active-key="coverActiveKey"
         tabPosition="left"
         :tabBarStyle="{
-          maxHeight: '20rem'
+          maxHeight: '20rem',
         }"
       >
-        <a-tab-pane
-          v-for="i in coverData"
-          :key="i.tag"
-          :tab="i.tag"
-        >
+        <a-tab-pane v-for="i in coverData" :key="i.tag" :tab="i.tag">
           <div id="blogoptions-cover-tag-view">
             <UploadPicList
-              style="height: 100%;"
+              style="height: 100%"
               :list="i.value"
               @onUpload="uploadedPic($event, i.value)"
               @onDelete="deletedPic($event, i.value)"
@@ -35,29 +28,25 @@
             ghostClass="ghost"
             @update="coverTagUpdate"
           >
-            <div
-              v-for="i in coverData"
-              style="display: inline-block;"
-            >
+            <div v-for="i in coverData" style="display: inline-block">
               <a-tag
                 id="blogoptions-cover-tags-view-item"
                 :closable="true"
                 @close="deleteTag(i.tag)"
-              >{{ i.tag }}</a-tag>
+                >{{ i.tag }}</a-tag
+              >
             </div>
           </VueDraggable>
         </div>
         <div id="blogoptions-cover-tags-add">
           <a-space-compact>
             <a-input v-model:value="coverItemNew"></a-input>
-            <a-button
-              type="primary"
-              @click="newCoverItem"
-            >添加标签</a-button>
+            <a-button type="primary" @click="newCoverItem">添加标签</a-button>
           </a-space-compact>
         </div>
       </div>
     </section>
+    <div style="height: 20rem"></div>
     <section name="tags">
       <p class="title">博客标签</p>
       <div id="blogoptions-tags">
@@ -67,24 +56,19 @@
           ghostClass="ghost"
           @update="tagsItemUpdate"
         >
-          <div
-            v-for="i in tagsData"
-            style="display: inline-block;"
-          >
+          <div v-for="i in tagsData" style="display: inline-block">
             <a-tag
               id="blogoptions-tags-"
               :closable="true"
               @close="tagsItemDel(i)"
-            >{{ i }}</a-tag>
+              >{{ i }}</a-tag
+            >
           </div>
         </VueDraggable>
         <div id="blogoptions-tags-add">
           <a-space-compact>
             <a-input v-model:value="tagsItemNew"></a-input>
-            <a-button
-              type="primary"
-              @click="tagsItemAdd"
-            >添加标签</a-button>
+            <a-button type="primary" @click="tagsItemAdd">添加标签</a-button>
           </a-space-compact>
         </div>
       </div>
@@ -93,10 +77,10 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import { useRoute } from 'vue-router'
 import { VueDraggable } from 'vue-draggable-plus'
-import { message } from 'ant-design-vue';
-import { GetPanelConfigAPI, SetPanelConfigAPI } from '../../../api/panel.api';
+import { message } from 'ant-design-vue'
+import { GetPanelConfigAPI, SetPanelConfigAPI } from '../../../api/panel.api'
 
 const PANEL = 'web'
 const GROUP = 'blogoptions'
@@ -105,7 +89,7 @@ const route = useRoute()
 /**
  * ! Cover.
  */
-type COVER_TYPE = Array<{ tag: string, value: Array<string> }>
+type COVER_TYPE = Array<{ tag: string; value: Array<string> }>
 const coverData = ref<COVER_TYPE>([])
 const coverActiveKey = ref<string>()
 const coverItemNew = ref<string>()
@@ -114,11 +98,13 @@ const coverItemNew = ref<string>()
  * Get Cover information from server.
  */
 const getCover = async function () {
-  const result: COVER_TYPE = (await GetPanelConfigAPI(PANEL, 'cover', GROUP))['value']
-  result.forEach(i => {
+  const result: COVER_TYPE = (await GetPanelConfigAPI(PANEL, 'cover', GROUP))[
+    'value'
+  ]
+  result.forEach((i) => {
     coverData.value.push({
       tag: i['tag'],
-      value: [...new Set(i['value'])]
+      value: [...new Set(i['value'])],
     })
   })
 }
@@ -137,7 +123,7 @@ const newCoverItem = async function () {
   if (coverItemNew.value) {
     coverData.value.push({
       tag: coverItemNew.value,
-      value: []
+      value: [],
     })
     coverItemNew.value = ''
     await SetPanelConfigAPI(PANEL, 'cover', coverData.value, GROUP)
@@ -181,7 +167,6 @@ const deleteTag = async function (tag: string) {
   }
 }
 
-
 /**
  * ! Tags
  */
@@ -189,10 +174,11 @@ const tagsData = ref<Array<string>>([])
 const tagsItemNew = ref<string>()
 
 const getTags = async function () {
-  const result: Array<string> = (await GetPanelConfigAPI(PANEL, 'tags', GROUP))['value']
-  result.forEach(i => {
-    if (i)
-      tagsData.value.push(i)
+  const result: Array<string> = (await GetPanelConfigAPI(PANEL, 'tags', GROUP))[
+    'value'
+  ]
+  result.forEach((i) => {
+    if (i) tagsData.value.push(i)
   })
 }
 getTags()
@@ -212,18 +198,21 @@ const tagsItemAdd = async function () {
 const tagsItemDel = async function (name: string) {
   tagsData.value.splice(tagsData.value.indexOf(name), 1)
   await tagsItemUpdate()
-  console.log(tagsData.value);
+  console.log(tagsData.value)
 }
-
 
 const toAnchor = function () {
   const set = function (v: any) {
     const dom = document.getElementsByName(v.toString())
     if (dom.length)
       dom[0].scrollIntoView({ behavior: 'smooth', block: 'start' })
+    console.log(v, dom)
   }
   set(route.params['sub'])
-  watch(() => route.params['sub'], v => set(v))
+  watch(
+    () => route.params['sub'],
+    (v) => set(v)
+  )
 }
 
 onMounted(() => {

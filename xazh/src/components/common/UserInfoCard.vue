@@ -6,6 +6,7 @@
         :style="{ backgroundColor: user2ImgColor(props.info?.user) }"
         :src="store.getters['config/fileUrl'](props.info?.himg)"
         :title="props.info?.uid"
+        @click="toUserHome()"
       >
         {{ user2ImgText(props.info?.user) }}
       </a-avatar>
@@ -44,16 +45,22 @@
 import { useStore } from 'vuex'
 import { user2ImgText, user2ImgColor } from '../../util/str.tool'
 import { EnvironmentOutlined } from '@ant-design/icons-vue'
+import { useRouter } from 'vue-router'
 import {
   getUserLevelName,
   getUserLevelTagColor,
 } from '../../types/level.user.type'
 
 const store = useStore()
+const router = useRouter()
 const props = defineProps({
   info: { type: Object, default: {} },
   style: { type: Object, default: {} },
 })
+
+const toUserHome = function () {
+  router.push('/home/' + props.info.uid)
+}
 </script>
 
 <style scoped lang="less">
@@ -61,6 +68,7 @@ const props = defineProps({
   width: 20rem;
   height: auto;
   padding: 1rem;
+  user-select: none;
 
   &-up {
     display: flex;

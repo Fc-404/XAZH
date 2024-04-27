@@ -35,10 +35,11 @@ export class ListUtilService {
    * @param session
    * @returns ObjectId
    */
-  async createList(chunkLen: number = 100, session?: mongoose.ClientSession): Promise<List> {
+  async createList(label: string, chunkLen: number = 100, session?: mongoose.ClientSession): Promise<List> {
     if (!chunkLen) chunkLen = 100
     const result = await list.create([{
       ishead: true,
+      label: label,
       chunkLen: chunkLen,
       totalLen: 0,
       length: 0,

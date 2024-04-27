@@ -20,11 +20,6 @@ const BlogShow = () => import('../pages/func/ShowBlog.vue')
 const AdminPanel = () => import('../pages/panel/AdminPanel.vue')
 
 const routes: RouteRecordRaw[] = [
-  // {
-  //   name: 'BlogShow',
-  //   path: '/b/:bid',
-  //   component: BlogShow,
-  // },
   {
     name: 'Signup',
     path: '/signup',

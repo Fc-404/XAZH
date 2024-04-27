@@ -2,17 +2,21 @@
   <div
     id="fnotice"
     :style="{
-      fontSize: fontSize
+      fontSize: fontSize,
     }"
   >
-    <div :style="{
-      height: height,
-      marginTop: '1em'
-    }">
+    <div
+      :style="{
+        height: height,
+        marginTop: '1em',
+      }"
+    >
       <Lottie path="/lottie/developing.json"></Lottie>
     </div>
     <div id="fnotice-tip">
-      <p id="fnotice-tip-">功能{{ props.maintenance ? '维护' : '开发' }}中...</p>
+      <p id="fnotice-tip-">
+        功能{{ props.maintenance ? '维护' : '开发' }}中...
+      </p>
       <p id="fnotice-tip-expect">敬请期待</p>
     </div>
   </div>
@@ -21,7 +25,7 @@
 <script setup lang="ts">
 const props = defineProps({
   maintenance: { type: Boolean, default: false },
-  size: { type: Number, default: 0 }
+  size: { type: Number, default: 0 },
 })
 
 const height = ref<string>()
@@ -46,14 +50,19 @@ onMounted(() => {
     position: absolute;
     top: 0;
     width: 100%;
+    height: 100%;
     font-size: 1em;
     text-align: center;
     display: block;
     font-weight: bold;
 
     &-expect {
-      line-height: 12em;
+      // line-height: 12em;
       color: #43434343;
+      text-align: center;
+      width: 100%;
+      position: absolute;
+      bottom: 30%;
     }
 
     &- {

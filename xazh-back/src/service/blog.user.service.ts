@@ -55,7 +55,7 @@ export class BlogUserService {
     session.startTransaction()
     try {
       if (!bu.blogs)
-        bu.blogs = await this.list.createList(null, session)
+        bu.blogs = await this.list.createList(UserBlog.name + '/blogs', null, session)
       await bu.save({ session })
       await session.commitTransaction()
     } catch (e) {
@@ -95,8 +95,8 @@ export class BlogUserService {
       }], { session })
       blogInfoResult[0].body = blogBodyResult[0]._id
       // blog countlist
-      const wholikeListId = await this.list.createList(1000, session)
-      const whostarListId = await this.list.createList(1000, session)
+      const wholikeListId = await this.list.createList(BlogInfo.name + '/wholike', 1000, session)
+      const whostarListId = await this.list.createList(BlogInfo.name + '/whostar', 1000, session)
       blogInfoResult[0].wholike = wholikeListId
       blogInfoResult[0].whostar = whostarListId
 

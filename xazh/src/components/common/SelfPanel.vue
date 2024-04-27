@@ -33,19 +33,35 @@
             消息
             <a-badge :count="messageCount" :offset="[12, -5]"> </a-badge>
           </a-button>
-          <a-button type="text" class="selfp-ctl-fun">
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+            @click="toRouterUserHome('blog')"
+          >
             <FileTwoTone two-tone-color="#4096ff" />
             文章管理
           </a-button>
-          <a-button type="text" class="selfp-ctl-fun">
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+            @click="toRouterUserHome('star')"
+          >
             <StarTwoTone two-tone-color="#f759ab" />
             我的收藏
           </a-button>
-          <a-button type="text" class="selfp-ctl-fun">
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+            @click="toRouterUserHome('edit')"
+          >
             <IdcardTwoTone two-tone-color="#36cfc9" />
             个人中心
           </a-button>
-          <a-button type="text" class="selfp-ctl-fun">
+          <a-button
+            type="text"
+            class="selfp-ctl-fun"
+            @click="toRouterUserHome('setting')"
+          >
             <SettingTwoTone two-tone-color="#ffc53d" />
             设置
           </a-button>
@@ -142,6 +158,7 @@ const messageSumCount = computed(() => {
  * Get User Info
  */
 const userInfo = reactive({
+  id: '',
   user: '未登录',
   userF: '',
   userHimg: '',
@@ -151,6 +168,7 @@ const userInfo = reactive({
   local: '未知',
 })
 const setUserInfo = function (v: any) {
+  v._id ? (userInfo.id = v._id) : null
   v.user ? (userInfo.user = v.user) : null
   v.himg ? (userInfo.userHimg = v.himg) : null
   v.level ? (userInfo.level = v.level) : null
@@ -179,6 +197,14 @@ const toRouter = function (name: string) {
   router.push({
     name: name,
   })
+  selfpcOpen.value = false
+}
+const toRouterUserHome = function (pos: string) {
+  if (!userInfo.id) {
+    message.error('请先登录！')
+    return
+  }
+  router.push('/home/' + userInfo.id + '/' + pos)
   selfpcOpen.value = false
 }
 

@@ -144,7 +144,7 @@ export class StarBlogUserService {
     try {
       for (let folder of options) {
         if (userBlogStar.list.find(v => v.name === folder.name)) continue
-        const l = await this.list.createList(null, session)
+        const l = await this.list.createList(UserBlogStar.name + '/list/collections', null, session)
         userBlogStar.list.push({ ...folder, collections: l })
       }
       userBlogStar.markModified('list')
