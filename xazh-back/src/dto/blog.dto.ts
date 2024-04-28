@@ -1,4 +1,4 @@
-import { Rule, RuleType } from "@midwayjs/validate";
+import { Rule, RuleType } from '@midwayjs/validate'
 
 export class BlogInfoDTO {
   @Rule(RuleType.string().max(256).required())
@@ -20,7 +20,7 @@ export class BlogInfoDTO {
   @Rule(RuleType.number().max(32))
   type: number
 
-  @Rule(RuleType.string().min(0).max(512))
+  @Rule(RuleType.string().min(0).max(1024))
   abstract: string
 
   @Rule(RuleType.array<string>().max(32))
@@ -28,6 +28,13 @@ export class BlogInfoDTO {
 
   @Rule(RuleType.object())
   wordcloud: object
+}
+
+export class UpdateBlogDTO extends BlogInfoDTO {
+  @Rule(RuleType.string().length(24).required())
+  bid: string
+  @Rule(RuleType.string().min(0).max(200000))
+  body: string
 }
 
 export class BlogCommentDTO {

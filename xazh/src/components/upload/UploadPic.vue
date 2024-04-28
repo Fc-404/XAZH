@@ -65,16 +65,16 @@ const emit = defineEmits(['update:fid'])
 const uploadState = ref<boolean | undefined>(true)
 const previewSrc = ref<string>()
 let file: File
+console.log(props.fid)
 
-watch(
-  () => props.fid,
-  () => {
-    uploadState.value = props.fid ? false : true
-    if (uploadState.value === false && props.fid !== 'wait') {
-      previewSrc.value = store.getters['config/fileUrl'](props.fid)
-    }
+const updateState = function () {
+  uploadState.value = props.fid ? false : true
+  if (uploadState.value === false && props.fid !== 'wait') {
+    previewSrc.value = store.getters['config/fileUrl'](props.fid)
   }
-)
+}
+updateState()
+watch(() => props.fid, updateState)
 
 /**
  * Upload Pictrue.

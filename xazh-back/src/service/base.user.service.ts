@@ -35,6 +35,9 @@ export class UserService {
   async haveId(id: Types.ObjectId): Promise<boolean> {
     return !!(await UserBase.model.findById(id))
   }
+  async id2user(id: Types.ObjectId): Promise<string> {
+    return (await UserBase.model.findOne({ _id: id }, ['user']))?.user
+  }
 
   /**
    * Add User

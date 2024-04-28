@@ -35,8 +35,8 @@ a {
 
 // Custiom scrollbar
 ::-webkit-scrollbar {
-  width: .4rem;
-  height: .4rem;
+  width: 0.4rem;
+  height: 0.4rem;
   background-color: var(--colorBgLayout);
 }
 ::-webkit-scrollbar-track {
@@ -47,5 +47,38 @@ a {
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  width: .4rem;
+  width: 0.4rem;
+}
+
+/**
+   * Following block of code is loading effect of text flow.
+  */
+.loading {
+  border-radius: var(--borderRadius);
+  background-color: var(--colorBgLayout);
+  overflow: hidden;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+.loading::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 100%;
+  background-color: var(--colorBgContainer);
+  box-shadow: 0 0 64px 64px var(--colorBgContainer);
+  transform: skewX(-30deg);
+  animation: bright 2s linear infinite;
+}
+
+@keyframes bright {
+  from {
+    margin-left: -100px;
+  }
+
+  to {
+    margin-left: calc(100% + 100px);
+  }
 }

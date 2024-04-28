@@ -20,7 +20,7 @@ export default defineConfig({
 
       resolvers: [],
 
-      dts: path.resolve(pathSrc, 'auto-imports.d.ts')
+      dts: path.resolve(pathSrc, 'auto-imports.d.ts'),
     }),
     Components({
       resolvers: [
@@ -29,7 +29,7 @@ export default defineConfig({
         }),
       ],
 
-      dts: path.resolve(pathSrc, 'components.d.ts')
+      dts: path.resolve(pathSrc, 'components.d.ts'),
     }),
   ],
 })

@@ -27,7 +27,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     name: 'BlogEdit',
-    path: '/blogs/edit',
+    path: '/blog/edit',
     component: BlogEdit,
   },
   {

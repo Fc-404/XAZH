@@ -18,7 +18,8 @@ const config: Module<any, any> = {
     // Antdv's theme token
     themeToken: null,
     // Backend API base address.
-    baseApi: 'http://192.168.22.32:7001/',
+    // baseApi: 'http://192.168.22.32:7001/',
+    baseApi: 'http://localhost:7001/',
   }),
   getters: {
     name(state): string {

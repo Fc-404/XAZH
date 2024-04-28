@@ -5,17 +5,38 @@ import { xazhAxios } from '../axios/xazh.axios'
  * @param param
  * @returns
  */
-export async function PublishBlog(param: object) {
+export async function PublishBlogAPI(param: object) {
   const result = await xazhAxios.post('/Blog/Publish', param)
   return {
     code: result.data?.code,
     body: result.data?.body,
   }
 }
+export async function UpdateBlogAPI(param: object) {
+  const result = await xazhAxios.post('/Blog/Update', param)
 
-export async function GetBlogInfoAPI(bid: string) {
+  return result.data ?? null
+}
+
+export async function DeleteBlogAPI(bid: string) {
+  const result = await xazhAxios.post('/Blog/Delete', {
+    bid: bid,
+  })
+
+  return result.data ? result.data.body : null
+}
+
+export async function GetBlogAPI(bid: string) {
   const result = await xazhAxios.post('/Blog/Get', {
     bid: bid,
+  })
+
+  return result.data ? result.data.body : null
+}
+
+export async function GetBlogsInfoAPI(bids: string[]) {
+  const result = await xazhAxios.post('/Blog/List', {
+    bids: bids,
   })
 
   return result.data ? result.data.body : null

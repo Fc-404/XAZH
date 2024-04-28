@@ -57,6 +57,7 @@
       <Editor
         :save="save"
         :value="draftContent"
+        @change="isModfiy = true"
         mode="edit"
         style="position: relative; z-index: 99"
         ref="editor"
@@ -130,7 +131,7 @@
               <a-textarea
                 v-model:value="blogInfo.abstract"
                 show-count
-                :maxlength="256"
+                :maxlength="512"
                 style="width: 25rem; height: 8rem; resize: none"
                 placeholder="请输入文章摘要"
               >
@@ -225,7 +226,7 @@ import { GetPanelConfigAPI } from '../../api/panel.api'
 import cookie from 'js-cookie'
 import { MDSummary } from '../../util/str.tool'
 import SigninModal from '../../components/common/SigninModal.vue'
-import { PublishBlog } from '../../api/blog.api'
+import { GetBlogAPI, PublishBlogAPI, UpdateBlogAPI } from '../../api/blog.api'
 import { useRouter } from 'vue-router'
 const store = useStore()
 const router = useRouter()
@@ -266,6 +267,28 @@ const serverData = reactive({
 })
 
 const signinOpen = ref<boolean>(false)
+const isModfiy = ref<boolean>(false)
+
+/**
+ * Edit blog from personage home.
+ */
+!(async function () {
+  const bid = history.state?.bid
+  if (!bid) return
+  const r = await GetBlogAPI(bid)
+  if (r) {
+    title.value = r.title
+    editor.value.content = r.body
+    blogInfo.coverImg = r.cover
+    blogInfo.tags = r.keywords
+    blogInfo.abstract = r.abstract
+    blogInfo.type = r.type
+    blogInfo.privacy = r.privacy
+  }
+  nextTick(() => {
+    isModfiy.value = false
+  })
+})()
 
 /**
  * Compute the timing result.
@@ -275,7 +298,7 @@ const getBlogInfoTiming = function () {
   const time = new Date(blogInfo.timing.time)
 
   const result = new Date(`
-  ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 
+  ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}
   ${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}
   `)
 
@@ -440,7 +463,7 @@ const publishBlog = async function () {
 
   const form = {
     title: title.value,
-    body: editor.value.content,
+    body: isModfiy.value ? editor.value.content : '',
 
     type: blogInfo.type,
     cover: coverId,
@@ -450,14 +473,17 @@ const publishBlog = async function () {
     // TODO:
     // createtime:
   }
+  console.log(isModfiy.value)
 
-  const result = await PublishBlog(form)
+  let result,
+    bid = history.state?.bid
+  if (bid) result = await UpdateBlogAPI({ bid: bid, ...form })
+  else result = await PublishBlogAPI(form)
   publishLoading.value = false
   if (result.code == 0) {
     message.success('发布成功！')
-    blogPublishOpen.value = false
     localStorage.removeItem('EditBlog/draft')
-    router.push('/404')
+    router.push('/b/' + bid ?? result.data)
     return
   } else {
     message.error('发布失败！')
@@ -482,6 +508,7 @@ onMounted(() => {
   window.onbeforeunload = function () {
     return '未保存草稿！'
   }
+  document.title = '编辑博客'
 })
 onUnmounted(() => {
   window.onbeforeunload = null

@@ -23,6 +23,7 @@
       :xssOptions="editorOptions.xssOptions"
       @imgAdd="addImg"
       @imgDel="delImg"
+      @change="change"
       @save="save"
       v-model="content"
     >
@@ -53,7 +54,7 @@
           class="top-3"
           @mouseenter="tinyPreview(false)"
           @mouseleave="tinyPreview(true)"
-          @click="$emit('send', content)"
+          @click="emit('send', content)"
           >发送
         </a-button>
       </template>
@@ -82,6 +83,8 @@ const props = defineProps({
   value: { type: String }, // default value
   save: { type: Function, default: () => null }, // backcall of save event
 })
+
+const emit = defineEmits(['change', 'send'])
 
 const mavonEditor = mavon.mavonEditor
 const vm = ref()
@@ -119,6 +122,10 @@ const delImg = async function (pos: any) {
   const fid = url.split('/').pop()
   await DeleteFileAPI(fid)
   props.save ? props.save() : null
+}
+
+const change = function (value: string, render: string) {
+  emit('change', value, render)
 }
 
 /**

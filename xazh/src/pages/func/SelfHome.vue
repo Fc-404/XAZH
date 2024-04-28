@@ -84,11 +84,16 @@
             <template #tab>
               <FileOutlined /> {{ isSelf ? '文章管理' : '文章' }}
             </template>
-            blog
+            <BlogViewList
+              v-for="i in 100"
+              bid="662b88ddfd3013692c733229"
+              :ctl="true"
+            >
+            </BlogViewList>
           </a-tab-pane>
           <a-tab-pane v-if="isSelf" :key="TAG.rel">
             <template #tab> <UserOutlined /> 好友管理 </template>
-            relation
+            <FnNotice :size="5"></FnNotice>
           </a-tab-pane>
           <a-tab-pane :key="TAG.star">
             <template #tab>
@@ -98,19 +103,19 @@
           </a-tab-pane>
           <a-tab-pane :key="TAG.liked">
             <template #tab> <LikeOutlined /> 最近点赞 </template>
-            liked
+            <FnNotice :size="5"></FnNotice>
           </a-tab-pane>
           <a-tab-pane :key="TAG.readed">
             <template #tab> <EyeOutlined /> 浏览历史 </template>
-            readed
+            <FnNotice :size="5"></FnNotice>
           </a-tab-pane>
           <a-tab-pane v-if="isSelf" :key="TAG.edit">
             <template #tab> <EditOutlined /> 编辑资料 </template>
-            edit
+            <FnNotice :size="5"></FnNotice>
           </a-tab-pane>
           <a-tab-pane v-if="isSelf" :key="TAG.setting">
             <template #tab> <SettingOutlined /> 设置 </template>
-            <FnNotice></FnNotice>
+            <FnNotice :size="5"></FnNotice>
           </a-tab-pane>
         </a-tabs>
       </div>
@@ -137,6 +142,7 @@ import {
 import { useTitle } from '../../composables/useTitle'
 import { useHeaderMode } from '../../composables/useHeaderMode'
 import { ModeHeaderPageI } from '../../interface/page.i'
+import BlogViewList from '../../components/common/BlogViewList.vue'
 
 const route = useRoute()
 const store = useStore()
@@ -194,7 +200,6 @@ useTitle(title)
 useHeaderMode(ModeHeaderPageI.NONE)
 onMounted(async () => {
   await getUserInfo()
-  console.log(userInfo)
 })
 </script>
 
@@ -242,6 +247,7 @@ onMounted(async () => {
         table {
           background-color: var(--colorBgContainer);
           border-radius: calc(var(--borderRadius) * 2);
+          box-shadow: var(--boxShadow);
           padding: 1.5rem;
           width: 20rem;
 

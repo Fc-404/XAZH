@@ -1,4 +1,5 @@
 export enum BLOG_TYPE {
+  none = 0,
   original = 1,
   repost,
   modified,
@@ -6,6 +7,8 @@ export enum BLOG_TYPE {
 
 export function getBlogTypeName(type: BLOG_TYPE): string {
   switch (type) {
+    case BLOG_TYPE.none:
+      return ''
     case BLOG_TYPE.original:
       return '原创'
     case BLOG_TYPE.repost:
@@ -17,6 +20,8 @@ export function getBlogTypeName(type: BLOG_TYPE): string {
 
 export function getBlogTypeColor(type: BLOG_TYPE): string {
   switch (type) {
+    case BLOG_TYPE.none:
+      return ''
     case BLOG_TYPE.original:
       return '#5cdbd3'
     case BLOG_TYPE.repost:

@@ -157,7 +157,7 @@ const url = window.location.href
 import { useRoute, useRouter } from 'vue-router'
 import {
   GetBUInteractionAPI,
-  GetBlogInfoAPI,
+  GetBlogAPI,
   LikeBlogAPI,
   ReadBlogAPI,
   StarBlogAPI,
@@ -235,7 +235,7 @@ const actState = reactive<{ [key: string]: boolean | undefined }>({
 
 const getInfo = async function () {
   // Get the blog's information
-  const c = await GetBlogInfoAPI(bid)
+  const c = await GetBlogAPI(bid)
   if (!c) {
     message.error('获取博客信息失败！')
     router.push('/404')
@@ -273,7 +273,6 @@ const getInfo = async function () {
   const ua = await GetRelationInteractionAPI([blogInfo.author])
   if (!ua) return
   if (ua[blogInfo.author]?.isfollow) actState.follow = true
-  console.log(ua)
 }
 
 const likeBlog = async function () {
@@ -400,7 +399,6 @@ onMounted(async () => {
 
       .btn {
         border: none;
-        box-shadow: none;
       }
     }
   }
