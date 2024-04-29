@@ -18,9 +18,10 @@ export async function UpdateBlogAPI(param: object) {
   return result.data ?? null
 }
 
-export async function DeleteBlogAPI(bid: string) {
+export async function DeleteBlogAPI(bid: string, chunk?: string) {
   const result = await xazhAxios.post('/Blog/Delete', {
     bid: bid,
+    chunk: chunk,
   })
 
   return result.data ? result.data.body : null
@@ -37,6 +38,19 @@ export async function GetBlogAPI(bid: string) {
 export async function GetBlogsInfoAPI(bids: string[]) {
   const result = await xazhAxios.post('/Blog/List', {
     bids: bids,
+  })
+
+  return result.data
+    ? Object.keys(result.data.body).length <= 0
+      ? null
+      : result.data.body
+    : null
+}
+
+export async function GetUserBlogInfoAPI(uid: string, chunk?: string) {
+  const result = await xazhAxios.post('/Blog/GetUserBlogs', {
+    uid: uid,
+    chunk: chunk,
   })
 
   return result.data ? result.data.body : null

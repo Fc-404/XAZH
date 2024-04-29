@@ -473,17 +473,17 @@ const publishBlog = async function () {
     // TODO:
     // createtime:
   }
-  console.log(isModfiy.value)
 
   let result,
     bid = history.state?.bid
   if (bid) result = await UpdateBlogAPI({ bid: bid, ...form })
   else result = await PublishBlogAPI(form)
+  console.log(result)
   publishLoading.value = false
   if (result.code == 0) {
     message.success('发布成功！')
     localStorage.removeItem('EditBlog/draft')
-    router.push('/b/' + bid ?? result.data)
+    router.push('/b/' + (bid || result.body))
     return
   } else {
     message.error('发布失败！')

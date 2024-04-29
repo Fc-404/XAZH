@@ -18,6 +18,7 @@ import { BlogCommentDTO, BlogInfoDTO, UpdateBlogDTO } from '../dto/blog.dto'
 import { LevelGuard } from '../guard/level.guard'
 import { USER_LEVEL } from '../types/userLevel.types'
 import { Level } from '../decorator/auth/level.decorator'
+import { RelationUserService } from '../service/relation.user.service'
 
 @Controller('/Blog')
 export class BlogController {
@@ -27,6 +28,8 @@ export class BlogController {
   blog: BlogUserService
   @Inject()
   user: UserService
+  @Inject()
+  rel: RelationUserService
   @Inject()
   comment: CommentBlogService
 
@@ -144,14 +147,55 @@ export class BlogController {
             ...binfo,
             authorName: await this.user.id2user(binfo.author),
           }
+          break
+        case PRIVACY_TYPE.followers:
+          break
         case PRIVACY_TYPE.onlyfriend:
           // TODO: check if the user is friend of the author
+          break
+        case PRIVACY_TYPE.onlyself:
+          let uid = this.ctx.user.id
+          if (uid && uid?.equals(binfo.author))
+            result[bid] = {
+              ...binfo,
+              authorName: await this.user.id2user(binfo.author),
+            }
           break
       }
     }
     return result
   }
 
+  /**
+   * Get user's blogs by user id.
+   * @param uid
+   * @param chunk
+   * @returns
+   */
+  @Post('/GetUserBlogs')
+  async getUserBlogList(
+    @Body('uid') uid: string,
+    @Body('chunk') chunk?: string
+  ) {
+    const uId = ObjectId.isValid(uid) ? new ObjectId(uid) : undefined
+    if (!uId) {
+      this.ctx.status = 422
+      return '无效的用户id'
+    }
+    const chunkId = chunk
+      ? ObjectId.isValid(chunk)
+        ? new ObjectId(chunk)
+        : undefined
+      : undefined
+    const blogs = await this.blog.getBlogsByUser(uId, chunkId)
+    return blogs
+  }
+
+  /**
+   * To comment a blog.
+   * @param options
+   * @returns
+   */
   @Post('/Comment')
   @UseGuard(TokenGuard)
   async replyBlog(@Body() options: BlogCommentDTO) {
@@ -391,15 +435,15 @@ export class BlogController {
    */
   @Post('/Delete')
   @UseGuard(TokenGuard)
-  async deleteBlog(@Body('bid') bid: string) {
-    if (!ObjectId.isValid(bid)) {
+  async deleteBlog(@Body('bid') bid: string, @Body('chunk') chunk: string) {
+    if (!ObjectId.isValid(bid) || (chunk && !ObjectId.isValid(chunk))) {
       this.ctx.status = 403
-      return '无效的博客id'
+      return '无效的id'
     }
     const bId = new ObjectId(bid)
-    const result = await this.blog.deleteBlog(this.ctx.user.id, bId)
-    if (!result)
-      new httpError.ForbiddenError('You cannot delete this blog.')
+    const chunkId = chunk ? new ObjectId(chunk) : undefined
+    const result = await this.blog.deleteBlog(this.ctx.user.id, bId, chunkId)
+    if (!result) new httpError.ForbiddenError('You cannot delete this blog.')
     return result
   }
 

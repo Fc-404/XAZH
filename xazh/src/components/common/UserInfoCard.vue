@@ -59,7 +59,7 @@ const props = defineProps({
 })
 
 const toUserHome = function () {
-  router.push('/home/' + props.info.uid)
+  router.push('/u/' + (props.info.uid || props.info.id || props.info._id))
 }
 </script>
 

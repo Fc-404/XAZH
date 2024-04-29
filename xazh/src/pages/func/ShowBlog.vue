@@ -237,7 +237,6 @@ const getInfo = async function () {
   // Get the blog's information
   const c = await GetBlogAPI(bid)
   if (!c) {
-    message.error('获取博客信息失败！')
     router.push('/404')
     return
   }
@@ -259,6 +258,7 @@ const getInfo = async function () {
 
   // Recode read action
   ReadBlogAPI(bid, store.getters['signin/id'])
+  blogInfo.readcount++
 
   // return if user is not signed in
   if (!store.getters['signin/on']) return

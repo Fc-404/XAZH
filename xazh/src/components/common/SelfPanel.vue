@@ -204,7 +204,7 @@ const toRouterUserHome = function (pos: string) {
     message.error('请先登录！')
     return
   }
-  router.push('/home/' + userInfo.id + '/' + pos)
+  router.push('/u/' + userInfo.id + '/' + pos)
   selfpcOpen.value = false
 }
 

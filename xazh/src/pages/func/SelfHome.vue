@@ -42,6 +42,20 @@
         <div id="selfhome-info-table">
           <table>
             <tr>
+              <td>点赞量</td>
+              <td>{{ userBlogInfo.likecount }}</td>
+              <td>阅读量</td>
+              <td>{{ userBlogInfo.readcount }}</td>
+            </tr>
+            <tr>
+              <td>收藏量</td>
+              <td>{{ userBlogInfo.starcount }}</td>
+              <td>总博客</td>
+              <td>{{ userBlogInfo.blogcount }}</td>
+            </tr>
+          </table>
+          <table>
+            <tr>
               <td>ID</td>
               <td>{{ uid }}</td>
             </tr>
@@ -85,8 +99,8 @@
               <FileOutlined /> {{ isSelf ? '文章管理' : '文章' }}
             </template>
             <BlogViewList
-              v-for="i in 100"
-              bid="662b88ddfd3013692c733229"
+              v-for="i in userBlogInfo.value"
+              :bid="i.value"
               :ctl="true"
             >
             </BlogViewList>
@@ -111,7 +125,7 @@
           </a-tab-pane>
           <a-tab-pane v-if="isSelf" :key="TAG.edit">
             <template #tab> <EditOutlined /> 编辑资料 </template>
-            <FnNotice :size="5"></FnNotice>
+            <EditUserInfo :userInfo="userInfo"></EditUserInfo>
           </a-tab-pane>
           <a-tab-pane v-if="isSelf" :key="TAG.setting">
             <template #tab> <SettingOutlined /> 设置 </template>
@@ -143,12 +157,13 @@ import { useTitle } from '../../composables/useTitle'
 import { useHeaderMode } from '../../composables/useHeaderMode'
 import { ModeHeaderPageI } from '../../interface/page.i'
 import BlogViewList from '../../components/common/BlogViewList.vue'
+import { GetUserBlogInfoAPI } from '../../api/blog.api'
+import EditUserInfo from '../userhome/editUserInfo.vue'
 
 const route = useRoute()
 const store = useStore()
-const uid: string = route.params['uid'].toString()
-const pos: string = route.params['pos'].toString()
-
+let uid: string = route.params['uid']?.toString()
+let pos: string = route.params['pos']?.toString()
 const isSelf = ref<boolean>(store.getters['signin/id'] == uid)
 
 enum TAG {
@@ -169,8 +184,19 @@ watch(
     tag.value = TAG[v]
   }
 )
+watch(
+  () => route.params['uid'],
+  (v) => {
+    uid = v as string
+    userBlogInfo.value = Array<any>()
+    isSelf.value = !!(store.getters['signin/id'] == uid)
+    getUserInfo()
+    getUserBlogInfo()
+  }
+)
 
 const userInfo = reactive({
+  _id: '',
   himg: '',
   user: '',
   exp: 0,
@@ -184,6 +210,15 @@ const userInfo = reactive({
 })
 const previewHimg = ref<boolean>(false)
 
+const userBlogInfo = reactive({
+  readcount: 0,
+  likecount: 0,
+  starcount: 0,
+  blogcount: 0,
+  value: Array<any>(),
+  next: '',
+})
+
 const getUserInfo = async function () {
   const u = await UsersInfoAPI([uid])
   if (!u) return
@@ -195,11 +230,29 @@ const getUserInfo = async function () {
   title.value = userInfo.user + title.value
 }
 
+const getUserBlogInfo = async function (chunk?: string) {
+  const ub = await GetUserBlogInfoAPI(uid, chunk)
+  if (!ub) return
+  ub.readcount ? (userBlogInfo.readcount = ub.readcount) : null
+  ub.likecount ? (userBlogInfo.likecount = ub.likecount) : null
+  ub.starcount ? (userBlogInfo.starcount = ub.starcount) : null
+  ub.blogcount ? (userBlogInfo.blogcount = ub.blogcount) : null
+  ub.next ? (userBlogInfo.next = ub.next) : null
+  ub.value.forEach((i: string) => {
+    userBlogInfo.value.push({
+      chunk: ub.node,
+      value: i,
+    })
+  })
+  console.log(userBlogInfo)
+}
+
 const title = ref<string>(' - 个人中心')
 useTitle(title)
 useHeaderMode(ModeHeaderPageI.NONE)
 onMounted(async () => {
   await getUserInfo()
+  await getUserBlogInfo()
 })
 </script>
 
@@ -213,9 +266,6 @@ onMounted(async () => {
   }
 
   &- {
-    // border: 1px solid red;
-    min-width: 64rem;
-    max-width: 96rem;
     margin: 0 auto;
     display: flex;
     flex-wrap: nowrap;
@@ -225,7 +275,6 @@ onMounted(async () => {
     &info {
       width: 20rem;
       margin-bottom: 12rem;
-      // border: 1px solid blue;
 
       &-img {
         border: none;
@@ -254,13 +303,13 @@ onMounted(async () => {
           margin: 1rem auto auto auto;
           color: var(--colorTextSecondary);
 
-          > tr td:nth-child(1) {
+          > tr td:nth-child(odd) {
             text-align: right;
             font-weight: bolder;
             padding-top: 1rem;
             user-select: none;
           }
-          > tr td:nth-child(2) {
+          > tr td:nth-child(even) {
             padding-left: 1.5rem;
             padding-top: 1rem;
           }
@@ -269,7 +318,9 @@ onMounted(async () => {
     }
 
     &page {
+      width: 50%;
       min-width: 54rem;
+      max-width: 64rem;
       margin: 0 3rem;
     }
   }

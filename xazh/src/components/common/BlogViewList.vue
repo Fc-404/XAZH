@@ -1,44 +1,52 @@
 <template>
-  <div id="blogviewlist" :title="bid" @click="toBlogPage">
-    <LazyComponent @intersected="getBlogInfo">
-      <div id="blogviewlist-title">
-        <h2 :title="blogInfo.title" :class="[blogInfo.value ? '' : 'loading']">
-          {{ blogInfo.title }}
-        </h2>
-        <div>
-          <span> <EyeOutlined />{{ blogInfo.readcount }}</span>
-          <span> <LikeOutlined />{{ blogInfo.likecount }}</span>
-          <span> <StarOutlined />{{ blogInfo.starcount }}</span>
+  <div ref="root" id="blogviewlist" :title="bid" @click="toBlogPage">
+    <LazyComponent id="blogviewlist-" @intersected="getBlogInfo">
+      <div id="blogviewlist-cover">
+        <img v-if="blogCoverSrc" :src="blogCoverSrc" />
+      </div>
+      <div>
+        <div id="blogviewlist-title">
+          <h2 :title="blogInfo.title" :class="[loadedBlog ? '' : 'loading']">
+            {{ blogInfo.title }}
+          </h2>
+          <div>
+            <span> <EyeOutlined />{{ blogInfo.readcount }}</span>
+            <span> <LikeOutlined />{{ blogInfo.likecount }}</span>
+            <span> <StarOutlined />{{ blogInfo.starcount }}</span>
+          </div>
         </div>
+        <div id="blogviewlist-info" :class="[loadedBlog ? '' : 'loading']">
+          <a-tag style="border: none" :color="getBlogTypeColor(blogInfo.type)">
+            {{ getBlogTypeName(blogInfo.type) }}
+          </a-tag>
+          <span>{{ blogInfo.authorName }}</span>
+          <span>
+            {{
+              blogInfo.createtime
+                ? formatDate(
+                    'YYYY-MM-DD hh:mm:ss',
+                    new Date(blogInfo.createtime)
+                  )
+                : ''
+            }}
+          </span>
+        </div>
+        <p v-if="blogInfo.abstract" :title="blogInfo.abstract" :class="[loadedBlog ? '' : 'loading']">
+          {{ blogInfo.abstract }}
+        </p>
+        <div v-if="props.ctl" id="blogviewlist-func">
+          <a-button type="link" @click.stop="toEditBlog"> 编辑 </a-button>
+          <a-popconfirm
+            title="确定要删除这篇博客吗？"
+            okText="确定"
+            cancelText="取消"
+            @confirm="deleteBlog"
+          >
+            <a-button type="link" @click.stop danger>删除</a-button>
+          </a-popconfirm>
+        </div>
+        <div v-else style="height: 1.5rem"></div>
       </div>
-      <div id="blogviewlist-info" :class="[blogInfo.value ? '' : 'loading']">
-        <a-tag style="border: none" :color="getBlogTypeColor(blogInfo.type)">
-          {{ getBlogTypeName(blogInfo.type) }}
-        </a-tag>
-        <span>{{ blogInfo.authorName }}</span>
-        <span>
-          {{
-            blogInfo.createtime
-              ? formatDate('YYYY-MM-DD hh:mm:ss', new Date(blogInfo.createtime))
-              : ''
-          }}
-        </span>
-      </div>
-      <p :title="blogInfo.abstract" :class="[blogInfo.value ? '' : 'loading']">
-        {{ blogInfo.abstract }}
-      </p>
-      <div v-if="props.ctl" id="blogviewlist-func">
-        <a-button type="link" @click.stop="toEditBlog"> 编辑 </a-button>
-        <a-popconfirm
-          title="确定要删除这篇博客吗？"
-          okText="确定"
-          cancelText="取消"
-          @confirm="deleteBlog"
-        >
-          <a-button type="link" @click.stop danger>删除</a-button>
-        </a-popconfirm>
-      </div>
-      <div v-else style="height: 1.5rem"></div>
     </LazyComponent>
   </div>
 </template>
@@ -55,15 +63,19 @@ import { message } from 'ant-design-vue'
 
 const store = useStore()
 const router = useRouter()
+const root = ref<HTMLElement>()
 const props = defineProps({
   bid: String,
+  info: { type: Object, default: null },
+  chunk: { type: String, default: undefined },
   ctl: { type: Boolean, default: false },
 })
+const loadedBlog = ref<boolean>(false)
 const blogInfo = reactive({
-  value: false,
   title: '',
   author: '',
   authorName: '',
+  cover: '',
   type: 0,
   createtime: '',
   abstract: '',
@@ -71,32 +83,54 @@ const blogInfo = reactive({
   likecount: 0,
   starcount: 0,
 })
+const blogCoverSrc = ref<string | undefined>(undefined)
 
 const getBlogInfo = async function () {
-  if (!props.bid) return
-  let r = await GetBlogsInfoAPI([props.bid])
-  if (!r) return
+  let r: any
+  if (props.bid) r = await GetBlogsInfoAPI([props.bid])
+  if (props.info) r[props.bid as string] = props.info
+  console.log(r)
+  if (!r)  {
+    root.value?.remove()
+    return false
+  }
   Object.keys(blogInfo).forEach((k) => {
     // @ts-ignore
     r[props.bid][k] ? (blogInfo[k] = r[props.bid][k]) : null
   })
-  blogInfo.value = true
+  loadedBlog.value = true
+  if (blogInfo.cover) {
+    blogCoverSrc.value = store.getters['config/fileUrl'](blogInfo.cover)
+  }
+  return true
 }
 
 const toBlogPage = function () {
+  if (!loadedBlog.value) return
   router.push('/b/' + props.bid)
 }
 const toEditBlog = function () {
-  if (store.getters['signin/id'] != blogInfo.author) return
+  if (
+    !props.bid ||
+    !loadedBlog.value ||
+    store.getters['signin/id'] != blogInfo.author
+  )
+    return
   router.push({
     name: 'BlogEdit',
     state: { bid: props.bid },
   })
 }
 const deleteBlog = async function () {
-  if (store.getters['signin/id'] != blogInfo.author || !props.bid) return
-  const r = await DeleteBlogAPI(props.bid)
+  if (
+    !props.bid ||
+    !loadedBlog.value ||
+    store.getters['signin/id'] != blogInfo.author
+  )
+    return
+  const r = await DeleteBlogAPI(props.bid, props.chunk)
   if (r) {
+    root.value?.remove()
     message.success('删除成功')
   }
 }
@@ -111,6 +145,7 @@ const deleteBlog = async function () {
   user-select: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  overflow: hidden;
   // box-shadow: var(--boxShadow);
 
   &:hover {
@@ -118,6 +153,21 @@ const deleteBlog = async function () {
   }
   &:hover &-func {
     opacity: 1;
+  }
+
+  &-cover {
+    img {
+      margin-right: 1rem;
+      margin-top: 0.2rem;
+      height: 8rem;
+      width: 12rem;
+      background-size: cover cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      object-fit: cover;
+      float: left;
+      border-radius: var(--borderRadius);
+    }
   }
 
   &-title {

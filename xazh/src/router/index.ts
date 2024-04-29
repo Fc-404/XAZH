@@ -15,8 +15,6 @@ import Menu from './menu'
 import Other from './other'
 import WEBPanel from './webpanel'
 
-const BlogShow = () => import('../pages/func/ShowBlog.vue')
-
 const AdminPanel = () => import('../pages/panel/AdminPanel.vue')
 
 const routes: RouteRecordRaw[] = [
