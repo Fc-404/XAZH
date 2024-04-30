@@ -102,6 +102,7 @@
               v-for="i in userBlogInfo.value"
               :bid="i.value"
               :ctl="true"
+              @deleted="userBlogInfo.blogcount--"
             >
             </BlogViewList>
           </a-tab-pane>
@@ -113,7 +114,7 @@
             <template #tab>
               <StarOutlined /> {{ isSelf ? '我的收藏' : '收藏' }}
             </template>
-            star
+            <UserStar :uid="uid"></UserStar>
           </a-tab-pane>
           <a-tab-pane :key="TAG.liked">
             <template #tab> <LikeOutlined /> 最近点赞 </template>
@@ -159,6 +160,7 @@ import { ModeHeaderPageI } from '../../interface/page.i'
 import BlogViewList from '../../components/common/BlogViewList.vue'
 import { GetUserBlogInfoAPI } from '../../api/blog.api'
 import EditUserInfo from '../userhome/editUserInfo.vue'
+import UserStar from '../userhome/userStar.vue'
 
 const route = useRoute()
 const store = useStore()
@@ -244,7 +246,6 @@ const getUserBlogInfo = async function (chunk?: string) {
       value: i,
     })
   })
-  console.log(userBlogInfo)
 }
 
 const title = ref<string>(' - 个人中心')

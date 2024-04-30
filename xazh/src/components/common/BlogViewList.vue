@@ -31,7 +31,11 @@
             }}
           </span>
         </div>
-        <p v-if="blogInfo.abstract" :title="blogInfo.abstract" :class="[loadedBlog ? '' : 'loading']">
+        <p
+          v-show="!(loadedBlog && !blogInfo.abstract)"
+          :title="blogInfo.abstract"
+          :class="[loadedBlog ? '' : 'loading']"
+        >
           {{ blogInfo.abstract }}
         </p>
         <div v-if="props.ctl" id="blogviewlist-func">
@@ -85,12 +89,14 @@ const blogInfo = reactive({
 })
 const blogCoverSrc = ref<string | undefined>(undefined)
 
+const emit = defineEmits(['deleted'])
+
 const getBlogInfo = async function () {
-  let r: any
-  if (props.bid) r = await GetBlogsInfoAPI([props.bid])
+  if (!props.bid) return
+  let r: any = {}
   if (props.info) r[props.bid as string] = props.info
-  console.log(r)
-  if (!r)  {
+  else r = await GetBlogsInfoAPI([props.bid])
+  if (!r[props.bid]) {
     root.value?.remove()
     return false
   }
@@ -131,6 +137,7 @@ const deleteBlog = async function () {
   const r = await DeleteBlogAPI(props.bid, props.chunk)
   if (r) {
     root.value?.remove()
+    emit('deleted')
     message.success('删除成功')
   }
 }
@@ -202,11 +209,11 @@ const deleteBlog = async function () {
   }
 
   p {
-    min-height: 4rem;
+    min-height: 3rem;
     color: var(--colorTextSecondary);
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     overflow: hidden;
   }
 

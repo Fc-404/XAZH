@@ -421,6 +421,8 @@ export class ListUtilService {
       throw new Error('Chunk\'s head is not ' + head?.toString())
 
     return {
+      totalLen: node?.totalLen,
+      length: node?.length,
       value: node?.body,
       head: node?.head,
       node: node?._id,

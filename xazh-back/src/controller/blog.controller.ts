@@ -149,10 +149,10 @@ export class BlogController {
           }
           break
         case PRIVACY_TYPE.followers:
-          break
+        // break
         case PRIVACY_TYPE.onlyfriend:
-          // TODO: check if the user is friend of the author
-          break
+        // TODO: check if the user is friend of the author
+        // break
         case PRIVACY_TYPE.onlyself:
           let uid = this.ctx.user.id
           if (uid && uid?.equals(binfo.author))
@@ -160,6 +160,7 @@ export class BlogController {
               ...binfo,
               authorName: await this.user.id2user(binfo.author),
             }
+          else result[bid] = false
           break
       }
     }

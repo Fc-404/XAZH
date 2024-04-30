@@ -182,7 +182,11 @@ export class BlogUserService {
    * @param bid
    * @returns boolean | 0
    */
-  async deleteBlog(uid: Types.ObjectId, bid: Types.ObjectId, chunk?: Types.ObjectId): Promise<boolean> {
+  async deleteBlog(
+    uid: Types.ObjectId,
+    bid: Types.ObjectId,
+    chunk?: Types.ObjectId
+  ): Promise<boolean> {
     const blog = await BlogInfo.model.findById(bid)
     if (!uid.equals(blog.author)) return false
 
@@ -191,10 +195,15 @@ export class BlogUserService {
     session.startTransaction()
     try {
       blog.deleted = true
-      await blog.save({session})
+      await blog.save({ session })
       const userBlog = await UserBlog.model.findById(uid)
-      await this.list.deleteOne(userBlog.blogs, (v) => bid.equals(v), chunk, session)
-
+      await userBlog.updateOne({ $inc: { blogcount: -1 } }, { session })
+      await this.list.deleteOne(
+        userBlog.blogs,
+        (v) => bid.equals(v),
+        chunk,
+        session
+      )
       await session.commitTransaction()
     } catch (e) {
       result = false
@@ -264,6 +273,12 @@ export class BlogUserService {
     return BlogInfo.model.findOne(id, filter).lean()
   }
 
+  /**
+   * Get user's blogs.
+   * @param uid
+   * @param chunk
+   * @returns
+   */
   async getBlogsByUser(
     uid: Types.ObjectId,
     chunk?: Types.ObjectId
@@ -430,5 +445,32 @@ export class BlogUserService {
     const blog = await BlogInfo.model.findById(id)
     blog.disabled = false
     return blog.save()
+  }
+
+  /**
+   * Get blogs by order.
+   * @param index
+   * @param step
+   * @param order
+   * @returns
+   */
+  async getBlogsByOrder(
+    index: number = 0,
+    step: number = 20,
+    order: boolean = false
+  ) {
+    const blogs = await BlogInfo.model
+      .find()
+      .sort({ _id: order ? 1 : -1 })
+      .skip(index)
+      .limit(step)
+
+    for (let i = 0; i < blogs.length; i++) {
+      if (blogs[i].deleted || blogs[i].disabled) {
+        blogs.splice(i--, 1)
+      }
+    }
+
+    return blogs
   }
 }

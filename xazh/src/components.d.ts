@@ -53,6 +53,7 @@ declare module 'vue' {
     BlogList: typeof import('./components/common/BlogList.vue')['default']
     BlogViewCard: typeof import('./components/common/BlogViewCard.vue')['default']
     BlogViewList: typeof import('./components/common/BlogViewList.vue')['default']
+    DailyQuoteEn: typeof import('./components/daily/DailyQuoteEn.vue')['default']
     Editor: typeof import('./components/common/Editor.vue')['default']
     FnNotice: typeof import('./components/common/FnNotice.vue')['default']
     Footer: typeof import('./components/main/Footer.vue')['default']

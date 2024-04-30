@@ -72,6 +72,7 @@ const toUserHome = function () {
 
   &-up {
     display: flex;
+    color: var(--colorText);
 
     &-img {
       border: none;

@@ -23,6 +23,7 @@
           id="selfp-ctl-info"
           :style="{ margin: 0 }"
           :info="store.getters['signin/info']"
+          @click="selfpcOpen = false"
         ></UserInfoCard>
 
         <a-divider></a-divider>

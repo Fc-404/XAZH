@@ -96,6 +96,20 @@ export async function UnstarBlogAPI(
   return result.data ? result.data.body : null
 }
 
+export async function GetUserStarBlogsAPI(
+  folder: string,
+  uid?: string,
+  chunk?: string
+) {
+  const result = await xazhAxios.post('/Star/Folder', {
+    name: folder,
+    uid: uid,
+    chunk: chunk,
+  })
+
+  return result.data ? result.data.body : null
+}
+
 export async function GetBUInteractionAPI(bid: string) {
   const result = await xazhAxios.post('/Blog/GetInteraction', {
     bid: bid,
