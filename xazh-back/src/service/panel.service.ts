@@ -58,7 +58,7 @@ export class PanelService {
         result = await AdminPanel.model.findOneAndUpdate(filter, modification, options)
         break
     }
-    console.log(result);
+    // console.log(result);
     return result ? true : false
   }
 

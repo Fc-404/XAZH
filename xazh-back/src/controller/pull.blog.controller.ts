@@ -36,9 +36,6 @@ export class PullController {
       }
     })
 
-    for (let i of result) {
-      console.log(i);
-    }
     return result
   }
 }

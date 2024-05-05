@@ -68,7 +68,7 @@ export class WEBPanelController {
     const name = options.name
     const value = options.value
 
-    console.log(name, value, group);
+    // console.log(name, value, group);
 
     const result = await this.panel.setConfig(type, name, value, group)
 

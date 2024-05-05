@@ -77,7 +77,7 @@ export class GetUserInfo implements IMiddleware<Context, NextFunction> {
       //   ctx.user['ipv4'] = /(\d{1,3}.){3}.\d{1,3}/.exec(ctx.ip)[0]
       // } catch { }
 
-      console.log(ctx.user);
+      // console.log(ctx.user);
       return await next()
     }
   }
