@@ -20,7 +20,7 @@ const config: Module<any, any> = {
     // Backend API base address.
     // baseApi: 'http://192.168.22.22:7001/',
     // baseApi: 'http://localhost:7001/',
-    baseApi: 'http://1mi91hh08233.vicp.fun',
+    baseApi: 'https://1mi91hh08233.vicp.fun',
   }),
   getters: {
     name(state): string {
