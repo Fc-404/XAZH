@@ -1,21 +1,11 @@
 <template>
   <div>
-    Projects
+    <FnNotice></FnNotice>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useStore } from 'vuex';
-
-const store = useStore()
-
-
-onMounted(() => {
-  store.commit('header/onProgress', false)
-})
-onUnmounted(() => {
-  store.commit('header/onProgress', true)
-})
+import FnNotice from '../../components/common/FnNotice.vue'
 </script>
 
 <style scoped></style>

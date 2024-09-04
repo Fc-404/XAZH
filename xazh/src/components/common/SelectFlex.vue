@@ -3,11 +3,12 @@
     <a-select
       v-model:value="itemsSelected"
       mode="multiple"
-      style="width: 100%;"
+      style="width: 100%"
       placeholder="点击添加"
+      :disabled="props.disabled"
     >
       <template #dropdownRender>
-        <div style="height: .2rem;"></div>
+        <div style="height: 0.2rem"></div>
         <a-input
           v-model:value="itemSearch"
           :placeholder="tipText.searchPlaceholder"
@@ -16,22 +17,25 @@
           :maxlength="maxStr"
         ></a-input>
 
-        <div
-          id="select-flex-content"
-          @mousedown.prevent
-        >
+        <div id="select-flex-content" @mousedown.prevent>
           <a-empty
             v-if="items.length == 0"
             :image="Empty.PRESENTED_IMAGE_SIMPLE"
-            style="width: 100%;"
+            style="width: 100%"
           ></a-empty>
           <a-button
-            :class="[props.flex ? 'select-flex-items' : 'select-flex-items-list']"
+            :class="[
+              props.flex ? 'select-flex-items' : 'select-flex-items-list',
+            ]"
             v-for="i in items.length"
             @click="itemSelectedClick(i - 1)"
-            :type="items[i - 1]['selected'] ? 'primary' : (
-              props.flex ? 'default' : 'text'
-            )"
+            :type="
+              items[i - 1]['selected']
+                ? 'primary'
+                : props.flex
+                ? 'default'
+                : 'text'
+            "
             v-html="highStr(items[i - 1]['name'])"
           ></a-button>
         </div>
@@ -56,57 +60,61 @@
             新建
           </a-button>
         </a-space>
-        <div style="height: .2rem;"></div>
+        <div style="height: 0.2rem"></div>
       </template>
     </a-select>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Empty } from 'ant-design-vue';
-import { PlusOutlined } from '@ant-design/icons-vue';
+import { Empty } from 'ant-design-vue'
+import { PlusOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps({
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
   flex: {
     type: Boolean,
-    default: true
+    default: true,
   },
   search: {
     type: Boolean,
-    default: true
+    default: true,
   },
   newItem: {
     type: Boolean,
-    dafault: true
+    dafault: true,
   },
   newItemEvent: {
     type: Function,
-    default: () => { }
+    default: () => {},
   },
   newItemException: {
     type: Function,
-    default: () => { }
+    default: () => {},
   },
   options: {
     type: Array<string>,
-    dafault: []
+    dafault: [],
   },
   value: {
     type: Array<string>,
-    default: []
-  }
+    default: [],
+  },
 })
 
 const emit = defineEmits(['update:value'])
 
-const items = ref<Array<{ name: string, selected: boolean }>>([])
+const items = ref<Array<{ name: string; selected: boolean }>>([])
 const itemsSelected = ref<Array<string>>(props.value)
 const itemSearch = ref<string>('')
 const newItemStr = ref<string>('')
 
 const tipText = reactive({
   newPlaceholder: '新建',
-  searchPlaceholder: '回车以搜索'
+  searchPlaceholder: '回车以搜索',
 })
 const isItemNewing = ref<boolean>(false)
 
@@ -119,7 +127,8 @@ const initItems = function () {
   items.value = []
   for (let i of props.options ?? []) {
     items.value.push({
-      name: i, selected: false
+      name: i,
+      selected: props.value.indexOf(i) != -1 ? true : false,
     })
   }
 }
@@ -170,7 +179,7 @@ const newItem = async function () {
   } else {
     items.value.push({
       name: newItemStr.value || '新建',
-      selected: false
+      selected: false,
     })
     tipText.newPlaceholder = '新建'
   }
@@ -185,7 +194,8 @@ const itemSelectedClick = function (i: number) {
   let selected = items.value[i]['selected']
   if (selected) {
     itemsSelected.value.splice(
-      itemsSelected.value.indexOf(items.value[i]['name']), 1
+      itemsSelected.value.indexOf(items.value[i]['name']),
+      1
     )
     items.value[i]['selected'] = false
   } else {
@@ -201,7 +211,8 @@ const itemSelectedClick = function (i: number) {
 const highStr = function (str: string) {
   const index = str.indexOf(itemSearch.value)
   if (index != -1) {
-    return `${str.slice(0, index)}<span style="color: var(--red);">
+    return `${str.slice(0, index)}
+      <span style="color: var(--colorHighlight); font-weight: bolder;">
       ${str.slice(index, index + itemSearch.value.length)}
       </span>${str.slice(index + itemSearch.value.length)}`
   }
@@ -217,7 +228,7 @@ const highStr = function (str: string) {
   &-content {
     display: flex;
     flex-wrap: wrap;
-    margin: .8rem auto;
+    margin: 0.8rem auto;
     min-height: 3rem;
     max-height: 12rem;
     overflow: auto;
@@ -231,12 +242,12 @@ const highStr = function (str: string) {
 }
 
 .select-flex-items {
-  margin: .2rem;
+  margin: 0.2rem;
 }
 
 .select-flex-items-list {
-  margin: .1rem;
-  width: calc(100% - .2rem);
+  margin: 0.1rem;
+  width: calc(100% - 0.2rem);
   text-align: left;
 }
 </style>

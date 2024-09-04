@@ -1,12 +1,9 @@
 <template>
-  <div
-    id="uploadPicList"
-    :uid="id"
-  >
+  <div id="uploadPicList" :uid="id">
     <a-upload
       v-model:file-list="fileList"
       list-type="picture-card"
-      style="display: block;"
+      style="display: block"
       accept="image/jpg,image/jpeg,image/png,image/gif"
       :multiple="true"
       @preview="handlePreview"
@@ -24,38 +21,34 @@
       :footer="null"
       @cancel="handleCancel"
     >
-      <img
-        alt="预览"
-        style="width: 100%"
-        :src="previewImage"
-      />
+      <img alt="预览" style="width: 100%" :src="previewImage" />
     </a-modal>
   </div>
 </template>
 <script lang="ts" setup>
-import { PlusOutlined } from '@ant-design/icons-vue';
-import { message, type UploadProps } from 'ant-design-vue';
-import { UploadFileAPI, GetFileInfoAPI } from '../../api/file.api';
-import { useStore } from 'vuex';
-import { uid } from 'uid/single';
+import { PlusOutlined } from '@ant-design/icons-vue'
+import { message, type UploadProps } from 'ant-design-vue'
+import { UploadFileAPI, GetFileInfoAPI } from '../../api/file.api'
+import { useStore } from 'vuex'
+import { uid } from 'uid/single'
 
 const id = ref<string>(uid())
 const props = defineProps({
   direction: {
     type: String,
-    default: 'row'
+    default: 'row',
   },
   size: {
     type: String,
-    default: '6rem'
+    default: '6rem',
   },
   gap: {
     type: String,
-    default: '.5rem'
+    default: '.5rem',
   },
   length: {
     type: String,
-    default: '100%'
+    default: '100%',
   },
   maxList: {
     type: Number,
@@ -63,8 +56,8 @@ const props = defineProps({
   },
   list: {
     type: Array<string>,
-    default: []
-  }
+    default: [],
+  },
 })
 
 const emit = defineEmits(['onUpload', 'onDelete'])
@@ -72,30 +65,31 @@ const store = useStore()
 
 function getBase64(file: File) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = (error) => reject(error)
+  })
 }
 
-const previewVisible = ref(false);
-const previewImage = ref('');
-const previewTitle = ref('');
+const previewVisible = ref(false)
+const previewImage = ref('')
+const previewTitle = ref('')
 
 const fileList = ref<UploadProps['fileList']>([])
 
 const handleCancel = () => {
-  previewVisible.value = false;
-  previewTitle.value = '';
+  previewVisible.value = false
+  previewTitle.value = ''
 }
 const handlePreview = async (file: any) => {
   if (!file.url && !file.preview) {
-    file.preview = (await getBase64(file.originFileObj)) as string;
+    file.preview = (await getBase64(file.originFileObj)) as string
   }
-  previewImage.value = file.url || file.preview;
-  previewVisible.value = true;
-  previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
+  previewImage.value = file.url || file.preview
+  previewVisible.value = true
+  previewTitle.value =
+    file.name || file.url.substring(file.url.lastIndexOf('/') + 1)
 }
 
 /**
@@ -134,8 +128,7 @@ const uploadFile = async function (options: any) {
  */
 const removeFile = function (options: any) {
   // The file upload failed is zero of percent in object.
-  if (options.percent !== 0)
-    emit('onDelete', options)
+  if (options.percent !== 0) emit('onDelete', options)
 }
 
 /**
@@ -146,16 +139,16 @@ const initList = function () {
     fileList.value?.push({
       uid: i,
       name: 'image',
-      url: store.getters['config/baseApi'] + 'File/' + i
+      url: store.getters['config/fileUrl'](i),
     })
   })
 }
 initList()
 const getFileName = function () {
-  fileList.value?.forEach(i => {
-    GetFileInfoAPI(i.uid).then(r => {
+  fileList.value?.forEach((i) => {
+    GetFileInfoAPI(i.uid).then((r) => {
       let name = r.data?.body['fileName']
-      name ? i.name = name : null
+      name ? (i.name = name) : null
     })
   })
 }
@@ -164,21 +157,29 @@ const getFileName = function () {
  * Initialise css.
  */
 const setItemCSS = function () {
-  const picItemsDom = document.querySelectorAll(`#uploadPicList[uid="${id.value}"] .ant-upload-list-item-container:not([set])`)
-  picItemsDom.forEach(i => {
-    ; (i as HTMLElement).style.cssText = `
+  const picItemsDom = document.querySelectorAll(
+    `#uploadPicList[uid="${id.value}"] .ant-upload-list-item-container:not([set])`
+  )
+  picItemsDom.forEach((i) => {
+    ;(i as HTMLElement).style.cssText = `
       width: ${props.size} !important;
       height: ${props.size} !important;
     `
-      ; (i as HTMLElement).setAttribute('set', '')
+    ;(i as HTMLElement).setAttribute('set', '')
   })
 }
 const initCSS = function () {
-  const containerWrapperDom = document.querySelector(`#uploadPicList[uid="${id.value}"] .ant-upload-picture-card-wrapper`)
-  const containerDom = document.querySelector(`#uploadPicList[uid="${id.value}"] .ant-upload-list-picture-card`)
-  const picuploadDom = document.querySelector(`#uploadPicList[uid="${id.value}"] .ant-upload-select-picture-card`)
+  const containerWrapperDom = document.querySelector(
+    `#uploadPicList[uid="${id.value}"] .ant-upload-picture-card-wrapper`
+  )
+  const containerDom = document.querySelector(
+    `#uploadPicList[uid="${id.value}"] .ant-upload-list-picture-card`
+  )
+  const picuploadDom = document.querySelector(
+    `#uploadPicList[uid="${id.value}"] .ant-upload-select-picture-card`
+  )
 
-    ; (containerDom as HTMLElement).style.cssText = `
+  ;(containerDom as HTMLElement).style.cssText = `
       display: flex;
       flex-direction: ${props.direction == 'row' ? 'row' : 'column'};
       width: ${props.direction == 'row' ? props.length : 'auto'};
@@ -186,10 +187,8 @@ const initCSS = function () {
       flex-wrap: wrap;
       align-content: start;
     `
-
-    ; (containerWrapperDom as HTMLElement).style.display = 'initial'
-
-    ; (picuploadDom as HTMLElement).style.cssText = `
+  ;(containerWrapperDom as HTMLElement).style.display = 'initial'
+  ;(picuploadDom as HTMLElement).style.cssText = `
       width: ${props.size} !important;
       height: ${props.size} !important;
     `

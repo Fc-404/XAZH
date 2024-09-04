@@ -18,7 +18,7 @@ export class FileService {
    * Upload File.
    * Here had handled the respond.
    * TODO: Due to handle the req necessarily, so cann't return status.
-   * @param options 
+   * @param options
    * @returns Number
    * code:
    * 1: The file size is too large.
@@ -32,7 +32,7 @@ export class FileService {
       return 1
     }
 
-    let result: any = await FileInfo.model.findOne({ fileUid: options.uid })
+    let result: any = await FileInfo.model.findOne({ fid: options.fid })
     if (result) {
       let authorL = result.author.length
       // ! The number 100 is the threshold to set the field of persitend.
@@ -64,7 +64,7 @@ export class FileService {
       }
 
       await FileInfo.model.create([{
-        fileUid: options.uid,
+        fid: options.fid,
         fileName: options.name,
         fileSize: filel,
         fileType: options.type,
@@ -75,7 +75,7 @@ export class FileService {
 
       await session.commitTransaction()
     } catch (e) {
-      await this.log.red('Upload file failed.', e)
+      await this.log.red('Upload file failed, execution in FileService', e)
       await session.abortTransaction()
     } finally {
       session.endSession()
@@ -86,7 +86,7 @@ export class FileService {
 
   /**
    * Delete File
-   * @param options 
+   * @param options
    * @returns Number
    * -1: The file is not exist.
    * 1: The file will never delete.
@@ -94,7 +94,7 @@ export class FileService {
    * 2: Delete the file.
    */
   async delete(options: IDeleteFile) {
-    const file = await FileInfo.model.findOne({ fileUid: options.uid })
+    const file = await FileInfo.model.findOne({ fid: options.fid })
 
     // Not file
     if (!file)
@@ -133,7 +133,7 @@ export class FileService {
 
       await session.commitTransaction()
     } catch (e) {
-      await this.log.red('Delete file failed.', e)
+      await this.log.red('Delete file failed, execution in FileService', e)
       await session.abortTransaction()
     } finally {
       await session.endSession()
@@ -143,23 +143,24 @@ export class FileService {
 
   /**
    * Get infomation about the file.
-   * @param uid 
+   * @param fid
+   * @param filter
    * @returns FileInfo
    */
-  async getInfo(uid: string, filter: Array<string> = []) {
-    return await FileInfo.model.findOne({ fileUid: uid }, filter) ?? null
+  async getInfo(fid: string, filter: Array<string> = []) {
+    return await FileInfo.model.findOne({ fid: fid }, filter) ?? null
   }
 
   /**
    * Get full file.
    * ! This function is not recommended.
-   * ! Unless it is explicitly known that 
+   * ! Unless it is explicitly known that
    * ! the file is less than 1.6M.
-   * @param options 
+   * @param options
    * @returns Object | number
    */
   async getAll(options: IGetFile) {
-    const filei = await this.getInfo(options.uid)
+    const filei = await this.getInfo(options.fid)
     if (!filei)
       return -1
     if (filei?.level > (options.level ?? 0))
@@ -181,13 +182,13 @@ export class FileService {
 
   /**
    * Get deals, anyone of which will get cell of file.
-   * @param options 
+   * @param options
    * @returns Object | number
    * -1: There is no such file.
    * 1: There is no permission to access the file.
    */
   async get(options: IGetFile) {
-    const filei = await this.getInfo(options.uid)
+    const filei = await this.getInfo(options.fid)
     if (!filei)
       return -1
     if (filei?.level > (options.level ?? 0))
@@ -199,7 +200,7 @@ export class FileService {
         try {
           return (await FileData.model.findById(i)).data
         } catch (e) {
-          await this.log.red(i + ' of FileData get failed.')
+          await this.log.red(i + ' of FileData get failed, execution in FileService', e)
           throw DefaultErrorFilter
         }
       })
@@ -215,7 +216,7 @@ export class FileService {
    * ! This way is to get file by the Readable Function.
 
   async getI(options: IGetFile) {
-    const filei = await this.getInfo(options.uid)
+    const filei = await this.getInfo(options.fid)
     if (filei?.level > options.level)
       return null
 

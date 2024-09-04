@@ -16,9 +16,13 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
       ctx.message = 'I know you know I like you.'
       ctx.form = true
 
+      let result
       try {
         const body = await next()
-        let result = {
+        if (ctx.code == 0 && ctx.status >= 400)
+          ctx.code = -1
+
+        result = {
           code: ctx.code,
           status: ctx.status,
           message: ctx.message,
@@ -28,13 +32,17 @@ export class NormalizeResponse implements IMiddleware<Context, NextFunction> {
         if (!ctx.form)
           result = body
 
-        return result
       } catch (error) {
-        await (await ctx.requestContext.getAsync(LogService)).red(
-          'getUserInfo() execution error. This is middlware.', error)
-        ctx.logger.warn(error)
+        console.log(error)
+        if (error.status >= 400 && error.status < 500)
+          await (await ctx.requestContext.getAsync(LogService)).yellow(
+            'Client error.', error)
+        else
+          await (await ctx.requestContext.getAsync(LogService)).red(
+            'Server error.', error)
         throw error
       }
+      return result
     }
   }
 }

@@ -11,8 +11,7 @@ const overtimeMax: number = 30000
 @Guard()
 export class TokenGuard implements IGuard {
   async canActivate(ctx: Context): Promise<boolean> {
-    // ! Develop
-    let timeout: boolean = true
+    let timeout: boolean = false
     let identicalUser: boolean = false
     let identicalToken: boolean = false
     let isDeleted: boolean = ctx.user['deleted']

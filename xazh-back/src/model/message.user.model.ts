@@ -1,35 +1,12 @@
 import mongoose from "mongoose";
+import { List } from "../service/list.util.service";
 
 const name: string = 'User.Message'
 
-
-/**
-msg = {
-  i: Number,
-  who: ObjectId,
-  content: String,
-  time: {
-    type: Date,
-    default: Date.now
-  }
-}
-newmsg = {
-  key: userid,
-  value: [msg]
-}
-msglist = {
-  key: userid,
-  value: {
-    msgid: ObjectId,
-    show: Boolean,
-    pinned: Boolean,
-  }
-}
-*/
-
 const schema = new mongoose.Schema({
-  newmsg: Object,
-  msglist: Object,
+  msgslist: List,
+  newmsgs: List,
+  pinned: Array,
 })
 
 const model = mongoose.model(name, schema, name)

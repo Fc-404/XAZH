@@ -1,22 +1,11 @@
 import mongoose from "mongoose";
+import { List } from "../service/list.util.service";
 
 const name: string = 'User.Relation'
 
-/*
-itemTemp = {
-  key: userid,
-  value: {
-    followtime: Date,
-    followertime: Date,
-    isfollow: Boolean,
-    isfollower: Boolean,
-    group: String,
-  }
-}
-*/
-
 const schema = new mongoose.Schema({
-  list: Object,
+  follow: List,
+  follower: List,
 })
 
 const model = mongoose.model(name, schema, name)

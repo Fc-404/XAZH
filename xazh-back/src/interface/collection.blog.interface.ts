@@ -9,5 +9,6 @@ export interface ICollectionCreate {
   name: string,
   author: Types.ObjectId,
   abstract?: string,
+  cover?: string,
   privacy?: PRIVACY_TYPE,
 }

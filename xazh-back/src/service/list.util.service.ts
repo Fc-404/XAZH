@@ -15,13 +15,31 @@ export const List = Schema.Types.ObjectId
 @Provide()
 export class ListUtilService {
   /**
+   * Get the head info.
+   * @param head 
+   * @returns 
+   */
+  async getHeadInfo(head: List) {
+    const root = await list.findById(head)
+    if (!root) return null
+    return {
+      chunkLen: root.chunkLen,
+      totalLen: root.totalLen,
+      last: root.last
+    }
+  }
+
+  /**
    * Create a new list.
-   * @param chunkLen 
+   * @param chunkLen
+   * @param session
    * @returns ObjectId
    */
-  async createList(chunkLen: number = 100, session?: mongoose.ClientSession): Promise<List> {
+  async createList(label: string, chunkLen: number = 100, session?: mongoose.ClientSession): Promise<List> {
     if (!chunkLen) chunkLen = 100
     const result = await list.create([{
+      ishead: true,
+      label: label,
       chunkLen: chunkLen,
       totalLen: 0,
       length: 0,
@@ -37,20 +55,24 @@ export class ListUtilService {
 
   /**
    * Append one value to the list.
-   * @param id 
-   * @param value 
+   * @param head
+   * @param value
+   * @param session
    * @returns true | false
    */
   async appendOne(head: List, value: any, session?: mongoose.ClientSession): Promise<boolean> {
     const root = await list.findOne({ _id: head }, ['chunkLen', 'totalLen', 'last'])
+    if (!root) {
+      throw new Error('List not found. That is ' + head?.toString())
+    }
     const last = await list.findOne({ _id: root.last })
     if (!last) {
-      return false
+      throw new Error('Last node not found. Head of List is ' + head?.toString())
     }
-    let result = true
-    session = session || (await mongoose.startSession())
-    session.startTransaction()
 
+    let result = true
+    const insession = session ?? await mongoose.startSession()
+    session ?? insession.startTransaction()
     try {
       let node = last
       if (last.length >= root.chunkLen) {
@@ -71,28 +93,42 @@ export class ListUtilService {
       await last.save({ session })
       await node.save({ session })
       await root.save({ session })
-      await session.commitTransaction()
+      session ?? await insession.commitTransaction()
     } catch {
-      await session.abortTransaction()
+      session ?? await insession.abortTransaction()
       result = false
     } finally {
-      await session.endSession()
+      session ?? await insession.endSession()
     }
 
     return result
   }
 
   /**
+   * Prepend one value to the list.
+   * @param head
+   * @param value
+   * @param session
+   */
+  async prependOne(head: List, value: any, session?: mongoose.ClientSession): Promise<boolean> {
+    return this.insertOne(head, value, 0, session)
+  }
+
+  /**
    * TODO: Add chunk option.
    * Insert one value to the list.
-   * @param head 
-   * @param value 
-   * @param index 
+   * @param head
+   * @param value
+   * @param index
+   * @param session
    * @returns true | false
    */
   async insertOne(head: List, value: any, index: number, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
+    if (!root) {
+      throw new Error('List not found. That is ' + head?.toString())
+    }
 
     if (index >= root.totalLen) {
       result = await this.appendOne(head, value)
@@ -101,8 +137,8 @@ export class ListUtilService {
       index = 0
     }
 
-    session = session || (await mongoose.startSession())
-    session.startTransaction()
+    const insession = session ?? await mongoose.startSession()
+    session ?? insession.startTransaction()
     try {
       // Search the node.
       let node = root
@@ -141,11 +177,11 @@ export class ListUtilService {
       }
       await node.save({ session })
       await root.save({ session })
-      await session.commitTransaction()
+      session ?? await insession.commitTransaction()
     } catch {
-      await session.abortTransaction()
+      session ?? await insession.abortTransaction()
     } finally {
-      await session.endSession()
+      session ?? await insession.endSession()
     }
 
     return result
@@ -153,43 +189,61 @@ export class ListUtilService {
 
   /**
    * Delete one value from the list.
-   * @param head 
-   * @param value 
-   * @returns 
+   * @param head
+   * @param value
+   * @param chunkid
+   * @param session
+   * @returns
    */
   async deleteOne(head: List, value: any, chunkid?: Types.ObjectId, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
+    if (!root) {
+      throw new Error('List not found. That is ' + head?.toString())
+    }
+
     let chunk
     if (chunkid)
       chunk = await list.findOne({ _id: chunkid })
 
-    session = session || await mongoose.startSession()
-    session.startTransaction()
+    const insession = session ?? await mongoose.startSession()
+    session ?? insession.startTransaction()
     try {
       let node = root
       let index = -1
 
       // Search the node.
       if (chunk) {
-        if (chunk.head != head)
+        if (!head.equals(chunk.head))
           throw new Error('Illegal chunk.')
-        index = chunk.body.indexOf(value)
+        // index = chunk.body.indexOf(value)
+        index = chunk.body.findIndex(
+          typeof value == 'function' ? value : v => v == value
+        )
         if (index == -1) {
           // Search the prev chunk.
           let nextid = chunk.next
           chunk = await list.findOne({ _id: chunk.prev })
-          index = chunk.body.indexOf(value)
+          // index = chunk.body.indexOf(value)
+          index = chunk.body.findIndex(
+            typeof value == 'function' ? value : v => v == value
+          )
           if (index == -1) {
             // Search the next chunk.
             chunk = await list.findOne({ _id: nextid })
-            index = chunk.body.indexOf(value)
+            // index = chunk.body.indexOf(value)
+            index = chunk.body.findIndex(
+              typeof value == 'function' ? value : v => v == value
+            )
           }
         }
         node = chunk
       } else {
         while (node) {
-          index = node.body.indexOf(value)
+          // index = node.body.indexOf(value)
+          index = node.body.findIndex(
+            typeof value == 'function' ? value : v => v == value
+          )
           if (index != -1)
             break
           node = await list.findOne({ _id: node.next })
@@ -209,16 +263,19 @@ export class ListUtilService {
       let prev = await list.findOne({ _id: node.prev })
       if (node.length <= 0) {
         if (node == root) {
-          node.body = next.body
-          node.next = next.next
-          node.length = next.length
-          await next.deleteOne({ session })
-          next = await list.findOne({ _id: node.next })
-          next.prev = node._id
-          next.save({ session })
+          if (next) {
+            node.body = next.body
+            node.next = next.next
+            node.length = next.length
+            await next.deleteOne({ session })
+            next = await list.findOne({ _id: node.next })
+            next.prev = node._id
+            next.save({ session })
+          }
         } else {
           prev.next = node.next
-          next.prev = prev._id
+          if (next)
+            next.prev = prev._id
           await prev.save({ session })
           await next.save({ session })
           await node.deleteOne({ session })
@@ -251,12 +308,12 @@ export class ListUtilService {
       }
 
       await root.save({ session })
-      await session.commitTransaction()
+      session ?? await insession.commitTransaction()
     } catch {
       result = false
-      await session.abortTransaction()
+      session ?? await insession.abortTransaction()
     } finally {
-      await session.endSession()
+      session ?? await insession.endSession()
     }
 
     return result
@@ -264,15 +321,14 @@ export class ListUtilService {
 
   /**
    * Find one from list.
-   * @param head 
-   * @param value 
-   * @returns 
+   * @param head
+   * @param value
+   * @returns
    */
   async findOne(head: List, value: any) {
     let result = null
-    const root = await list.findOne({ _id: head })
-
-    let node = root
+    let node = await list.findOne({ _id: head })
+    if (!node) throw new Error('List not found. That is ' + head?.toString())
     let count = 0
     while (node) {
       let index = node.body.indexOf(value)
@@ -294,15 +350,14 @@ export class ListUtilService {
 
   /**
    * Fine one by index from list.
-   * @param head 
-   * @param index 
-   * @returns 
+   * @param head
+   * @param index
+   * @returns
    */
   async findByIndex(head: List, index: number) {
     let result = null
-    const root = await list.findOne({ _id: head })
-
-    let node = root
+    let node = await list.findOne({ _id: head })
+    if (!node) throw new Error('List not found. That is ' + head?.toString())
     let count = 0
     while (node) {
       let recount = count
@@ -322,15 +377,14 @@ export class ListUtilService {
 
   /**
    * Find a chunk from list.
-   * @param head 
-   * @param nodeindex 
-   * @returns 
+   * @param head
+   * @param nodeindex
+   * @returns
    */
   async findByNode(head: List, nodeindex: number) {
     let result = null
-    const root = await list.findOne({ _id: head })
-
-    let node = root
+    let node = await list.findOne({ _id: head })
+    if (!node) throw new Error('List not found. That is ' + head?.toString())
     let index = 0
     while (node) {
       if (nodeindex == index) {
@@ -351,30 +405,38 @@ export class ListUtilService {
 
   /**
    * Find a chunk by id.
-   * @param chunk 
-   * @returns 
+   * @param head
+   * @param chunk
+   * @returns
    */
-  async findByChunk(head: List, chunk: Types.ObjectId) {
-    const node = await list.findOne({ _id: chunk })
-    if (node.head != head)
-      return null
+  async findByChunk(head: List, chunkid?: Types.ObjectId) {
+    let node
+    if (chunkid)
+      node = await list.findOne({ _id: chunkid })
+    else
+      node = await list.findOne({ _id: head })
+    if (!node)
+      throw new Error('Chunk not found. That is ' + chunkid?.toString() + ', Head of List is ' + head?.toString())
+    if (!node.head.equals(head))
+      throw new Error('Chunk\'s head is not ' + head?.toString())
 
-    let result = {
-      value: node.body,
-      node: node._id,
-      prev: node.prev,
-      next: node.next
+    return {
+      totalLen: node?.totalLen,
+      length: node?.length,
+      value: node?.body,
+      head: node?.head,
+      node: node?._id,
+      prev: node?.prev,
+      next: node?.next,
     }
-
-    return result
   }
 
   /**
    * Find a range of values from list.
-   * @param head 
-   * @param start 
-   * @param end 
-   * @returns 
+   * @param head
+   * @param start
+   * @param length
+   * @returns
    */
   async findMany(head: List, start: number, length: number) {
     if (start < 0 || length <= 0) {
@@ -387,6 +449,9 @@ export class ListUtilService {
       length: 0,
     }
     const root = await list.findOne({ _id: head })
+    if (!root) {
+      throw new Error('List not found. That is ' + head?.toString())
+    }
 
     let node = root
     let count = 0
@@ -433,15 +498,20 @@ export class ListUtilService {
 
   /**
    * Delete a list.
-   * @param head 
+   * @param head
+   * @param session
    * @returns true | false
    */
-  async deleteList(head: List): Promise<boolean> {
+  async deleteList(head: List, session?: mongoose.ClientSession): Promise<boolean> {
     let result = true
     const root = await list.findOne({ _id: head })
+    if (!root)
+      return true
+    if (!root.head.equals(head))
+      throw new Error('Need head\'s id to delete. That is ' + head?.toString())
 
-    const session = await mongoose.startSession()
-    session.startTransaction()
+    const insession = session ?? await mongoose.startSession()
+    session ?? insession.startTransaction()
     try {
       let node = root
       while (node) {
@@ -449,14 +519,33 @@ export class ListUtilService {
         await node.deleteOne({ session })
         node = await list.findOne({ _id: nextid })
       }
-      await session.commitTransaction()
+      session ?? await insession.commitTransaction()
     } catch {
-      await session.abortTransaction()
+      session ?? await insession.abortTransaction()
       result = false
     } finally {
-      await session.endSession()
+      session ?? await insession.endSession()
     }
 
+    return result
+  }
+
+  /**
+   * Foreach a list.
+   * @param head 
+   * @param callback 
+   * @returns 
+   */
+  async foreachList(head: List, callback: (value: any, index: number) => void) {
+    let result = true
+    let node = await list.findOne({ _id: head })
+    let index = 0
+    while (node) {
+      // node.body.forEach(v => callback(v, index++))
+      for (let i of node.body)
+        await callback(i, index++)
+      node = await list.findOne({ _id: node.next })
+    }
     return result
   }
 

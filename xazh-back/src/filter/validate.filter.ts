@@ -8,6 +8,7 @@ export class ValidateErrorFilter {
     ctx.status = 422
 
     return {
+      code: -1,
       status: 422,
       message: 'Parameter error.'
     }

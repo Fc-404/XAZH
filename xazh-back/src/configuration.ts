@@ -1,4 +1,4 @@
-import { Configuration, App, Inject, MidwayDecoratorService } from '@midwayjs/core';
+import {Configuration, App, Inject, MidwayDecoratorService} from '@midwayjs/core';
 import * as koa from '@midwayjs/koa';
 import * as validate from '@midwayjs/validate';
 import * as info from '@midwayjs/info';
@@ -41,6 +41,7 @@ export class ContainerLifeCycle {
   decoratorService: MidwayDecoratorService
 
   async onReady() {
+
 
     // add middleware
     this.app.useMiddleware([

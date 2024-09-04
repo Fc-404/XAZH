@@ -8,4 +8,4 @@ const schema = new mongoose.Schema({
 
 const model = mongoose.model(name, schema, name)
 
-export default { name, schema, model }
+export default {name, schema, model}

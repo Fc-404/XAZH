@@ -355,7 +355,7 @@ const signUpOrIn = function (
 /**
  * Check user input
  */
-watch(username, (v) => {
+watch(username, (v: any) => {
   if (!isSignup.value)
     return
 
@@ -363,11 +363,11 @@ watch(username, (v) => {
   usernameF.value = /[\u4e00-\u9fa5]/.test(username.value[0]) ?
     username.value[0] : username.value.substring(0, 2)
 })
-watch(userpswd, (v) => {
+watch(userpswd, (v: any) => {
   userpswd.value = formatPswd(v || '')
   userpswdR.value = ''
 })
-watch(usermail, (v) => {
+watch(usermail, (v: any) => {
   !v ? (
     validMail.value = undefined
   ) : (

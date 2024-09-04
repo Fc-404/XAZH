@@ -43,11 +43,11 @@ export class WEBPanelController {
     const name = options.name
 
     const result = await this.panel.getConfig(type, name, group)
-
-    return result ?? (function (_this) {
-      _this.ctx.code = 1
-      _this.ctx.message = '没有该配置'
-    }(this))
+    if (!result) {
+      this.ctx.code = 1
+      this.ctx.message = 'No such config.'
+    }
+    return result ? result : false
   }
 
   /**
@@ -68,7 +68,7 @@ export class WEBPanelController {
     const name = options.name
     const value = options.value
 
-    console.log(name, value, group);
+    // console.log(name, value, group);
 
     const result = await this.panel.setConfig(type, name, value, group)
 

@@ -1,8 +1,8 @@
 <template>
   <div id="webpanel">
-    <div style="height: 2rem;"></div>
+    <div style="height: 32px;"></div>
     <a-affix
-      :offsetTop="64"
+      :offsetTop="96"
       style="width: 20rem; display: inline-block; position: relative;"
     >
       <div id="webpanel-title">网站控制面板</div>
@@ -202,7 +202,7 @@ onUnmounted(() => {
   &-menu {
     display: inline-block;
     width: 20rem;
-    height: calc(100vh - var(--headerHeight));
+    height: calc(100vh - 96px);
     padding-top: 5rem;
     overflow: auto;
     border-radius: 0 1rem 0 0;

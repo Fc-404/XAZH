@@ -1,7 +1,7 @@
-import { xazhAxios } from "../axios/xazh.axios";
-import { AxiosProgressEvent } from "axios";
+import { xazhAxios } from '../axios/xazh.axios'
+import { AxiosProgressEvent } from 'axios'
 
-import { Md5 } from "ts-md5";
+import { Md5 } from 'ts-md5'
 /**
  * Upload file.
  * @param name filename
@@ -24,14 +24,14 @@ export async function UploadFileAPI(
       'Custom-Filename': name.replace(/[^\x00-\x7F]/g, ''),
       'Custom-Fileuid': dataMd5,
     },
-    onUploadProgress: progress
+    onUploadProgress: progress,
   })
 
   return result.data.code == 0 ? result.data.body : null
 }
 
-export async function GetFileInfoAPI(uid: string) {
-  const result = await xazhAxios.get('/File/GetInfo/' + uid)
+export async function GetFileInfoAPI(fid: string) {
+  const result = await xazhAxios.get('/File/GetInfo/' + fid)
 
   return result ?? null
 }
@@ -39,20 +39,37 @@ export async function GetFileInfoAPI(uid: string) {
 /**
  * Get file by post.
  */
-export async function GetFilesAPI(uid: string, save: boolean = false): Promise<Buffer | null> {
+export async function GetFilesAPI(
+  fid: string,
+  save: boolean = false
+): Promise<Buffer | null> {
   const result = await xazhAxios.post('/File/Get', {
-    uid: uid, save: save
+    fid: fid,
+    save: save,
   })
-  return result.data as Buffer ?? null
+  return (result.data as Buffer) ?? null
 }
 
 /**
  * Get bit file by get.
  */
-export async function GetFileAPI(uid: string, save: boolean = false) {
-  let url = '/File/Get/' + uid
+export async function GetFileAPI(fid: string, save: boolean = false) {
+  let url = '/File/' + fid
   save ? url + '?save=true' : null
   const result = await xazhAxios.get(url)
 
-  return result.data as Buffer ?? null
+  return (result.data as Buffer) ?? null
+}
+
+/**
+ * Delete a file
+ * @param fid
+ * @returns
+ */
+export async function DeleteFileAPI(fid: string) {
+  const result = await xazhAxios.post('/File/Delete', {
+    fid: fid,
+  })
+
+  return result
 }

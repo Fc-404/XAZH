@@ -1,7 +1,8 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, {Schema} from "mongoose";
 
 const ObjectId = Schema.Types.ObjectId
 const name: string = 'User.Blog.Like'
+const listMax = 1000
 
 const schema = new mongoose.Schema({
   list: [ObjectId]
@@ -9,4 +10,4 @@ const schema = new mongoose.Schema({
 
 const model = mongoose.model(name, schema, name)
 
-export default { name, schema, model }
+export default {name, schema, model, listMax}

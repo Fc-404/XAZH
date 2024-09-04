@@ -3,11 +3,14 @@ import { IAddUser } from '../interface/user.interface';
 import { Types } from 'mongoose';
 
 import UserBase from '../model/base.user.model';
-import UserBlogs from '../model/blog.user.model'
+import UserBlog from '../model/blog.user.model'
+import UserBlogRead from '../model/read.blog.user.model'
+import UserBlogLike from '../model/like.blog.user.model'
+import UserBlogStar from '../model/star.blog.user.model'
 import UserConfig from '../model/config.user.model'
 import UserMesg from '../model/message.user.model'
 import UserRel from '../model/relation.user.model'
-import { sha1 } from '../util/crypto.util';
+import { md5 } from '../util/crypto.util';
 import { LogService } from './log.service';
 
 const ipMaxCount = 20
@@ -27,13 +30,18 @@ export class UserService {
    * @returns true | false
    */
   async haveUser(user: string): Promise<boolean> {
-    return (await UserBase.model.findOne({ user: user }))
-      ? true : false
+    return !!(await UserBase.model.findOne({ user: user }))
+  }
+  async haveId(id: Types.ObjectId): Promise<boolean> {
+    return !!(await UserBase.model.findById(id))
+  }
+  async id2user(id: Types.ObjectId): Promise<string> {
+    return (await UserBase.model.findOne({ _id: id }, ['user']))?.user
   }
 
   /**
    * Add User
-   * @param options 
+   * @param options
    * @returns true | false
    */
   async addUser(options: IAddUser): Promise<boolean> {
@@ -52,10 +60,19 @@ export class UserService {
       }], { session })
 
       // Personal Blog.
-      const blogs = await UserBlogs.model.create([{
+      const blogs = await UserBlog.model.create([{
         _id: user[0]._id
       }], { session })
       user[0].set('blogs_link', blogs[0]._id)
+      await UserBlogRead.model.create([{
+        _id: user[0]._id
+      }], { session })
+      await UserBlogLike.model.create([{
+        _id: user[0]._id
+      }], { session })
+      await UserBlogStar.model.create([{
+        _id: user[0]._id
+      }], { session })
 
       // Personal Config.
       const config = await UserConfig.model.create([{
@@ -80,7 +97,7 @@ export class UserService {
       await user[0].save({ session })
       await session.commitTransaction()
     } catch (e) {
-      this.log.red('addUser() error.', e)
+      await this.log.red('addUser() execution error in UserService.', e)
       await session.abortTransaction()
       result = false
     } finally {
@@ -106,7 +123,7 @@ export class UserService {
       }
     )
 
-    return result ? true : false
+    return !!result
   }
 
   /**
@@ -114,8 +131,9 @@ export class UserService {
    * 0 means validation success
    * 1 means account not exist
    * 2 means validation failed
-   * @param account 
-   * @param pswd 
+   * @param account
+   * @param pswd
+   * @param userInfo
    * @returns number
    */
   async verifyPswd(account: string, pswd: string, userInfo?: Object): Promise<number> {
@@ -130,7 +148,8 @@ export class UserService {
       return 1
 
     // Confusion password verification.
-    if (sha1(account + result.pswd + account) == pswd) {
+    // if (sha1(account + result.pswd + account) == pswd) {
+    if (md5(account + result.pswd + account) == pswd) {
       for (let i of filter)
         userInfo[i] = result[i]
       return 0
@@ -140,19 +159,18 @@ export class UserService {
 
   /**
    * Whether the mail is registered.
-   * @param mail 
+   * @param mail
    * @returns true | false
    */
   async existMail(mail: string): Promise<boolean> {
-    return (await UserBase.model.findOne({ bind_mail: mail, deleted: { $ne: true } }))
-      ? true : false
+    return !!(await UserBase.model.findOne({ bind_mail: mail, deleted: { $ne: true } }))
   }
 
   /**
    * Add the signin or verify ip address.
    * And calclate the belong_place.
-   * @param user 
-   * @param ip 
+   * @param userid
+   * @param ip
    */
   async pushIp(userid: Types.ObjectId, ip: string) {
     if (!ip) {
@@ -163,9 +181,9 @@ export class UserService {
     /**
      const url = `http://ip-api.com/json/${ip}?fields=16409&lang=zh-CN`
      ipInfo?.data['status'] != 'success' ? 'unknow'
-        : (ipInfo?.data['country'] ?? 'unknow')
-        + ',' + (ipInfo?.data['regionName'] ?? 'unknow')
-        + ',' + (ipInfo?.data['city'] ?? 'unknow')
+     : (ipInfo?.data['country'] ?? 'unknow')
+     + ',' + (ipInfo?.data['regionName'] ?? 'unknow')
+     + ',' + (ipInfo?.data['city'] ?? 'unknow')
      */
     const url = `https://www.ip.cn/api/index?ip=${ip}&type=1`
     let ipInfo
@@ -182,7 +200,7 @@ export class UserService {
       else
         throw 'Status error.'
     }).catch((e) => {
-      this.log.red('Failed to require information of ip.', e)
+      this.log.red('Failed to require information of ip, execution in UserService', e)
     })
 
     if (ipInfo?.rs != 1) {
@@ -225,13 +243,14 @@ export class UserService {
 
   /**
    * Get User Info.
-   * @param user 
+   * @param userid
+   * @param options
    * @returns UserInfo
    */
   async getUserInfo(userid: Types.ObjectId, options = null): Promise<object> {
-    return await UserBase.model.findOne(
+    return UserBase.model.findOne(
       { _id: userid },
       options ?? { pswd: 0 }
-    )
+    );
   }
 }

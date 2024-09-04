@@ -2,7 +2,7 @@ import { Provide } from "@midwayjs/core";
 import { Types } from "mongoose";
 import UserConfig from '../model/config.user.model'
 import UserBase from '../model/base.user.model'
-import { sha1 } from "../util/crypto.util";
+import { md5 } from "../util/crypto.util";
 
 @Provide()
 export class UserConfigService {
@@ -54,7 +54,7 @@ export class UserConfigService {
       spconf[i] = pconf[i]
     const { version, date, ...newpconf } = spconf
     spconf['date'] = Date.now()
-    spconf['version'] = sha1(JSON.stringify(newpconf))
+    spconf['version'] = md5(JSON.stringify(newpconf))
     result.markModified('pconf')
     return (await result.save()) ? true : false
   }

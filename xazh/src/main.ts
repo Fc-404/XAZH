@@ -4,7 +4,6 @@
  * Haha, She is drinking milk.
  */
 
-
 import { createApp } from 'vue'
 import App from './App.vue'
 
@@ -18,5 +17,5 @@ import './assets/css/transition.less'
 
 const app = createApp(App)
 app.use(router)
-  .use(store)
-  .mount('#app')
+   .use(store)
+   .mount('#app')
